@@ -1,0 +1,103 @@
+{
+    "common": {
+        "add": "添加",
+        "edit": "编辑",
+        "delete": "删除",
+        "save": "保存",
+        "cancel": "取消",
+        "confirm": "确认",
+        "loading": "加载中...",
+        "processing": "处理中..."
+    },
+    "nav": {
+        "send": "发起推送",
+        "history": "历史消息",
+        "settings": "修改配置"
+    },
+    "device": {
+        "title": "设备管理",
+        "add": "添加设备",
+        "edit": "编辑设备",
+        "name": "设备名",
+        "name_placeholder": "例如: 我的iPhone",
+        "name_helper": "用于识别设备，可自定义",
+        "api_url": "API URL",
+        "api_url_placeholder": "例如: https://api.day.app/你的key/",
+        "api_url_helper": "打开 Bark App 拷贝地址到此处",
+        "preview_url": "预览地址: {{url}}",
+        "no_devices": "暂无设备，请点击\"添加设备\"按钮添加一个设备。",
+        "common_names": {
+            "iphone": "iPhone",
+            "ipad": "iPad",
+            "mac": "Mac"
+        }
+    },
+    "settings": {
+        "title": "其他设置",
+        "theme": {
+            "title": "主题设置",
+            "light": "浅色",
+            "dark": "深色",
+            "system": "跟随系统"
+        },
+        "context_menu": {
+            "title": "右键菜单",
+            "enable": "启用右键上下文菜单"
+        },
+        "shortcuts": {
+            "title": "快捷键",
+            "edit": "修改快捷键",
+            "open_window": "打开推送窗口: {{key}}"
+        }
+    },
+    "about": {
+        "title": "关于",
+        "github": {
+            "title": "GitHub",
+            "description": "查看源代码、提交问题"
+        },
+        "feedback": {
+            "title": "问题反馈",
+            "description": "遇到问题？点击反馈"
+        },
+        "telegram": {
+            "title": "Telegram 频道",
+            "description": "加入频道获取动态"
+        },
+        "contact": {
+            "title": "联系方式",
+            "email": "feedback@uuphy.com"
+        }
+    },
+    "push": {
+        "title": "推送消息",
+        "target_device": "目标设备",
+        "select_device": "选择要发送的设备",
+        "message": "推送内容",
+        "message_placeholder": "输入要推送的消息内容",
+        "send": "发送",
+        "sending": "发送中...",
+        "send_clipboard": "发送剪切板内容",
+        "reading_clipboard": "读取剪切板中...",
+        "shortcuts_tip": "快捷键提示",
+        "send_key": "{{key}} 发送",
+        "open_key": "{{key}} 快速打开推送窗口",
+        "open_extension": "打开推送窗口",
+        "success": "发送成功！",
+        "clipboard_empty": "剪切板为空或无有效内容",
+        "errors": {
+            "no_device": "请选择一个设备",
+            "no_content": "请输入推送内容",
+            "send_failed": "发送失败: {{message}}",
+            "clipboard_failed": "发送剪切板失败: {{message}}"
+        }
+    },
+    "history": {
+        "title": "历史消息",
+        "coming_soon": "功能开发中",
+        "description": "历史消息功能即将上线",
+        "follow": "你可以关注",
+        "telegram": "Telegram 频道",
+        "updates": "获取最新动态"
+    }
+}

@@ -1,0 +1,103 @@
+{
+    "common": {
+        "add": "Add",
+        "edit": "Edit",
+        "delete": "Delete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "loading": "Loading...",
+        "processing": "Processing..."
+    },
+    "nav": {
+        "send": "Send",
+        "history": "History",
+        "settings": "Settings"
+    },
+    "device": {
+        "title": "Devices",
+        "add": "Add Device",
+        "edit": "Edit Device",
+        "name": "Device Name",
+        "name_placeholder": "e.g., My iPhone",
+        "name_helper": "Used to identify the device, customizable",
+        "api_url": "API URL",
+        "api_url_placeholder": "e.g., https://api.day.app/your-key/",
+        "api_url_helper": "Open Bark App and copy the URL here",
+        "preview_url": "Preview URL: {{url}}",
+        "no_devices": "No devices yet. Click \"Add Device\" button to add one.",
+        "common_names": {
+            "iphone": "iPhone",
+            "ipad": "iPad",
+            "mac": "Mac"
+        }
+    },
+    "settings": {
+        "title": "Other Settings",
+        "theme": {
+            "title": "Theme Settings",
+            "light": "Light",
+            "dark": "Dark",
+            "system": "System"
+        },
+        "context_menu": {
+            "title": "Context Menu",
+            "enable": "Enable right-click context menu"
+        },
+        "shortcuts": {
+            "title": "Shortcuts",
+            "edit": "Edit Shortcuts",
+            "open_window": "Open send window: {{key}}"
+        }
+    },
+    "about": {
+        "title": "About",
+        "github": {
+            "title": "GitHub",
+            "description": "View source code, submit issues"
+        },
+        "feedback": {
+            "title": "Feedback",
+            "description": "Having issues? Click to report"
+        },
+        "telegram": {
+            "title": "Telegram Channel",
+            "description": "Join channel for updates"
+        },
+        "contact": {
+            "title": "Contact",
+            "email": "feedback@uuphy.com"
+        }
+    },
+    "push": {
+        "title": "Send Push Message",
+        "target_device": "Target Device",
+        "select_device": "Select device to send push",
+        "message": "Message",
+        "message_placeholder": "Enter message to push",
+        "send": "Send Push",
+        "sending": "Sending...",
+        "send_clipboard": "Send Clipboard Content",
+        "reading_clipboard": "Reading clipboard...",
+        "shortcuts_tip": "Shortcuts Tips",
+        "send_key": "{{key}} to send",
+        "open_key": "{{key}} to open push window",
+        "open_extension": "Open push window",
+        "success": "Sent successfully!",
+        "clipboard_empty": "Clipboard is empty or has no valid content",
+        "errors": {
+            "no_device": "Please select a device",
+            "no_content": "Please enter message content",
+            "send_failed": "Send failed: {{message}}",
+            "clipboard_failed": "Send clipboard failed: {{message}}"
+        }
+    },
+    "history": {
+        "title": "History",
+        "coming_soon": "Coming Soon",
+        "description": "Message history feature is coming soon",
+        "follow": "You can follow",
+        "telegram": "Telegram Channel",
+        "updates": "for updates"
+    }
+}

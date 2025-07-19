@@ -1,0 +1,103 @@
+{
+    "common": {
+        "add": "新增",
+        "edit": "編輯",
+        "delete": "刪除",
+        "save": "儲存",
+        "cancel": "取消",
+        "confirm": "確認",
+        "loading": "載入中...",
+        "processing": "處理中..."
+    },
+    "nav": {
+        "send": "傳送通知",
+        "history": "歷史紀錄",
+        "settings": "設定"
+    },
+    "device": {
+        "title": "裝置管理",
+        "add": "新增裝置",
+        "edit": "編輯裝置",
+        "name": "裝置名稱",
+        "name_placeholder": "例如：我的iPhone",
+        "name_helper": "用來識別裝置，可自訂",
+        "api_url": "API 網址",
+        "api_url_placeholder": "例如：https://api.day.app/你的key/",
+        "api_url_helper": "開啟 Bark App 複製網址到此處",
+        "preview_url": "預覽網址：{{url}}",
+        "no_devices": "目前沒有裝置，請點選「新增裝置」按鈕來新增。",
+        "common_names": {
+            "iphone": "iPhone",
+            "ipad": "iPad",
+            "mac": "Mac"
+        }
+    },
+    "settings": {
+        "title": "其他設定",
+        "theme": {
+            "title": "主題設定",
+            "light": "淺色",
+            "dark": "深色",
+            "system": "跟隨系統"
+        },
+        "context_menu": {
+            "title": "右鍵選單",
+            "enable": "啟用右鍵選單"
+        },
+        "shortcuts": {
+            "title": "快速鍵",
+            "edit": "修改快速鍵",
+            "open_window": "開啟通知視窗：{{key}}"
+        }
+    },
+    "about": {
+        "title": "關於",
+        "github": {
+            "title": "GitHub",
+            "description": "查看原始碼、回報問題"
+        },
+        "feedback": {
+            "title": "問題回報",
+            "description": "遇到問題？點此回報"
+        },
+        "telegram": {
+            "title": "Telegram 頻道",
+            "description": "加入頻道獲取動態"
+        },
+        "contact": {
+            "title": "聯絡方式",
+            "email": "feedback@uuphy.com"
+        }
+    },
+    "push": {
+        "title": "推送訊息",
+        "target_device": "目標裝置",
+        "select_device": "選擇要傳送通知的裝置",
+        "message": "通知內容",
+        "message_placeholder": "輸入要傳送的通知內容",
+        "send": "傳送通知",
+        "sending": "傳送中...",
+        "send_clipboard": "傳送剪貼簿內容",
+        "reading_clipboard": "讀取剪貼簿中...",
+        "shortcuts_tip": "快速鍵提示",
+        "send_key": "{{key}} 傳送",
+        "open_key": "{{key}} 快速開啟通知視窗",
+        "open_extension": "開啟通知視窗",
+        "success": "傳送成功！",
+        "clipboard_empty": "剪貼簿為空或沒有有效內容",
+        "errors": {
+            "no_device": "請選擇一個裝置",
+            "no_content": "請輸入通知內容",
+            "send_failed": "傳送失敗：{{message}}",
+            "clipboard_failed": "傳送剪貼簿失敗：{{message}}"
+        }
+    },
+    "history": {
+        "title": "歷史紀錄",
+        "coming_soon": "功能開發中",
+        "description": "歷史紀錄功能即將推出",
+        "follow": "您可以追蹤",
+        "telegram": "Telegram 頻道",
+        "updates": "取得最新消息"
+    }
+}
