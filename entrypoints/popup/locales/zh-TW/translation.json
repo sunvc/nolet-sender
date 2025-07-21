@@ -7,7 +7,8 @@
         "cancel": "取消",
         "confirm": "確認",
         "loading": "載入中...",
-        "processing": "處理中..."
+        "processing": "處理中...",
+        "error_update": "更新設定失敗：{{message}}"
     },
     "nav": {
         "send": "傳送通知",
@@ -19,13 +20,14 @@
         "add": "新增裝置",
         "edit": "編輯裝置",
         "name": "裝置名稱",
-        "name_placeholder": "例如：我的iPhone",
+        "name_placeholder": "例如：我的 iPhone",
         "name_helper": "用來識別裝置，可自訂",
         "api_url": "API 網址",
         "api_url_placeholder": "例如：https://api.day.app/你的key/",
-        "api_url_helper": "開啟 Bark App 複製網址到此處",
+        "api_url_helper": "請開啟 Bark App 將網址複製貼上至此",
         "preview_url": "預覽網址：{{url}}",
-        "no_devices": "目前沒有裝置，請點選「新增裝置」按鈕來新增。",
+        "test_message": "測試通知",
+        "no_devices": "尚未新增任何裝置，請點選『新增裝置』來開始設定。",
         "common_names": {
             "iphone": "iPhone",
             "ipad": "iPad",
@@ -48,6 +50,30 @@
             "title": "快速鍵",
             "edit": "修改快速鍵",
             "open_window": "開啟通知視窗：{{key}}"
+        },
+        "sound": {
+            "title": "鈴聲設定",
+            "select": "選擇鈴聲",
+            "current": "目前鈴聲：{{sound}}",
+            "default": "預設",
+            "description": "選擇推送時使用的鈴聲，留空則使用系統預設鈴聲",
+            "default_description": "使用系統預設鈴聲",
+            "clear": "清除"
+        },
+        "encryption": {
+            "title": "加密設定",
+            "enable": "啟用加密",
+            "options": "加密選項",
+            "key_invalid": "無效的金鑰",
+            "key_valid": "有效的金鑰",
+            "tooltips": {
+                "encryption_on": "關閉加密",
+                "encryption_off": "開啟加密"
+            },
+            "errors": {
+                "update_failed": "更新加密設定失敗：{{message}}",
+                "config_save_failed": "儲存加密配置失敗：{{message}}"
+            }
         }
     },
     "about": {
@@ -74,22 +100,44 @@
         "target_device": "目標裝置",
         "select_device": "選擇要傳送通知的裝置",
         "message": "通知內容",
-        "message_placeholder": "輸入要傳送的通知內容",
+        "message_placeholder": "輸入您要傳送的通知內容",
         "send": "傳送通知",
         "sending": "傳送中...",
         "send_clipboard": "傳送剪貼簿內容",
-        "reading_clipboard": "讀取剪貼簿中...",
+        "reading_clipboard": "正在讀取剪貼簿內容...",
         "shortcuts_tip": "快速鍵提示",
         "send_key": "{{key}} 傳送",
         "open_key": "{{key}} 快速開啟通知視窗",
         "open_extension": "開啟通知視窗",
         "success": "傳送成功！",
-        "clipboard_empty": "剪貼簿為空或沒有有效內容",
+        "clipboard_empty": "剪貼簿為空或沒有可用內容",
         "errors": {
             "no_device": "請選擇一個裝置",
             "no_content": "請輸入通知內容",
             "send_failed": "傳送失敗：{{message}}",
             "clipboard_failed": "傳送剪貼簿失敗：{{message}}"
+        }
+    },
+    "encryption": {
+        "title": "加密設定",
+        "algorithm": "演算法",
+        "mode": "模式",
+        "padding": "填補",
+        "key": "金鑰 (Key)",
+        "iv": "初始化向量 (IV)",
+        "generate_key": "產生隨機金鑰",
+        "generate_iv": "產生隨機 IV",
+        "iv_description": "僅供隨機產生 IV 示例，實際傳送為隨機值",
+        "algorithms": {
+            "aes256": "AES-256",
+            "aes192": "AES-192",
+            "aes128": "AES-128"
+        },
+        "modes": {
+            "cbc": "CBC"
+        },
+        "paddings": {
+            "pkcs7": "PKCS7"
         }
     },
     "history": {

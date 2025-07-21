@@ -7,11 +7,15 @@ import {
     BottomNavigation,
     BottomNavigationAction,
     Paper,
-    Stack
+    Stack,
+    IconButton,
+    Tooltip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
+import LockIcon from '@mui/icons-material/Lock';
+import LockOpenIcon from '@mui/icons-material/LockOpen';
 import { useTranslation } from 'react-i18next';
 import { TabValue } from '../types';
 import LanguageSelect from './LanguageSelect';
@@ -20,12 +24,19 @@ interface LayoutProps {
     children: React.ReactNode;
     currentTab: TabValue;
     onTabChange: (newTab: TabValue) => void;
+    // 加密相关 props
+    showEncryptionToggle?: boolean;
+    encryptionEnabled?: boolean;
+    onEncryptionToggle?: () => void;
 }
 
 export default function Layout({
     children,
     currentTab,
-    onTabChange
+    onTabChange,
+    showEncryptionToggle = false,
+    encryptionEnabled = false,
+    onEncryptionToggle
 }: LayoutProps) {
     const { t } = useTranslation();
     const getTabIndex = (tab: TabValue): number => {
@@ -64,6 +75,25 @@ export default function Layout({
                         <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: '1.1rem' }}>
                             Bark Sender
                         </Typography>
+                        {/* Appbar 的加密切换按钮 */}
+                        {showEncryptionToggle && (
+                            <Tooltip title={encryptionEnabled ?
+                                t('settings.encryption.tooltips.encryption_on') :
+                                t('settings.encryption.tooltips.encryption_off')
+                            }>
+                                <IconButton
+                                    style={{ outline: 'none' }}
+                                    onClick={onEncryptionToggle}
+                                    sx={{
+                                        color: 'white',
+                                        mr: 1
+                                    }}
+                                    size="small"
+                                >
+                                    {encryptionEnabled ? <LockIcon /> : <LockOpenIcon />}
+                                </IconButton>
+                            </Tooltip>
+                        )}
                         <LanguageSelect />
                     </Toolbar>
                 </AppBar>

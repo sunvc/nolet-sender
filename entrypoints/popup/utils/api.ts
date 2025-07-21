@@ -1,10 +1,34 @@
 import { PushResponse } from '../types';
+import { getAppSettings } from './settings';
+import { encryptAESCBC, generateIV } from './crypto';
 
 // 发送推送消息 - 通过background script
 export async function sendPushMessage(apiURL: string, message: string): Promise<PushResponse> {
     try {
-        // 直接尝试fetch，如果失败则通过background script
-        const url = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
+        // 检查是否启用加密
+        const settings = await getAppSettings();
+
+        if (settings.enableEncryption && settings.encryptionConfig?.key) {
+            // 使用加密发送
+            return await sendEncryptedPushMessage(apiURL, message, settings.encryptionConfig, settings.sound);
+        } else {
+            // 使用原有的GET方式发送
+            return await sendPlainPushMessage(apiURL, message, settings.sound);
+        }
+    } catch (error) {
+        console.error('发送推送失败:', error);
+        throw error;
+    }
+}
+
+// 发送明文推送消息
+async function sendPlainPushMessage(apiURL: string, message: string, sound?: string): Promise<PushResponse> {
+    try {
+        // 构建URL，添加sound参数
+        let url = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
+        if (sound) {
+            url += `&sound=${encodeURIComponent(sound)}`;
+        }
         console.log('发送请求到:', url);
 
         // 尝试直接请求
@@ -32,7 +56,10 @@ export async function sendPushMessage(apiURL: string, message: string): Promise<
             const response = await sendMessageToBackground({
                 action: 'sendPush',
                 apiURL,
-                message
+                message,
+                sound,
+                url: undefined, // 可选
+                title: undefined // 可选
             });
 
             if (response.success) {
@@ -42,6 +69,76 @@ export async function sendPushMessage(apiURL: string, message: string): Promise<
             }
         } catch (bgError) {
             console.error('Background script请求也失败:', bgError);
+            throw new Error('网络请求失败，请检查网络连接和API地址');
+        }
+    }
+}
+
+// 发送加密推送消息
+async function sendEncryptedPushMessage(apiURL: string, message: string, encryptionConfig: any, sound?: string): Promise<PushResponse> {
+    try {
+        // 生成随机 IV
+        const iv = generateIV();
+
+        const encryptData: any = {
+            body: message
+        };
+        if (sound) {
+            encryptData.sound = sound;
+        }
+
+        const plaintext = JSON.stringify(encryptData);
+        const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv); // 加密消息
+
+        console.log('发送加密请求到:', apiURL);
+        console.log('IV:', iv);
+        console.log('Ciphertext:', ciphertext);
+
+        const formData = new URLSearchParams();
+        formData.append('iv', iv);
+        formData.append('ciphertext', ciphertext);
+
+        // 发送加密请求
+        const response = await fetch(`${apiURL}?sound=${sound}`, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'User-Agent': 'Bark-Browser-Extension/1.0'
+            },
+            body: formData.toString()
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data: PushResponse = await response.json();
+        console.log('加密请求成功:', data);
+        return data;
+    } catch (error) {
+        console.error('加密请求失败，尝试通过background script:', error);
+
+        // 如果直接请求失败，通过background script发送
+        try {
+            const response = await sendMessageToBackground({
+                action: 'sendEncryptedPush',
+                apiURL,
+                message,
+                encryptionConfig,
+                sound,
+                url: undefined, // 可选
+                title: undefined // 可选
+            });
+
+            if (response.success) {
+                return response.data;
+            } else {
+                throw new Error(response.error || '未知错误');
+            }
+        } catch (bgError) {
+            console.error('Background script加密请求也失败:', bgError);
             throw new Error('网络请求失败，请检查网络连接和API地址');
         }
     }

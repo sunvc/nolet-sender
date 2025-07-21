@@ -7,10 +7,11 @@
         "cancel": "Cancel",
         "confirm": "Confirm",
         "loading": "Loading...",
-        "processing": "Processing..."
+        "processing": "Processing...",
+        "error_update": "Failed to update settings: {{message}}"
     },
     "nav": {
-        "send": "Send",
+        "send": "Push",
         "history": "History",
         "settings": "Settings"
     },
@@ -25,7 +26,8 @@
         "api_url_placeholder": "e.g., https://api.day.app/your-key/",
         "api_url_helper": "Open Bark App and copy the URL here",
         "preview_url": "Preview URL: {{url}}",
-        "no_devices": "No devices yet. Click \"Add Device\" button to add one.",
+        "test_message": "Test Message",
+        "no_devices": "No devices yet. Click the \"Add Device\" button to add one.",
         "common_names": {
             "iphone": "iPhone",
             "ipad": "iPad",
@@ -41,13 +43,37 @@
             "system": "System"
         },
         "context_menu": {
-            "title": "Context Menu",
+            "title": "Right-click Menu",
             "enable": "Enable right-click context menu"
         },
         "shortcuts": {
             "title": "Shortcuts",
             "edit": "Edit Shortcuts",
-            "open_window": "Open send window: {{key}}"
+            "open_window": "Open push window: {{key}}"
+        },
+        "sound": {
+            "title": "Sound Settings",
+            "select": "Select Sound",
+            "current": "Current sound: {{sound}}",
+            "default": "Default",
+            "description": "Select the sound to use when pushing notifications, leave blank to use system default",
+            "default_description": "Use system default sound",
+            "clear": "Clear"
+        },
+        "encryption": {
+            "title": "Encryption Settings",
+            "enable": "Enable Encryption",
+            "options": "Encryption Options",
+            "key_invalid": "Invalid key",
+            "key_valid": "Valid key",
+            "tooltips": {
+                "encryption_on": "Turn off encryption",
+                "encryption_off": "Turn on encryption"
+            },
+            "errors": {
+                "update_failed": "Failed to update encryption settings: {{message}}",
+                "config_save_failed": "Failed to save encryption config: {{message}}"
+            }
         }
     },
     "about": {
@@ -58,7 +84,7 @@
         },
         "feedback": {
             "title": "Feedback",
-            "description": "Having issues? Click to report"
+            "description": "Facing issues? Click to report them"
         },
         "telegram": {
             "title": "Telegram Channel",
@@ -70,11 +96,11 @@
         }
     },
     "push": {
-        "title": "Send Push Message",
+        "title": "Send Push Notification",
         "target_device": "Target Device",
-        "select_device": "Select device to send push",
+        "select_device": "Select a device to send to",
         "message": "Message",
-        "message_placeholder": "Enter message to push",
+        "message_placeholder": "Type your message here",
         "send": "Send Push",
         "sending": "Sending...",
         "send_clipboard": "Send Clipboard Content",
@@ -84,7 +110,7 @@
         "open_key": "{{key}} to open push window",
         "open_extension": "Open push window",
         "success": "Sent successfully!",
-        "clipboard_empty": "Clipboard is empty or has no valid content",
+        "clipboard_empty": "Clipboard is empty or contains no valid content",
         "errors": {
             "no_device": "Please select a device",
             "no_content": "Please enter message content",
@@ -92,11 +118,33 @@
             "clipboard_failed": "Send clipboard failed: {{message}}"
         }
     },
+    "encryption": {
+        "title": "Encryption Settings",
+        "algorithm": "Algorithm",
+        "mode": "Mode",
+        "padding": "Padding",
+        "key": "Key",
+        "iv": "Initialization Vector (IV)",
+        "generate_key": "Generate Random Key",
+        "generate_iv": "Generate Random IV",
+        "iv_description": "Example random IV generation only, actual sending uses random values",
+        "algorithms": {
+            "aes256": "AES-256",
+            "aes192": "AES-192",
+            "aes128": "AES-128"
+        },
+        "modes": {
+            "cbc": "CBC"
+        },
+        "paddings": {
+            "pkcs7": "PKCS7"
+        }
+    },
     "history": {
         "title": "History",
         "coming_soon": "Coming Soon",
         "description": "Message history feature is coming soon",
-        "follow": "You can follow",
+        "follow": "Follow our",
         "telegram": "Telegram Channel",
         "updates": "for updates"
     }

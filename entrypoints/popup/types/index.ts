@@ -17,14 +17,41 @@ export interface PushResponse {
 // 页面标识
 export type TabValue = 'send' | 'history' | 'settings';
 
+// 主题模式类型
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+// 加密算法类型
+export type EncryptionAlgorithm = 'AES256' | 'AES192' | 'AES128';
+
+// 加密模式类型  
+export type EncryptionMode = 'CBC';
+
+// 填充模式类型
+export type PaddingMode = 'pkcs7';
+
+// 加密配置接口
+export interface EncryptionConfig {
+    algorithm: EncryptionAlgorithm;
+    mode: EncryptionMode;
+    padding: PaddingMode;
+    key: string;
+}
+
+// 铃声接口
+export interface Sound {
+    name: string;
+    duration: string;
+    description: string;
+}
+
 // 应用设置接口
 export interface AppSettings {
     enableContextMenu: boolean;
     themeMode: ThemeMode;
+    enableEncryption: boolean;
+    encryptionConfig?: EncryptionConfig;
+    sound?: string;
 }
-
-// 主题模式类型
-export type ThemeMode = 'light' | 'dark' | 'system';
 
 // 平台类型
 export type PlatformType = 'mac' | 'windows' | 'linux' | 'unknown';
@@ -37,9 +64,17 @@ export interface AppContextState {
         send: string; // 发送快捷键组合
         openExtension: string; // 打开扩展快捷键组合
     };
+    // 加密相关
+    appSettings: AppSettings | null;
+    loading: boolean;
 }
 
 // App上下文接口
 export interface AppContextType extends AppContextState {
-    // 未来可以在这里添加更多方法
+    // 加密相关
+    toggleEncryption: () => Promise<void>;
+    updateEncryptionConfig: (config: EncryptionConfig) => Promise<void>;
+    updateAppSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<void>;
+    reloadSettings: () => Promise<void>;
+    shouldShowEncryptionToggle: boolean;
 }

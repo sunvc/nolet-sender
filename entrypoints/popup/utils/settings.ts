@@ -8,7 +8,15 @@ const SETTINGS_KEY = 'bark_app_settings';
 // 默认设置
 const DEFAULT_SETTINGS: AppSettings = {
     enableContextMenu: true,
-    themeMode: 'system'
+    themeMode: 'system',
+    enableEncryption: false,
+    encryptionConfig: {
+        algorithm: 'AES256',
+        mode: 'CBC',
+        padding: 'pkcs7',
+        key: ''
+    },
+    sound: undefined // 推送铃声，默认不设置
 };
 
 // 获取浏览器存储API

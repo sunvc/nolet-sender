@@ -2,7 +2,18 @@ export default defineBackground(() => {
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title)
+        .then(result => {
+          sendResponse({ success: true, data: result });
+        })
+        .catch(error => {
+          sendResponse({ success: false, error: error.message });
+        });
+      return true; // 保持消息通道开放
+    }
+
+    if (message.action === 'sendEncryptedPush') {
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -122,12 +133,108 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string) {
     try {
-      const response = await sendPushMessage(apiURL, message);
+      const response = await sendPushMessage(apiURL, message, sound, url, title);
       return response;
     } catch (error) {
       console.error('Background发送推送失败:', error);
+      throw error;
+    }
+  }
+
+  // 处理加密推送请求
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: any, sound?: string, url?: string, title?: string) {
+    try {
+      function generateAsciiString(len: number): string {
+        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        const arr = new Uint8Array(len);
+        crypto.getRandomValues(arr);
+        return Array.from(arr, b => charset[b % charset.length]).join('');
+      }
+
+      function generateIV(): string {
+        return generateAsciiString(16);
+      }
+
+      function toUtf8Bytes(str: string): Uint8Array {
+        return new TextEncoder().encode(str);
+      }
+
+      function arrayBufferToBase64(buffer: ArrayBuffer): string {
+        const binary = String.fromCharCode(...new Uint8Array(buffer));
+        return btoa(binary);
+      }
+
+      async function encryptAESCBC(plaintext: string, keyStr: string, ivStr: string): Promise<string> {
+        const keyBytes = toUtf8Bytes(keyStr);
+        const iv = toUtf8Bytes(ivStr);
+        const data = toUtf8Bytes(plaintext);
+
+        const cryptoKey = await crypto.subtle.importKey(
+          'raw',
+          keyBytes,
+          { name: 'AES-CBC' },
+          false,
+          ['encrypt']
+        );
+
+        const encryptedBuffer = await crypto.subtle.encrypt(
+          {
+            name: 'AES-CBC',
+            iv: iv
+          },
+          cryptoKey,
+          data
+        );
+
+        return arrayBufferToBase64(encryptedBuffer);
+      }
+
+      // 生成随机IV
+      const iv = generateIV();
+
+      // 构建加密内容
+      const encryptData: any = { body: message };
+      if (sound) {
+        encryptData.sound = sound;
+      }
+      if (url) {
+        encryptData.url = url;
+      }
+      if (title) {
+        encryptData.title = title;
+      }
+
+      // 加密消息
+      const plaintext = JSON.stringify(encryptData);
+      const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv);
+
+      console.log('Background 发送加密请求到:', apiURL);
+
+      const formData = new URLSearchParams();
+      formData.append('iv', iv);
+      formData.append('ciphertext', ciphertext);
+
+      // 发送加密请求
+      const response = await fetch(apiURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'User-Agent': 'Bark-Sender-Browser-Extension/1.0.0'
+        },
+        body: formData.toString()
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log('Background 加密请求成功:', result);
+      return result;
+    } catch (error) {
+      console.error('Background 发送加密推送失败:', error);
       throw error;
     }
   }
@@ -200,31 +307,40 @@ export default defineBackground(() => {
   // 处理右键菜单点击
   browser.contextMenus.onClicked.addListener(async (info: any, tab: any) => {
     try {
-      // 获取默认设备
-      const [devicesResult, defaultDeviceResult] = await Promise.all([
+      // 获取默认设备和设置
+      const [devicesResult, defaultDeviceResult, settingsResult] = await Promise.all([
         browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device')
+        browser.storage.local.get('bark_default_device'),
+        browser.storage.local.get('bark_app_settings')
       ]);
 
       const devices = devicesResult.bark_devices || [];
       const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
+      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
 
       if (!defaultDevice) {
         console.error('未找到默认设备');
         return;
       }
 
-      let message = '';
+      let message = '', title = '', url = '';
 
       if (info.menuItemId === 'send-selection' && info.selectionText) {
         message = info.selectionText;
       } else if (info.menuItemId === 'send-page' && tab?.url) {
-        message = `${tab.title || '网页链接'}: ${tab.url}`;
+        title = tab.title || 'Web'; // 网页标题作为推送标题
+        message = tab.url; // 网页 URL 作为推送内容
+        url = tab.url; // 同时保留url参数
       }
 
       if (message) {
-        await sendPushMessage(defaultDevice.apiURL, message);
+        // 根据设置选择发送方式
+        if (settings.enableEncryption && settings.encryptionConfig?.key) {
+          await handleSendEncryptedPush(defaultDevice.apiURL, message, settings.encryptionConfig, settings.sound, url, title);
+        } else {
+          await sendPushMessage(defaultDevice.apiURL, message, settings.sound, url, title);
+        }
 
         // 显示通知
         browser.notifications.create({
@@ -247,11 +363,25 @@ export default defineBackground(() => {
   });
 
   // 发送推送消息
-  async function sendPushMessage(apiURL: string, message: string) {
-    const url = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
-    console.log('Background发送请求到:', url);
+  async function sendPushMessage(apiURL: string, message: string, sound?: string, url?: string, title?: string) {
+    let requestUrl; // 如果有标题则插入到路径中
+    if (title) {
+      // 含标题格式: https://api.day.app/key/title/body?params
+      requestUrl = `${apiURL}${encodeURIComponent(title)}/${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
+    } else {
+      // 默认的格式: https://api.day.app/key/body?params  
+      requestUrl = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
+    }
 
-    const response = await fetch(url, {
+    if (sound) {
+      requestUrl += `&sound=${encodeURIComponent(sound)}`;
+    }
+    if (url) {
+      requestUrl += `&url=${encodeURIComponent(url)}`;
+    }
+    console.log('Background 发送请求到:', requestUrl);
+
+    const response = await fetch(requestUrl, {
       method: 'GET',
       headers: {
         'User-Agent': 'Bark-Browser-Extension/1.0'

@@ -28,6 +28,22 @@ const Transition = forwardRef(function Transition(
 
 const COMMON_DEVICE_NAMES = ['iphone', 'ipad', 'mac'];
 
+// 截取第 4 个斜杠后的内容 (如果没有协议则截取第 2 个斜杠后的内容)
+const truncateAfterFourthSlash = (url: string): string => {
+    if (!url) return url;
+
+    // 检查是否包含协议
+    const hasProtocol = /^https?:\/\//.test(url);
+
+    if (hasProtocol) {
+        const match = url.match(/^(.*?\/.*?\/.*?\/.*?\/)/);
+        return match ? match[1] : url;
+    } else {
+        const match = url.match(/^(.*?\/.*?\/)/);
+        return match ? match[1] : url;
+    }
+};
+
 interface DeviceDialogProps {
     open: boolean;
     onClose: () => void;
@@ -66,10 +82,11 @@ export default function DeviceDialog({
     useEffect(() => {
         if (deviceApiURL.trim()) {
             try {
-                const formattedURL = validateApiURL(deviceApiURL.trim())
-                    ? deviceApiURL.trim()
+                const truncatedURL = truncateAfterFourthSlash(deviceApiURL.trim());
+                const formattedURL = validateApiURL(truncatedURL)
+                    ? truncatedURL
                     : '';
-                setPreviewURL(formattedURL ? `${formattedURL}测试消息` : '');
+                setPreviewURL(formattedURL ? `${formattedURL}${t('device.test_message')}` : '');
             } catch (error) {
                 setPreviewURL('');
             }
@@ -89,7 +106,9 @@ export default function DeviceDialog({
             return;
         }
 
-        if (!validateApiURL(deviceApiURL.trim())) {
+        const truncatedURL = truncateAfterFourthSlash(deviceApiURL.trim());
+
+        if (!validateApiURL(truncatedURL)) {
             setError('API URL格式不正确，请检查格式');
             return;
         }
@@ -98,7 +117,7 @@ export default function DeviceDialog({
         setError('');
 
         try {
-            await onSubmit(deviceAlias.trim(), deviceApiURL.trim());
+            await onSubmit(deviceAlias.trim(), truncatedURL);
             onClose();
         } catch (error) {
             setError(`操作失败: ${error instanceof Error ? error.message : '未知错误'}`);

@@ -39,6 +39,7 @@ export default function LanguageSelect() {
         <>
             <Tooltip title="Language" placement="left">
                 <IconButton
+                    style={{ outline: 'none' }}
                     onClick={handleClick}
                     size="small"
                     sx={{ ml: 1 }}

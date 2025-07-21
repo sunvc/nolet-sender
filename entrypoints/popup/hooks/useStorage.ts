@@ -107,7 +107,17 @@ export function useDevices() {
 
 // 设置管理hook
 export function useAppSettings() {
-    const [settings, setSettings] = useState<AppSettings>({ enableContextMenu: true, themeMode: 'system' });
+    const [settings, setSettings] = useState<AppSettings>({
+        enableContextMenu: true,
+        themeMode: 'system',
+        enableEncryption: false,
+        encryptionConfig: {
+            algorithm: 'AES256',
+            mode: 'CBC',
+            padding: 'pkcs7',
+            key: ''
+        }
+    });
     const [loading, setLoading] = useState(true);
 
     // 加载设置

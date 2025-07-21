@@ -4,7 +4,7 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { TabValue } from './types';
 import { useDevices } from './hooks/useStorage';
 import { useTheme } from './hooks/useTheme';
-import { AppProvider } from './contexts/AppContext';
+import { AppProvider, useAppContext } from './contexts/AppContext';
 import Layout from './components/Layout';
 import SendPush from './pages/SendPush';
 import History from './pages/History';
@@ -13,7 +13,8 @@ import Settings from './pages/Settings';
 import './i18n';
 import './App.css';
 
-function App() {
+// 主应用组件内容
+function AppContent() {
   const [currentTab, setCurrentTab] = useState<TabValue>('send');
   const {
     devices,
@@ -32,6 +33,14 @@ function App() {
     loading: themeLoading,
     updateThemeMode
   } = useTheme();
+
+  const {
+    appSettings,
+    loading: settingsLoading,
+    toggleEncryption,
+    shouldShowEncryptionToggle,
+    reloadSettings
+  } = useAppContext();
 
   // 检查是否是窗口模式并添加类名
   useEffect(() => {
@@ -117,6 +126,7 @@ function App() {
             onSetDefaultDevice={setDefaultDevice}
             themeMode={themeMode}
             onThemeChange={updateThemeMode}
+            onSettingsChange={reloadSettings}
           />
         );
       default:
@@ -130,35 +140,43 @@ function App() {
     }
   };
 
-  if (devicesLoading || themeLoading) {
+  // 如果数据还在加载中, 显示加载状态
+  if (devicesLoading || themeLoading || settingsLoading) {
     return (
-      <AppProvider>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <Layout
-            currentTab={currentTab}
-            onTabChange={setCurrentTab}
-          >
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-              加载中...
-            </div>
-          </Layout>
-        </ThemeProvider>
-      </AppProvider>
-    );
-  }
-
-  return (
-    <AppProvider>
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Layout
           currentTab={currentTab}
           onTabChange={setCurrentTab}
         >
-          {renderCurrentPage()}
+          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+            加载中...
+          </div>
         </Layout>
       </ThemeProvider>
+    );
+  }
+
+  return (
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Layout
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+        showEncryptionToggle={shouldShowEncryptionToggle}
+        encryptionEnabled={appSettings?.enableEncryption || false}
+        onEncryptionToggle={toggleEncryption}
+      >
+        {renderCurrentPage()}
+      </Layout>
+    </ThemeProvider>
+  );
+}
+
+function App() {
+  return (
+    <AppProvider>
+      <AppContent />
     </AppProvider>
   );
 }

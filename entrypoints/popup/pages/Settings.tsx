@@ -10,7 +10,6 @@ import {
     List,
     ListItem,
     ListItemText,
-    ListItemSecondaryAction,
     Radio,
     FormControlLabel,
     Switch,
@@ -28,12 +27,16 @@ import BugReportIcon from '@mui/icons-material/BugReport';
 import EmailIcon from '@mui/icons-material/Email';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TelegramIcon from '@mui/icons-material/Telegram';
+import SecurityIcon from '@mui/icons-material/Security';
+import TuneIcon from '@mui/icons-material/Tune';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import { useTranslation } from 'react-i18next';
-import { Device, AppSettings, ThemeMode } from '../types';
-import { getAppSettings, updateAppSetting } from '../utils/settings';
+import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import ThemeSelector from '../components/ThemeSelector';
 import DeviceDialog from '../components/DeviceDialog';
+import EncryptionDialog from '../components/EncryptionDialog';
+import SoundDialog from '../components/SoundDialog';
 import { openExtensionShortcuts, openGitHub, openFeedback, openTelegramChannel } from '../utils/extension';
 
 interface SettingsProps {
@@ -45,6 +48,7 @@ interface SettingsProps {
     onSetDefaultDevice: (deviceId: string) => Promise<void>;
     themeMode: ThemeMode;
     onThemeChange: (mode: ThemeMode) => void;
+    onSettingsChange?: () => void;
 }
 
 export default function Settings({
@@ -55,38 +59,54 @@ export default function Settings({
     onRemoveDevice,
     onSetDefaultDevice,
     themeMode,
-    onThemeChange
+    onThemeChange,
+    onSettingsChange
 }: SettingsProps) {
     const { t } = useTranslation();
-    const { shortcutKeys } = useAppContext();
+    const { shortcutKeys, appSettings, updateAppSetting, updateEncryptionConfig } = useAppContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [appSettings, setAppSettings] = useState<AppSettings>({
-        enableContextMenu: true,
-        themeMode: 'system'
-    });
     const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
     const [editingDevice, setEditingDevice] = useState<Device | undefined>();
-
-    // 加载应用设置
-    useEffect(() => {
-        const loadSettings = async () => {
-            try {
-                const settings = await getAppSettings();
-                setAppSettings(settings);
-            } catch (error) {
-                console.error('加载设置失败:', error);
-            }
-        };
-        loadSettings();
-    }, []);
+    const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
+    const [soundDialogOpen, setSoundDialogOpen] = useState(false);
 
     const handleContextMenuToggle = async (enabled: boolean) => {
         try {
             await updateAppSetting('enableContextMenu', enabled);
-            setAppSettings(prev => ({ ...prev, enableContextMenu: enabled }));
         } catch (error) {
-            setError(`更新设置失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // 更新设置失败: {{message}}
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 处理加密开关切换
+    const handleEncryptionToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('enableEncryption', enabled);
+        } catch (error) {
+            // 更新加密设置失败: {{message}}
+            setError(t('settings.encryption.errors.update_failed', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 处理加密配置保存
+    const handleEncryptionConfigSave = async (config: any) => {
+        try {
+            await updateEncryptionConfig(config);
+        } catch (error) {
+            // 保存加密配置失败: {{message}}
+            setError(t('settings.encryption.errors.config_save_failed', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 处理铃声保存
+    const handleSoundSave = async (sound: string) => {
+        try {
+            await updateAppSetting('sound', sound || undefined);
+        } catch (error) {
+            // 保存铃声设置失败: {{message}}
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
         }
     };
 
@@ -95,6 +115,7 @@ export default function Settings({
         setError('');
         try {
             await onAddDevice(alias, apiURL);
+            onSettingsChange?.();
         } catch (error) {
             setError(`添加设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
             throw error;
@@ -111,6 +132,7 @@ export default function Settings({
         try {
             await onEditDevice(editingDevice.id, alias, apiURL);
             setEditingDevice(undefined);
+            onSettingsChange?.();
         } catch (error) {
             setError(`编辑设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
             throw error;
@@ -122,6 +144,7 @@ export default function Settings({
     const handleRemove = async (deviceId: string) => {
         try {
             await onRemoveDevice(deviceId);
+            onSettingsChange?.();
         } catch (error) {
             setError(`删除设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
         }
@@ -130,6 +153,7 @@ export default function Settings({
     const handleSetDefault = async (deviceId: string) => {
         try {
             await onSetDefaultDevice(deviceId);
+            onSettingsChange?.();
         } catch (error) {
             setError(`设置默认设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
         }
@@ -249,6 +273,102 @@ export default function Settings({
                     </Stack>
                 </Paper>
 
+                {/* 铃声设置卡片 */}
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Stack spacing={3}>
+                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <VolumeUpIcon />
+                            {/* 铃声设置 */}
+                            {t('settings.sound.title')}
+                        </Typography>
+                        <Stack direction="column" gap={2} >
+                            <Button
+                                variant="outlined"
+                                size="small"
+                                fullWidth
+                                onClick={() => setSoundDialogOpen(true)}
+                                startIcon={<VolumeUpIcon />}
+                                sx={{ alignSelf: 'flex-start' }}
+                            >
+                                {/* 选择铃声 */}
+                                {t('settings.sound.select')}
+                            </Button>
+                            <Typography variant="body2" color="text.secondary">
+                                {/* 当前铃声: {{sound}} */}
+                                {t('settings.sound.current', { sound: appSettings?.sound || t('settings.sound.default') })}
+                            </Typography>
+                        </Stack>
+                    </Stack>
+                </Paper>
+
+                {/* 加密设置卡片 */}
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Stack spacing={3}>
+                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SecurityIcon fontSize="small" />
+                            {/* 加密设置 */}
+                            {t('settings.encryption.title')}
+                        </Typography>
+                        <Stack direction="column" gap={2} >
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={appSettings?.enableEncryption || false}
+                                        onChange={(e) => handleEncryptionToggle(e.target.checked)}
+                                    />
+                                }
+                                label={t('settings.encryption.enable')}
+                                sx={{ userSelect: 'none' }}
+                            />
+                            {/* 根据算法的对应长度检测 key 是否有效 */}
+                            {appSettings?.enableEncryption && (() => {
+                                const algorithm = appSettings?.encryptionConfig?.algorithm;
+                                const key = appSettings?.encryptionConfig?.key || '';
+                                let isValid = false;
+
+                                switch (algorithm) {
+                                    case 'AES256':
+                                        isValid = /^[A-Za-z0-9]{32}$/.test(key);
+                                        break;
+                                    case 'AES192':
+                                        isValid = /^[A-Za-z0-9]{24}$/.test(key);
+                                        break;
+                                    case 'AES128':
+                                        isValid = /^[A-Za-z0-9]{16}$/.test(key);
+                                        break;
+                                }
+
+                                return (
+                                    <Alert severity={isValid ? "success" : "error"} sx={{ mt: 1 }}>
+                                        <Typography variant="body2">
+                                            {isValid ?
+                                                /* 密钥有效 */
+                                                t('settings.encryption.key_valid') :
+                                                /* 密钥无效 */
+                                                t('settings.encryption.key_invalid')
+                                            }
+                                        </Typography>
+                                    </Alert>
+                                );
+                            })()}
+
+                            {appSettings?.enableEncryption && (
+                                <Button
+                                    variant="outlined"
+                                    size="small"
+                                    fullWidth
+                                    onClick={() => setEncryptionDialogOpen(true)}
+                                    startIcon={<TuneIcon />}
+                                    sx={{ alignSelf: 'flex-start' }}
+                                >
+                                    {/* 加密选项 */}
+                                    {t('settings.encryption.options')}
+                                </Button>
+                            )}
+                        </Stack>
+                    </Stack>
+                </Paper>
+
                 {/* 其他设置卡片 */}
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Stack spacing={3}>
@@ -274,7 +394,7 @@ export default function Settings({
                             <FormControlLabel
                                 control={
                                     <Switch
-                                        checked={appSettings.enableContextMenu}
+                                        checked={appSettings?.enableContextMenu || false}
                                         onChange={(e) => handleContextMenuToggle(e.target.checked)}
                                     />
                                 }
@@ -423,6 +543,25 @@ export default function Settings({
                 onSubmit={editingDevice ? handleEditDevice : handleAddDevice}
                 editDevice={editingDevice}
                 title={editingDevice ? t('device.edit') : t('device.add')}
+            />
+
+            <EncryptionDialog
+                open={encryptionDialogOpen}
+                config={appSettings?.encryptionConfig || {
+                    algorithm: 'AES256',
+                    mode: 'CBC',
+                    padding: 'pkcs7',
+                    key: ''
+                }}
+                onClose={() => setEncryptionDialogOpen(false)}
+                onSave={handleEncryptionConfigSave}
+            />
+
+            <SoundDialog
+                open={soundDialogOpen}
+                onClose={() => setSoundDialogOpen(false)}
+                onSave={handleSoundSave}
+                currentSound={appSettings?.sound || ''}
             />
         </Box>
     );
