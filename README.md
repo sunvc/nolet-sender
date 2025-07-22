@@ -5,7 +5,7 @@
 
 ## English Description
 
-Bark Sender is a browser extension that allows you to quickly push selected text from a webpage or clipboard content to any iOS device with the Bark App installed.
+Bark Sender is a browser extension that allows you to quickly push selected text from a webpage or clipboard content to any iOS device with the [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) installed.
 
 🧩 Features:
 - Select any text on a webpage and right-click to send it;
@@ -14,7 +14,7 @@ Bark Sender is a browser extension that allows you to quickly push selected text
 - Supports adding multiple iOS devices with Bark App installed.
 
 📌 Requirements:
-You must install the Bark App on your iOS device and enable notification permissions.
+You must install the [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) on your iOS device and enable notification permissions.
 
 📱 How to Add iOS Devices:
 - Open the Bark App on your iOS device, tap the cloud icon in the top-right corner to open the server list;
@@ -26,7 +26,7 @@ You must install the Bark App on your iOS device and enable notification permiss
 
 ## 中文说明
 
-Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 PC 剪贴板中的文本，快速推送到安装了 Bark App 的 iOS 设备上。
+Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 PC 剪贴板中的文本，快速推送到安装了 [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) 的 iOS 设备上。
 
 🧩  本扩展实现以下功能：
 1. 选中网页上的任意文字，右键进行发送；
@@ -35,7 +35,7 @@ Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 P
 4. 支持添加多个装有 Bark App 的 iOS 设备。
 
 📌  前提要求：
-需要在 iOS 设备上安装 Bark App 并开启消息推送权限。
+需要在 iOS 设备上安装 [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) 并开启消息推送权限。
 
 📱  如何添加 iOS 设备：
 1. 打开 iOS 设备上的 Bark App，点击右上角的云朵图标，打开服务器列表；
