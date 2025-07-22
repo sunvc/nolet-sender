@@ -8,7 +8,16 @@
         "confirm": "Confirm",
         "loading": "Loading...",
         "processing": "Processing...",
-        "error_update": "Failed to update settings: {{message}}"
+        "error_update": "Failed to update settings: {{message}}",
+        "yes": "Yes",
+        "no": "No",
+        "error_unknown": "Unknown Error",
+        "success": "Success",
+        "failed": "Failed",
+        "other": "Other",
+        "page": "Page",
+        "previous_page": "Previous Page",
+        "next_page": "Next Page"
     },
     "nav": {
         "send": "Push",
@@ -56,15 +65,50 @@
             "select": "Select Sound",
             "current": "Current sound: {{sound}}",
             "default": "Default",
+            "test_message": "Sound Test: {{sound}}",
             "description": "Select the sound to use when pushing notifications, leave blank to use system default",
+            "description_2": "Click the play icon to test the sound effect",
             "default_description": "Use system default sound",
-            "clear": "Clear"
+            "deprecated": "Deprecated",
+            "clear": "Clear",
+            "silence": "Silence",
+            "alarm": "Alarm",
+            "anticipate": "Anticipate",
+            "bell": "Bell",
+            "birdsong": "Bird Song",
+            "bloom": "Bloom",
+            "calypso": "Calypso",
+            "chime": "Chime",
+            "choo": "Choo",
+            "descent": "Descent",
+            "electronic": "Electronic",
+            "fanfare": "Fanfare",
+            "glass": "Glass",
+            "gotosleep": "Go to Sleep",
+            "healthnotification": "Health Notification",
+            "horn": "Horn",
+            "ladder": "Ladder",
+            "mailsent": "Mail Sent",
+            "minuet": "Minuet",
+            "multiwayinvitation": "Multiway Invitation",
+            "newmail": "New Mail",
+            "newsflash": "News Flash",
+            "noir": "Noir",
+            "paymentsuccess": "Payment Success",
+            "shake": "Shake",
+            "sherwoodforest": "Sherwood Forest",
+            "spell": "Spell",
+            "suspense": "Suspense",
+            "telegraph": "Telegraph",
+            "tiptoes": "Tiptoes",
+            "typewriters": "Typewriters",
+            "update": "Update"
         },
         "encryption": {
             "title": "Encryption Settings",
             "enable": "Enable Encryption",
             "options": "Encryption Options",
-            "key_invalid": "Invalid key",
+            "key_invalid": "Invalid, please check options",
             "key_valid": "Valid key",
             "tooltips": {
                 "encryption_on": "Turn off encryption",
@@ -80,7 +124,8 @@
         "title": "About",
         "github": {
             "title": "GitHub",
-            "description": "View source code, submit issues"
+            "description": "View source code, submit issues",
+            "description2": "If you like this project, consider giving it a star or a fork~"
         },
         "feedback": {
             "title": "Feedback",
@@ -93,6 +138,15 @@
         "contact": {
             "title": "Contact",
             "email": "feedback@uuphy.com"
+        },
+        "bark_app": {
+            "title": "Download Bark App",
+            "description": "Go to App Store to download Bark App"
+        },
+        "bark_website": {
+            "title": "About Bark",
+            "description": "Visit Bark website to learn more",
+            "documentation": "View documentation"
         }
     },
     "push": {
@@ -141,11 +195,39 @@
         }
     },
     "history": {
-        "title": "History",
-        "coming_soon": "Coming Soon",
-        "description": "Message history feature is coming soon",
-        "follow": "Follow our",
-        "telegram": "Telegram Channel",
-        "updates": "for updates"
+        "title": "Message History",
+        "export": "Export Records",
+        "import": "Import Records",
+        "refresh": "Refresh",
+        "toolbar": {
+            "search_placeholder": "Search message content or device name...",
+            "clear_search": "Clear Search",
+            "search": "Search",
+            "delete_selected": "Delete Selected"
+        },
+        "confirm_delete": "Confirm Deletion",
+        "confirm_delete_message": "Are you sure you want to delete the selected {{count}} record(s)? This action cannot be undone.",
+        "table": {
+            "records_count": "{{count}} record(s) total",
+            "selected_count": "{{count}} selected",
+            "time": "Time",
+            "content": "Message Content",
+            "device": "Device",
+            "method": "Method",
+            "status": "Status",
+            "encrypted": "Encrypted",
+            "title_prefix": "Title"
+        },
+        "messages": {
+            "empty": "No history available",
+            "no_search_results": "No matching records found",
+            "load_failed": "Failed to load history",
+            "delete_success": "{{count}} record(s) deleted",
+            "delete_failed": "Failed to delete",
+            "export_success": "Export successful",
+            "export_failed": "Export failed",
+            "import_failed": "Import failed",
+            "import_success_message": "Import complete: {{success}} succeeded, {{skipped}} skipped, {{errors}} failed"
+        }
     }
 }

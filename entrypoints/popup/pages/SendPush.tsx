@@ -79,7 +79,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     try {
                         browser.runtime.onMessage.removeListener(handleMessage);
                     } catch (error) {
-                        console.log('移除消息监听器失败:', error);
+                        console.debug('移除消息监听器失败:', error);
                     }
                 };
             }
@@ -90,12 +90,12 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     try {
                         (window as any).chrome.runtime.onMessage.removeListener(handleMessage);
                     } catch (error) {
-                        console.log('移除消息监听器失败:', error);
+                        console.debug('移除消息监听器失败:', error);
                     }
                 };
             }
         } catch (error) {
-            console.log('添加消息监听器失败:', error);
+            console.debug('添加消息监听器失败:', error);
         }
     }, [selectedDevice]);
 
@@ -135,7 +135,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setLoading(true);
 
         try {
-            const response = await sendPushMessage(selectedDevice.apiURL, shortcutClipboardText.trim());
+            const response = await sendPushMessage(selectedDevice.apiURL, shortcutClipboardText.trim(), selectedDevice.alias);
 
             if (response.code === 200) {
                 setShortcutDialogOpen(false);
@@ -163,7 +163,16 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             event.preventDefault();
             handleShortcutSend();
         } else if (event.key === 'Escape') {
-            setShortcutDialogOpen(false);
+            handleShortcutCancel();
+        }
+    };
+
+    // 处理快捷键对话框取消操作
+    const handleShortcutCancel = () => {
+        setShortcutDialogOpen(false);
+        // 如果是窗口模式，关闭整个窗口
+        if (isWindowMode) {
+            window.close();
         }
     };
 
@@ -184,7 +193,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setResult(null);
 
         try {
-            const response = await sendPushMessage(selectedDevice.apiURL, message.trim());
+            const response = await sendPushMessage(selectedDevice.apiURL, message.trim(), selectedDevice.alias);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -224,7 +233,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 return;
             }
 
-            const response = await sendPushMessage(selectedDevice.apiURL, clipboardText.trim());
+            const response = await sendPushMessage(selectedDevice.apiURL, clipboardText.trim(), selectedDevice.alias);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -268,6 +277,37 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             });
         }
     };
+
+    // 检测是否是窗口模式
+    const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
+
+    // 检测是否需要自动打开添加设备对话框
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const autoAddDevice = urlParams.get('autoAddDevice') === 'true';
+
+        if (autoAddDevice && devices.length === 0) {
+            // 读取剪切板内容到输入框
+            const loadClipboardContent = async () => {
+                try {
+                    const clipboardText = await readClipboard();
+                    if (clipboardText && clipboardText.trim()) {
+                        setMessage(clipboardText.trim());
+                    }
+                } catch (error) {
+                    console.debug('读取剪切板失败:', error);
+                }
+            };
+
+            // 延迟一下确保组件完全加载，然后读取剪切板并打开对话框
+            setTimeout(() => {
+                loadClipboardContent();
+                setDeviceDialogOpen(true);
+                // 移除网址参数
+                window.history.replaceState({}, '', window.location.pathname);
+            }, 600);
+        }
+    }, [devices.length]);
 
     return (
         <>
@@ -365,6 +405,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                                 {t('push.target_device')}:
                             </Typography>
                             <DeviceSelect
+                                showLabel={false}
                                 devices={devices}
                                 selectedDevice={selectedDevice}
                                 onDeviceChange={setSelectedDevice}
@@ -405,7 +446,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     </Stack>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={() => setShortcutDialogOpen(false)}>
+                    <Button onClick={handleShortcutCancel}>
                         {/* 取消 */}
                         {t('common.cancel')}
                     </Button>

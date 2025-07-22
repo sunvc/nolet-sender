@@ -8,7 +8,16 @@
         "confirm": "确认",
         "loading": "加载中...",
         "processing": "处理中...",
-        "error_update": "更新设置失败: {{message}}"
+        "error_update": "更新设置失败: {{message}}",
+        "yes": "是",
+        "no": "否",
+        "error_unknown": "未知错误",
+        "success": "成功",
+        "failed": "失败",
+        "other": "其他",
+        "page": "页",
+        "previous_page": "上一页",
+        "next_page": "下一页"
     },
     "nav": {
         "send": "发起推送",
@@ -56,15 +65,50 @@
             "select": "选择铃声",
             "current": "当前铃声: {{sound}}",
             "default": "默认",
+            "test_message": "铃声测试: {{sound}}",
             "description": "选择推送时使用的铃声，留空则使用系统默认铃声",
+            "description_2": "点击播放图标可测试铃声效果",
             "default_description": "使用系统默认铃声",
-            "clear": "清除"
+            "deprecated": "弃用",
+            "clear": "清除",
+            "silence": "静音",
+            "alarm": "提醒声",
+            "anticipate": "悉心期盼",
+            "bell": "铃声",
+            "birdsong": "鸟鸣声",
+            "bloom": "百花怒放",
+            "calypso": "即兴曲调",
+            "chime": "风铃",
+            "choo": "火车鸣笛",
+            "descent": "渐弱",
+            "electronic": "电子乐",
+            "fanfare": "嘹亮吹奏声",
+            "glass": "玻璃声",
+            "gotosleep": "睡眠提醒",
+            "healthnotification": "健康提醒",
+            "horn": "喇叭声",
+            "ladder": "连音效果",
+            "mailsent": "嗖",
+            "minuet": "小步舞曲",
+            "multiwayinvitation": "多方邀请",
+            "newmail": "叮",
+            "newsflash": "新闻快讯",
+            "noir": "夜色",
+            "paymentsuccess": "支付成功",
+            "shake": "震动声",
+            "sherwoodforest": "绿林好汉旋律",
+            "spell": "神奇魔咒",
+            "suspense": "侦探悬念",
+            "telegraph": "敲打电报",
+            "tiptoes": "蹑手蹑脚",
+            "typewriters": "敲打字机",
+            "update": "整点新闻"
         },
         "encryption": {
             "title": "加密设置",
             "enable": "启用加密",
             "options": "加密选项",
-            "key_invalid": "密钥无效",
+            "key_invalid": "密钥无效, 请修改加密选项",
             "key_valid": "密钥有效",
             "tooltips": {
                 "encryption_on": "关闭加密",
@@ -80,7 +124,8 @@
         "title": "关于",
         "github": {
             "title": "GitHub",
-            "description": "查看源代码、提交问题"
+            "description": "查看源代码、提交问题",
+            "description2": "如果喜欢这个项目，欢迎 Star 或 Fork~"
         },
         "feedback": {
             "title": "问题反馈",
@@ -93,6 +138,15 @@
         "contact": {
             "title": "联系方式",
             "email": "feedback@uuphy.com"
+        },
+        "bark_app": {
+            "title": "下载 Bark App",
+            "description": "前往 App Store 下载 Bark App"
+        },
+        "bark_website": {
+            "title": "了解 Bark",
+            "description": "访问 Bark 官网了解更多",
+            "documentation": "查看官方文档"
         }
     },
     "push": {
@@ -142,10 +196,38 @@
     },
     "history": {
         "title": "历史消息",
-        "coming_soon": "功能开发中",
-        "description": "历史消息功能即将上线",
-        "follow": "你可以关注",
-        "telegram": "Telegram 频道",
-        "updates": "获取最新动态"
+        "export": "导出记录",
+        "import": "导入记录",
+        "refresh": "刷新",
+        "toolbar": {
+            "search_placeholder": "搜索消息内容、设备名称...",
+            "clear_search": "清除搜索",
+            "search": "搜索",
+            "delete_selected": "删除所选"
+        },
+        "confirm_delete": "确认删除",
+        "confirm_delete_message": "确定要删除选中的 {{count}} 条记录吗？此操作不可撤销。",
+        "table": {
+            "records_count": "共 {{count}} 条记录",
+            "selected_count": "已选择 {{count}} 条",
+            "time": "时间",
+            "content": "消息内容",
+            "device": "设备",
+            "method": "方法",
+            "status": "状态",
+            "encrypted": "加密",
+            "title_prefix": "标题"
+        },
+        "messages": {
+            "empty": "暂无历史记录",
+            "no_search_results": "未找到匹配的记录",
+            "load_failed": "加载历史记录失败",
+            "delete_success": "已删除 {{count}} 条记录",
+            "delete_failed": "删除失败",
+            "export_success": "导出成功",
+            "export_failed": "导出失败",
+            "import_failed": "导入失败",
+            "import_success_message": "导入完成：成功 {{success}} 条，跳过 {{skipped}} 条，失败 {{errors}} 条"
+        }
     }
 }

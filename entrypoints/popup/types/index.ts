@@ -40,8 +40,8 @@ export interface EncryptionConfig {
 // 铃声接口
 export interface Sound {
     name: string;
-    duration: string;
-    description: string;
+    duration: number; // 持续时间 (ms)
+    old?: boolean; // 是否为旧铃声
 }
 
 // 应用设置接口

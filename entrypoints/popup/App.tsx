@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
+import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { useTranslation } from 'react-i18next';
 import { TabValue } from './types';
 import { useDevices } from './hooks/useStorage';
 import { useTheme } from './hooks/useTheme';
 import { AppProvider, useAppContext } from './contexts/AppContext';
+import { initHistoryService } from './utils/history-service';
+import { createAppTheme } from './theme';
 import Layout from './components/Layout';
 import SendPush from './pages/SendPush';
 import History from './pages/History';
@@ -15,6 +18,7 @@ import './App.css';
 
 // 主应用组件内容
 function AppContent() {
+  const { i18n } = useTranslation();
   const [currentTab, setCurrentTab] = useState<TabValue>('send');
   const {
     devices,
@@ -42,6 +46,11 @@ function AppContent() {
     reloadSettings
   } = useAppContext();
 
+  // 初始化历史服务
+  useEffect(() => {
+    initHistoryService();
+  }, []);
+
   // 检查是否是窗口模式并添加类名
   useEffect(() => {
     const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
@@ -60,47 +69,28 @@ function AppContent() {
     document.documentElement.setAttribute('data-theme', effectiveTheme);
   }, [effectiveTheme]);
 
+  // 等待 i18n 和其他资源加载完成
+  if (!i18n.isInitialized || devicesLoading || themeLoading || settingsLoading) {
+    return (
+      <ThemeProvider theme={createAppTheme(effectiveTheme, i18n.language === 'zh' ? 'zh' : 'en')}>
+        <CssBaseline />
+        {/* 加载中，此时需要等待i18n和其他资源 */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+          fontSize: '14px',
+          color: '#666'
+        }}>
+          Loading...
+        </div>
+      </ThemeProvider>
+    );
+  }
+
   // 创建动态主题
-  const theme = createTheme({
-    palette: {
-      mode: effectiveTheme,
-      primary: {
-        main: effectiveTheme === 'dark' ? '#90caf9' : '#1976d2',
-      },
-      secondary: {
-        main: effectiveTheme === 'dark' ? '#f48fb1' : '#dc004e',
-      },
-      background: {
-        default: effectiveTheme === 'dark' ? '#121212' : '#ffffff',
-        paper: effectiveTheme === 'dark' ? '#1e1e1e' : '#ffffff',
-      },
-    },
-    components: {
-      MuiCssBaseline: {
-        styleOverrides: {
-          body: {
-            margin: 0,
-            padding: 0,
-            overflow: 'hidden',
-          },
-        },
-      },
-      MuiAppBar: {
-        styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-          },
-        },
-      },
-      MuiPaper: {
-        styleOverrides: {
-          root: {
-            backgroundImage: 'none',
-          },
-        },
-      },
-    },
-  });
+  const theme = createAppTheme(effectiveTheme, i18n.language === 'zh' ? 'zh' : 'en');
 
   // 渲染当前页面内容
   const renderCurrentPage = () => {
@@ -139,23 +129,6 @@ function AppContent() {
         );
     }
   };
-
-  // 如果数据还在加载中, 显示加载状态
-  if (devicesLoading || themeLoading || settingsLoading) {
-    return (
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <Layout
-          currentTab={currentTab}
-          onTabChange={setCurrentTab}
-        >
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-            加载中...
-          </div>
-        </Layout>
-      </ThemeProvider>
-    );
-  }
 
   return (
     <ThemeProvider theme={theme}>

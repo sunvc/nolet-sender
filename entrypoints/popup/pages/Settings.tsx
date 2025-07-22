@@ -13,7 +13,9 @@ import {
     Radio,
     FormControlLabel,
     Switch,
-    Link
+    Link,
+    Tooltip,
+    Divider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -30,6 +32,7 @@ import TelegramIcon from '@mui/icons-material/Telegram';
 import SecurityIcon from '@mui/icons-material/Security';
 import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
@@ -37,7 +40,7 @@ import ThemeSelector from '../components/ThemeSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
-import { openExtensionShortcuts, openGitHub, openFeedback, openTelegramChannel } from '../utils/extension';
+import { openExtensionShortcuts, openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp } from '../utils/extension';
 
 interface SettingsProps {
     devices: Device[];
@@ -194,6 +197,9 @@ export default function Settings({
                                     setEditingDevice(undefined);
                                     setDeviceDialogOpen(true);
                                 }}
+                                sx={{
+                                    px: 1.2,
+                                }}
                             >
                                 {/* 添加设备 */}
                                 {t('device.add')}
@@ -286,6 +292,7 @@ export default function Settings({
                                 variant="outlined"
                                 size="small"
                                 fullWidth
+                                disabled={devices.length === 0}
                                 onClick={() => setSoundDialogOpen(true)}
                                 startIcon={<VolumeUpIcon />}
                                 sx={{ alignSelf: 'flex-start' }}
@@ -313,6 +320,7 @@ export default function Settings({
                             <FormControlLabel
                                 control={
                                     <Switch
+                                        disabled={devices.length === 0}
                                         checked={appSettings?.enableEncryption || false}
                                         onChange={(e) => handleEncryptionToggle(e.target.checked)}
                                     />
@@ -394,6 +402,7 @@ export default function Settings({
                             <FormControlLabel
                                 control={
                                     <Switch
+                                        disabled={devices.length === 0}
                                         checked={appSettings?.enableContextMenu || false}
                                         onChange={(e) => handleContextMenuToggle(e.target.checked)}
                                     />
@@ -413,6 +422,10 @@ export default function Settings({
                                     startIcon={<KeyboardIcon />}
                                     onClick={openExtensionShortcuts}
                                     size="small"
+                                    sx={{
+                                        px: 1.2,
+                                        mb: 1
+                                    }}
                                 >
                                     {/* 修改快捷键 */}
                                     {t('settings.shortcuts.edit')}
@@ -436,6 +449,50 @@ export default function Settings({
                     </Stack>
                 </Paper>
 
+                {/* 了解 Bark 卡片 */}
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Stack spacing={3}>
+                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <AutoStoriesIcon />
+                            {/* 了解 Bark */}
+                            {t('about.bark_website.title')}
+                        </Typography>
+
+                        <Stack direction="column" alignItems="flex-start" gap={1}>
+                            <Stack direction="row" alignItems="center" gap={1.5}>
+                                <Tooltip title={t('about.bark_website.description')}>
+                                    {/* 查看文档 */}
+                                    <Button
+                                        variant="outlined"
+                                        size='small'
+                                        color='success'
+                                        onClick={openBarkWebsite}
+                                        sx={{
+                                            px: 1.2,
+                                        }}
+                                    >
+                                        {t('about.bark_website.documentation')}
+                                    </Button>
+                                </Tooltip>
+                                <Tooltip title={t('about.bark_app.description')}>
+                                    {/* 下载 Bark App */}
+                                    <Button
+                                        variant="outlined"
+                                        color='secondary'
+                                        size='small'
+                                        onClick={openBarkApp}
+                                        sx={{
+                                            px: 1.2,
+                                        }}
+                                    >
+                                        {t('about.bark_app.title')}
+                                    </Button>
+                                </Tooltip>
+                            </Stack>
+                        </Stack>
+                    </Stack>
+                </Paper>
+
                 {/* 关于卡片 */}
                 <Paper
                     elevation={2}
@@ -452,7 +509,7 @@ export default function Settings({
                         </Typography>
 
                         <List>
-                            <ListItem sx={{ display: 'none' }}>
+                            <ListItem>
                                 <ListItemText
                                     primary={
                                         <Stack direction="row" alignItems="center" spacing={1}>
@@ -465,9 +522,11 @@ export default function Settings({
                                     }
                                     secondary={t('about.github.description')}
                                 />
-                                <IconButton edge="end" onClick={openGitHub}>
-                                    <OpenInNewIcon />
-                                </IconButton>
+                                <Tooltip title={t('about.github.description2')}>
+                                    <IconButton edge="end" onClick={openGitHub}>
+                                        <OpenInNewIcon />
+                                    </IconButton>
+                                </Tooltip>
                             </ListItem>
 
                             <ListItem sx={{ display: 'none' }}>

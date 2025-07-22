@@ -2,7 +2,7 @@
   "name": "Bark Sender",
   "description": "Push text from webpages or clipboard to iOS devices using the Bark app. Includes shortcut key support.",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -20,6 +20,7 @@
     "@lottiefiles/react-lottie-player": "^3.6.0",
     "@mui/icons-material": "^7.2.0",
     "@mui/material": "^7.2.0",
+    "@types/uuid": "^10.0.0",
     "ag-grid-community": "^34.0.2",
     "ag-grid-react": "^34.0.2",
     "dayjs": "^1.11.13",
@@ -29,7 +30,8 @@
     "idb": "^8.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "react-i18next": "^15.6.0"
+    "react-i18next": "^15.6.0",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.1.2",

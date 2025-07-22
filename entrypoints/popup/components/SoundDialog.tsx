@@ -15,12 +15,17 @@ import {
     FormControlLabel,
     Typography,
     Slide,
-    Grid
+    Grid,
+    IconButton,
+    Tooltip,
+    Chip
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslation } from 'react-i18next';
 import { Sound } from '../types';
+import { sendPushMessage } from '../utils/api';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -34,163 +39,134 @@ const Transition = forwardRef(function Transition(
 const sounds: Sound[] = [
     {
         name: "silence",
-        duration: "0s",
-        description: "静音"
+        duration: 500
     },
     {
         name: "alarm",
-        duration: "3s",
-        description: "警报声"
+        duration: 2000,
     },
     {
         name: "anticipate",
-        duration: "2s",
-        description: "期待声"
+        duration: 4500
     },
     {
         name: "bell",
-        duration: "4s",
-        description: "铃声"
+        duration: 1400
     },
     {
         name: "birdsong",
-        duration: "3s",
-        description: "鸟鸣声"
+        duration: 670
     },
     {
         name: "bloom",
-        duration: "2s",
-        description: "绽放声"
+        duration: 1600
     },
     {
         name: "calypso",
-        duration: "2s",
-        description: "卡利普索"
+        duration: 900
     },
     {
         name: "chime",
-        duration: "3s",
-        description: "风铃声"
+        duration: 4500
     },
     {
         name: "choo",
-        duration: "2s",
-        description: "火车声"
+        duration: 2200
     },
     {
         name: "descent",
-        duration: "3s",
-        description: "下降声"
+        duration: 1900
     },
     {
         name: "electronic",
-        duration: "2s",
-        description: "电子声"
+        duration: 1500
     },
     {
         name: "fanfare",
-        duration: "2s",
-        description: "号角声"
+        duration: 1500
     },
     {
         name: "glass",
-        duration: "2s",
-        description: "玻璃声"
+        duration: 1700
     },
     {
         name: "gotosleep",
-        duration: "4s",
-        description: "睡眠声"
+        duration: 3000
     },
     {
         name: "healthnotification",
-        duration: "2s",
-        description: "健康提醒"
+        duration: 1800
     },
     {
         name: "horn",
-        duration: "2s",
-        description: "喇叭声"
+        duration: 1500,
+        old: true
     },
     {
         name: "ladder",
-        duration: "3s",
-        description: "阶梯声"
+        duration: 1300
     },
     {
         name: "mailsent",
-        duration: "3s",
-        description: "邮件发送"
+        duration: 1500
     },
     {
         name: "minuet",
-        duration: "3s",
-        description: "小步舞曲"
+        duration: 7000
     },
     {
         name: "multiwayinvitation",
-        duration: "2s",
-        description: "多方邀请"
+        duration: 2200,
+        old: true
     },
     {
         name: "newmail",
-        duration: "4s",
-        description: "新邮件"
+        duration: 1500
     },
     {
         name: "newsflash",
-        duration: "3s",
-        description: "新闻快讯"
+        duration: 2900
     },
     {
         name: "noir",
-        duration: "3s",
-        description: "黑色风格"
+        duration: 1900
     },
     {
         name: "paymentsuccess",
-        duration: "2s",
-        description: "支付成功"
+        duration: 1400
     },
     {
         name: "shake",
-        duration: "2s",
-        description: "震动声"
+        duration: 600,
+        old: true
     },
     {
         name: "sherwoodforest",
-        duration: "2s",
-        description: "舍伍德森林"
+        duration: 4700
     },
     {
         name: "spell",
-        duration: "2s",
-        description: "咒语声"
+        duration: 2900
     },
     {
         name: "suspense",
-        duration: "3s",
-        description: "悬疑声"
+        duration: 4200
     },
     {
         name: "telegraph",
-        duration: "3s",
-        description: "电报声"
+        duration: 1200
     },
     {
         name: "tiptoes",
-        duration: "2s",
-        description: "脚尖声"
+        duration: 1500
     },
     {
         name: "typewriters",
-        duration: "2s",
-        description: "打字机声"
+        duration: 2600
     },
     {
         name: "update",
-        duration: "2s",
-        description: "更新提示"
+        duration: 4500
     }
 ];
 
@@ -204,6 +180,7 @@ interface SoundDialogProps {
 export default function SoundDialog({ open, currentSound, onClose, onSave }: SoundDialogProps) {
     const { t } = useTranslation();
     const [selectedSound, setSelectedSound] = useState<string>('');
+    const [testingSound, setTestingSound] = useState<string>('');
 
     // 重置状态
     useEffect(() => {
@@ -215,6 +192,35 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
     // 处理铃声选择
     const handleSoundChange = (soundName: string) => {
         setSelectedSound(soundName);
+    };
+
+    // 测试铃声
+    const handleTestSound = async (soundName: string, duration: number = 1000) => {
+        try {
+            setTestingSound(soundName);
+
+            const devicesResult = await browser.storage.local.get('bark_devices');
+            const defaultDeviceResult = await browser.storage.local.get('bark_default_device');
+
+            const devices = devicesResult.bark_devices || [];
+            const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+            const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
+
+            if (!defaultDevice) {
+                console.warn('未找到默认设备，无法测试铃声');
+                return;
+            }
+
+            const testMessage = `${t('settings.sound.test_message', { sound: soundName })}`;
+            await sendPushMessage(defaultDevice.apiURL, testMessage, defaultDevice.alias, soundName);
+
+        } catch (error) {
+            console.error('测试铃声失败:', error);
+        } finally {
+            setTimeout(() => {
+                setTestingSound('');
+            }, Math.max(duration, 1000)); // 最小等待 1s
+        }
     };
 
     // 保存铃声设置
@@ -246,23 +252,37 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
             </DialogTitle>
             <DialogContent dividers>
                 <Stack spacing={2}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="caption" color="text.secondary">
                         {/* 选择推送时使用的铃声，留空则用默认铃声 */}
                         {t('settings.sound.description')}
+                        <br />
+                        <Typography component="span" variant="caption" color="primary">
+                            {/* 点击播放图标可测试铃声效果 */}
+                            {t('settings.sound.description_2')}
+                        </Typography>
                     </Typography>
 
-                    <Grid container spacing={2}>
+                    <Grid container spacing={1}>
                         <Grid
                             size={{
                                 xs: 12,
                             }}
                         >
-                            <List dense>
-                                <ListItem>
+                            <List dense sx={{ userSelect: 'none', p: 0 }}>
+                                <ListItem sx={{ p: 0 }}>
                                     <ListItemAvatar>
-                                        <Avatar>
-                                            <VolumeUpIcon />
-                                        </Avatar>
+                                        <Tooltip title={t('settings.sound.default')} placement='top'>
+                                            <span>
+                                                <IconButton
+                                                    disabled
+                                                    size="small"
+                                                >
+                                                    <Avatar sx={{ width: 32, height: 32 }}>
+                                                        <VolumeUpIcon fontSize="small" />
+                                                    </Avatar>
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
                                     </ListItemAvatar>
                                     <ListItemText
                                         primary={t('settings.sound.default')}
@@ -283,15 +303,47 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
                                 </ListItem>
 
                                 {sounds.map((sound) => (
-                                    <ListItem key={sound.name}>
-                                        <ListItemAvatar>
-                                            <Avatar>
-                                                <VolumeUpIcon />
-                                            </Avatar>
+                                    <ListItem key={sound.name} sx={{ p: 0 }}>
+                                        <ListItemAvatar style={{ pointerEvents: testingSound !== '' ? 'none' : 'auto' }}>
+                                            <IconButton
+                                                onClick={() => handleTestSound(sound.name, sound.duration)}
+                                                size="small"
+                                                sx={{
+                                                    backgroundColor: testingSound === sound.name ? 'ButtonHighlight' : 'transparent',
+                                                }}
+                                                style={{ outline: 'none' }}
+                                            >
+                                                <Avatar sx={{
+                                                    width: 32, height: 32,
+                                                    // sound.name 为当前铃声
+                                                    backgroundColor: testingSound === sound.name ? 'primary.main' : 'avatar.main',
+                                                    '&:hover': {
+                                                        backgroundColor: 'primary.main',
+                                                    },
+                                                }}>
+                                                    {testingSound === sound.name ? <VolumeUpIcon fontSize="small" /> : <PlayArrowIcon fontSize="small" />}
+                                                </Avatar>
+                                            </IconButton>
                                         </ListItemAvatar>
                                         <ListItemText
-                                            primary={sound.description}
-                                            secondary={`${sound.name} (${sound.duration})`}
+                                            primary={
+                                                <Stack direction="row" alignItems="center" spacing={1}>
+                                                    <Typography>
+                                                        {t(`settings.sound.${sound.name}`)}
+                                                    </Typography>
+                                                    {/* 新版 iOS 没有这些铃声, 但目前还能用 */}
+                                                    {/* {sound.old && (
+                                                        <Chip
+                                                            label={t('settings.sound.deprecated')}
+                                                            size="small"
+                                                            variant="outlined"
+                                                            color="warning"
+                                                            sx={{ fontSize: '10px', height: '20px' }}
+                                                        />
+                                                    )} */}
+                                                </Stack>
+                                            }
+                                            secondary={`${sound.name} (${sound.duration / 1000}s)`}
                                         />
                                         <FormControlLabel
                                             value={sound.name}
@@ -313,7 +365,10 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={handleClear} color="error">
+                <Button onClick={handleClear} color="error"
+                    sx={{
+                        mr: 'auto',
+                    }}>
                     {/* 清除 */}
                     {t('settings.sound.clear')}
                 </Button>
@@ -329,6 +384,6 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
                     {t('common.save')}
                 </Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 } 

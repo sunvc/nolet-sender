@@ -22,6 +22,7 @@ interface DeviceSelectProps {
     onAddClick: () => void;
     label?: string;
     placeholder?: string;
+    showLabel?: boolean;
 }
 
 export default function DeviceSelect({
@@ -30,7 +31,8 @@ export default function DeviceSelect({
     onDeviceChange,
     onAddClick,
     label = '选择设备',
-    placeholder = '请选择一个设备'
+    placeholder = '请选择一个设备',
+    showLabel = true
 }: DeviceSelectProps) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -49,7 +51,7 @@ export default function DeviceSelect({
 
     return (
         <FormControl fullWidth variant="outlined" size="small">
-            <InputLabel
+            {showLabel && <InputLabel
                 shrink
                 sx={{
                     backgroundColor: 'background.paper',
@@ -61,7 +63,7 @@ export default function DeviceSelect({
             >
                 {/* 目标设备 */}
                 {t('push.target_device')}
-            </InputLabel>
+            </InputLabel>}
             <Select
                 open={open}
                 onOpen={() => setOpen(true)}
@@ -85,12 +87,16 @@ export default function DeviceSelect({
                     }
                 }}
             >
-                <MenuItem value="" disabled>
-                    <Typography color="text.secondary">
+                {devices.length === 0 ?
+                    <MenuItem disabled value="">
+                        <em>{t('push.select_device')}</em>
+                    </MenuItem> :
+                    <Typography color="text.secondary" variant="overline" sx={{
+                        px: 1, pt: 1, userSelect: 'none'
+                    }}>
                         {/* 选择要发送推送的设备 */}
                         {t('push.select_device')}
-                    </Typography>
-                </MenuItem>
+                    </Typography>}
                 {devices.map((device) => (
                     <MenuItem key={device.id} value={device.id}>
                         <Stack sx={{ width: '100%' }}>
@@ -119,21 +125,15 @@ export default function DeviceSelect({
                         onClick={handleAddClick}
                         sx={{
                             justifyContent: 'center',
-                            py: 1,
-                            '&:hover': {
-                                backgroundColor: 'transparent'
-                            }
+                            p: 0,
                         }}
                     >
-                        <Button
-                            startIcon={<AddIcon />}
-                            onClick={handleAddClick}
-                            fullWidth
-                            size="small"
-                        >
+                        <Stack direction="row" alignItems="center" justifyContent="center"
+                            sx={{ p: 0, color: 'primary.main' }}>
+                            <AddIcon sx={{ mr: 1 }} />
                             {/* 添加新设备 */}
                             {t('device.add')}
-                        </Button>
+                        </Stack>
                     </MenuItem>
                 </Box>
             </Select>

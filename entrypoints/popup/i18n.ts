@@ -22,43 +22,41 @@ const resources = {
     }
 };
 
-// 从 storage 中获取语言设置
-const getStoredLanguage = async () => {
+// 同步初始化 i18n，避免异步导致的渲染问题
+i18n
+    .use(LanguageDetector)
+    .use(initReactI18next)
+    .init({
+        resources,
+        lng: 'zh-CN', // 默认语言
+        fallbackLng: {
+            'zh-HK': ['zh-TW', 'zh-CN', 'en'],
+            'zh-TW': ['zh-HK', 'zh-CN', 'en'],
+            'zh-CN': ['en'],
+            default: ['en']
+        },
+        interpolation: {
+            escapeValue: false
+        },
+        detection: {
+            order: ['navigator'],
+            caches: []
+        }
+    });
+
+// 异步加载保存的语言设置
+const loadStoredLanguage = async () => {
     try {
         const result = await browser.storage.local.get('language');
-        return result.language;
+        if (result.language && result.language !== i18n.language) {
+            await i18n.changeLanguage(result.language);
+        }
     } catch (error) {
-        console.error('获取语言设置失败:', error);
-        return null;
+        console.error('加载语言设置失败:', error);
     }
 };
 
-// 初始化 i18n
-const initI18n = async () => {
-    const storedLanguage = await getStoredLanguage();
-
-    i18n
-        .use(LanguageDetector)
-        .use(initReactI18next)
-        .init({
-            resources,
-            lng: storedLanguage,
-            fallbackLng: {
-                'zh-HK': ['zh-TW', 'zh-CN', 'en'],
-                'zh-TW': ['zh-HK', 'zh-CN', 'en'],
-                'zh-CN': ['en'],
-                default: ['en']
-            },
-            interpolation: {
-                escapeValue: false
-            },
-            detection: {
-                order: ['navigator'],
-                caches: []
-            }
-        });
-};
-
-initI18n();
+// 在i18n初始化完成后加载保存的语言设置
+loadStoredLanguage();
 
 export default i18n; 

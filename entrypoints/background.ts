@@ -24,8 +24,8 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'readClipboard') {
-      // 在offscreen document中处理剪切板读取
-      handleOffscreenClipboard()
+      // 处理剪切板读取
+      handleClipboard()
         .then(result => {
           sendResponse(result);
         })
@@ -36,20 +36,53 @@ export default defineBackground(() => {
     }
   });
 
-  // 处理offscreen剪切板读取
-  async function handleOffscreenClipboard(): Promise<string> {
+  // 保存历史记录到 chrome.storage.local 进行暂存 ，在打开历史页面时，再从 chrome.storage.local 写入历史记录
+  async function saveHistoryRecord(record: any) {
+    try {
+      // 获取现有历史记录
+      const result = await browser.storage.local.get('bark_history');
+      const existingHistory = result.bark_history || [];
+
+      // 添加新记录到数组开头（最新的在前面）
+      existingHistory.unshift(record);
+
+      // 限制历史记录数量，比如最多保存1000条
+      if (existingHistory.length > 1000) {
+        existingHistory.splice(1000);
+      }
+
+      await browser.storage.local.set({ bark_history: existingHistory });
+
+      console.debug('历史记录已保存:', record);
+      console.debug('当前历史记录总数:', existingHistory.length);
+    } catch (error) {
+      console.error('保存历史记录失败:', error);
+    }
+  }
+
+  // 生成 UUID 用于历史记录的唯一标识
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0;
+      const v = c == 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  // 处理剪切板读取
+  async function handleClipboard(): Promise<string> {
     try {
       const text = await navigator.clipboard.readText();
       return text || '';
     } catch (error) {
-      console.error('Offscreen读取剪切板失败:', error);
+      console.error('读取剪切板失败:', error);
       return '';
     }
   }
 
   // 监听快捷键命令
   browser.commands.onCommand.addListener(async (command) => {
-    console.log('收到快捷键命令:', command);
+    console.debug('收到快捷键命令:', command);
     if (command === 'send-clipboard') {
       await handleClipboardShortcut();
     }
@@ -58,7 +91,7 @@ export default defineBackground(() => {
   // 处理剪切板快捷键
   async function handleClipboardShortcut() {
     try {
-      console.log('收到全局快捷键触发');
+      console.debug('收到全局快捷键触发');
 
       // 获取默认设备
       const [devicesResult, defaultDeviceResult] = await Promise.all([
@@ -71,26 +104,10 @@ export default defineBackground(() => {
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
 
       if (!defaultDevice) {
-        console.log('未找到默认设备');
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/48.png',
-          title: 'Bark推送',
-          message: '未找到默认设备，请先配置设备'
-        });
-        return;
-      }
-
-      // 尝试打开popup
-      let popupOpened = false;
-      try {
-        await browser.action.openPopup();
-        popupOpened = true;
-      } catch (error) {
-        console.log('无法直接打开popup，创建新窗口');
-        // 如果无法直接打开popup，创建一个小窗口
+        console.debug('未找到默认设备，但仍打开窗口让用户配置');
+        // 仍然打开小窗口，让用户可以添加设备，补充 URL 插叙参数（autoAddDevice=true），自动打开添加设备对话框
         await browser.windows.create({
-          url: browser.runtime.getURL('/popup.html?mode=window'),
+          url: browser.runtime.getURL('/popup.html?mode=window&autoAddDevice=true'),
           type: 'popup',
           width: 380,
           height: 660,
@@ -98,28 +115,45 @@ export default defineBackground(() => {
           top: 0,
           focused: true
         });
-        popupOpened = true;
+
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: '/icon/48.png',
+          title: 'Bark推送',
+          message: '未找到默认设备，请先添加设备'
+        });
+        return;
       }
 
-      if (popupOpened) {
-        // 延迟发送消息，确保popup已经完全加载
-        setTimeout(() => {
-          // 向popup发送快捷键触发消息
-          browser.runtime.sendMessage({
-            action: 'shortcut-triggered',
-            defaultDevice: defaultDevice
-          }).catch(error => {
-            console.log('发送消息到popup失败:', error);
-            // 如果发送消息失败，显示通知
-            browser.notifications.create({
-              type: 'basic',
-              iconUrl: '/icon/48.png',
-              title: 'Bark推送',
-              message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
-            });
+      // 直接创建小窗口
+      console.debug('创建小窗口');
+      await browser.windows.create({
+        url: browser.runtime.getURL('/popup.html?mode=window'),
+        type: 'popup',
+        width: 380,
+        height: 660,
+        left: 0,
+        top: 0,
+        focused: true
+      });
+
+      // 延迟发送消息，确保窗口已经完全加载
+      setTimeout(() => {
+        // 向窗口发送快捷键触发消息
+        browser.runtime.sendMessage({
+          action: 'shortcut-triggered',
+          defaultDevice: defaultDevice
+        }).catch(error => {
+          console.debug('发送消息到窗口失败:', error);
+          // 如果发送消息失败，显示通知
+          browser.notifications.create({
+            type: 'basic',
+            iconUrl: '/icon/48.png',
+            title: 'Bark推送',
+            message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
           });
-        }, 300); // 给popup足够时间加载
-      }
+        });
+      }, 300); // 给窗口足够时间加载
 
     } catch (error) {
       console.error('快捷键处理失败:', error);
@@ -210,7 +244,7 @@ export default defineBackground(() => {
       const plaintext = JSON.stringify(encryptData);
       const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv);
 
-      console.log('Background 发送加密请求到:', apiURL);
+      console.debug('Background 发送加密请求到:', apiURL);
 
       const formData = new URLSearchParams();
       formData.append('iv', iv);
@@ -221,7 +255,7 @@ export default defineBackground(() => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Bark-Sender-Browser-Extension/1.0.0'
+          'User-Agent': 'Bark-Sender-Browser-Extension/0.1.1'
         },
         body: formData.toString()
       });
@@ -231,7 +265,7 @@ export default defineBackground(() => {
       }
 
       const result = await response.json();
-      console.log('Background 加密请求成功:', result);
+      console.debug('Background 加密请求成功:', result);
       return result;
     } catch (error) {
       console.error('Background 发送加密推送失败:', error);
@@ -241,7 +275,7 @@ export default defineBackground(() => {
 
   // 监听扩展安装和启动
   browser.runtime.onInstalled.addListener(() => {
-    console.log('Bark推送助手已安装');
+    console.debug('Bark 推送助手已安装');
     updateContextMenus();
   });
 
@@ -306,6 +340,10 @@ export default defineBackground(() => {
 
   // 处理右键菜单点击
   browser.contextMenus.onClicked.addListener(async (info: any, tab: any) => {
+    let message = '', title = '', url = '';
+    let defaultDevice: any = null;
+    let settings: any = {};
+
     try {
       // 获取默认设备和设置
       const [devicesResult, defaultDeviceResult, settingsResult] = await Promise.all([
@@ -316,15 +354,20 @@ export default defineBackground(() => {
 
       const devices = devicesResult.bark_devices || [];
       const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
-      const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
-      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+      defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
+      settings = settingsResult.bark_app_settings || { enableEncryption: false };
 
       if (!defaultDevice) {
         console.error('未找到默认设备');
+        // 显示通知
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: '/icon/48.png',
+          title: 'Bark推送',
+          message: '未找到默认设备，请先添加设备'
+        });
         return;
       }
-
-      let message = '', title = '', url = '';
 
       if (info.menuItemId === 'send-selection' && info.selectionText) {
         message = info.selectionText;
@@ -335,12 +378,74 @@ export default defineBackground(() => {
       }
 
       if (message) {
+        const requestTimestamp = Date.now();
+        let response: any;
+        let method: 'GET' | 'POST' = 'GET';
+        let isEncrypted = false;
+        let parameters: any[] = [];
+
         // 根据设置选择发送方式
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
-          await handleSendEncryptedPush(defaultDevice.apiURL, message, settings.encryptionConfig, settings.sound, url, title);
+          method = 'POST';
+          isEncrypted = true;
+          response = await handleSendEncryptedPush(defaultDevice.apiURL, message, settings.encryptionConfig, settings.sound, url, title);
+          parameters = [
+            { key: 'iv', value: '***' },
+            { key: 'ciphertext', value: '***' },
+            { key: 'sound', value: settings.sound || '' }
+          ];
         } else {
-          await sendPushMessage(defaultDevice.apiURL, message, settings.sound, url, title);
+          method = 'GET';
+          response = await sendPushMessage(defaultDevice.apiURL, message, settings.sound, url, title);
+          parameters = [
+            { key: 'message', value: message },
+            { key: 'autoCopy', value: '1' },
+            { key: 'copy', value: message },
+            { key: 'sound', value: settings.sound || '' }
+          ];
+          if (title) {
+            parameters.push({ key: 'title', value: title });
+          }
+          if (url) {
+            parameters.push({ key: 'url', value: url });
+          }
         }
+
+        const responseTimestamp = Date.now();
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const createdAt = new Date(requestTimestamp).toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        });
+
+        // 创建历史记录对象
+        const historyRecord = {
+          id: Date.now(), // 使用时间戳作为ID
+          uuid: generateUUID(),
+          timestamp: requestTimestamp,
+          body: message,
+          apiUrl: defaultDevice.apiURL,
+          deviceName: defaultDevice.alias,
+          parameters: parameters,
+          responseJson: response,
+          requestTimestamp: requestTimestamp,
+          responseTimestamp: responseTimestamp,
+          timezone: timezone,
+          method: method,
+          title: title || undefined,
+          sound: settings.sound || undefined,
+          url: url || undefined,
+          isEncrypted: isEncrypted,
+          createdAt: createdAt
+        };
+
+        // 保存历史记录
+        await saveHistoryRecord(historyRecord);
 
         // 显示通知
         browser.notifications.create({
@@ -353,6 +458,47 @@ export default defineBackground(() => {
 
     } catch (error) {
       console.error('发送推送失败:', error);
+
+      // 即使发送失败也要记录历史
+      if (message && defaultDevice) {
+        const requestTimestamp = Date.now();
+        const errorResponse = {
+          code: -1,
+          message: error instanceof Error ? error.message : '未知错误',
+          timestamp: Date.now()
+        };
+
+        const historyRecord = {
+          id: Date.now(),
+          uuid: generateUUID(),
+          timestamp: requestTimestamp,
+          body: message,
+          apiUrl: defaultDevice.apiURL,
+          deviceName: defaultDevice.alias,
+          parameters: [],
+          responseJson: errorResponse,
+          requestTimestamp: requestTimestamp,
+          responseTimestamp: Date.now(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          method: 'GET' as const,
+          title: title || undefined,
+          sound: settings.sound || undefined,
+          url: url || undefined,
+          isEncrypted: false,
+          createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+          })
+        };
+
+        await saveHistoryRecord(historyRecord);
+      }
+
       browser.notifications.create({
         type: 'basic',
         iconUrl: '/icon/48.png',
@@ -379,7 +525,7 @@ export default defineBackground(() => {
     if (url) {
       requestUrl += `&url=${encodeURIComponent(url)}`;
     }
-    console.log('Background 发送请求到:', requestUrl);
+    console.debug('Background 发送请求到:', requestUrl);
 
     const response = await fetch(requestUrl, {
       method: 'GET',
@@ -393,7 +539,7 @@ export default defineBackground(() => {
     }
 
     const result = await response.json();
-    console.log('Background请求成功:', result);
+    console.debug('Background 请求成功:', result);
     return result;
   }
 });

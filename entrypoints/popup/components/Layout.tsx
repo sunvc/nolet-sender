@@ -116,7 +116,8 @@ export default function Layout({
             <Paper sx={{
                 elevation: 3,
                 width: '100%',
-                flexShrink: 0 // 防止footer被压缩
+                borderRadius: 0, // 覆盖主题的 borderRadius 
+                flexShrink: 0 // 防止 footer 被压缩
             }}>
                 <BottomNavigation
                     value={getTabIndex(currentTab)}

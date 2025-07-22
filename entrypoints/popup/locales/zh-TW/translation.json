@@ -8,7 +8,16 @@
         "confirm": "確認",
         "loading": "載入中...",
         "processing": "處理中...",
-        "error_update": "更新設定失敗：{{message}}"
+        "error_update": "更新設定失敗：{{message}}",
+        "yes": "是",
+        "no": "否",
+        "error_unknown": "未知錯誤",
+        "success": "成功",
+        "failed": "失敗",
+        "other": "其他",
+        "page": "頁",
+        "previous_page": "上一頁",
+        "next_page": "下一頁"
     },
     "nav": {
         "send": "傳送通知",
@@ -56,15 +65,50 @@
             "select": "選擇鈴聲",
             "current": "目前鈴聲：{{sound}}",
             "default": "預設",
+            "test_message": "鈴聲測試: {{sound}}",
             "description": "選擇推送時使用的鈴聲，留空則使用系統預設鈴聲",
+            "description_2": "點擊播放圖標可測試鈴聲效果",
             "default_description": "使用系統預設鈴聲",
-            "clear": "清除"
+            "deprecated": "棄用",
+            "clear": "清除",
+            "silence": "靜音",
+            "alarm": "提醒聲",
+            "anticipate": "悉心期盼",
+            "bell": "鈴聲",
+            "birdsong": "鳥鳴聲",
+            "bloom": "百花怒放",
+            "calypso": "即興曲調",
+            "chime": "風鈴",
+            "choo": "火車鳴笛",
+            "descent": "漸弱",
+            "electronic": "電子樂",
+            "fanfare": "嘹亮吹奏聲",
+            "glass": "玻璃聲",
+            "gotosleep": "睡眠提醒",
+            "healthnotification": "健康提醒",
+            "horn": "喇叭聲",
+            "ladder": "連音效果",
+            "mailsent": "嗖",
+            "minuet": "小步舞曲",
+            "multiwayinvitation": "多方邀請",
+            "newmail": "叮",
+            "newsflash": "新聞快訊",
+            "noir": "夜色",
+            "paymentsuccess": "支付成功",
+            "shake": "震動聲",
+            "sherwoodforest": "綠林好漢旋律",
+            "spell": "神奇魔咒",
+            "suspense": "偵探懸念",
+            "telegraph": "敲打電報",
+            "tiptoes": "躡手躡腳",
+            "typewriters": "敲打字機",
+            "update": "整點新聞"
         },
         "encryption": {
             "title": "加密設定",
             "enable": "啟用加密",
             "options": "加密選項",
-            "key_invalid": "無效的金鑰",
+            "key_invalid": "無效的金鑰, 請修改加密選項",
             "key_valid": "有效的金鑰",
             "tooltips": {
                 "encryption_on": "關閉加密",
@@ -80,7 +124,8 @@
         "title": "關於",
         "github": {
             "title": "GitHub",
-            "description": "查看原始碼、回報問題"
+            "description": "查看原始碼、回報問題",
+            "description2": "如果喜歡這個項目，歡迎 Star 或 Fork~"
         },
         "feedback": {
             "title": "問題回報",
@@ -93,6 +138,15 @@
         "contact": {
             "title": "聯絡方式",
             "email": "feedback@uuphy.com"
+        },
+        "bark_app": {
+            "title": "下載 Bark App",
+            "description": "前往 App Store 下載 Bark App"
+        },
+        "bark_website": {
+            "title": "認識 Bark",
+            "description": "造訪 Bark 官網了解更多",
+            "documentation": "查看官方文檔"
         }
     },
     "push": {
@@ -141,11 +195,39 @@
         }
     },
     "history": {
-        "title": "歷史紀錄",
-        "coming_soon": "功能開發中",
-        "description": "歷史紀錄功能即將推出",
-        "follow": "您可以追蹤",
-        "telegram": "Telegram 頻道",
-        "updates": "取得最新消息"
+        "title": "歷史訊息",
+        "export": "匯出紀錄",
+        "import": "匯入紀錄",
+        "refresh": "重新整理",
+        "toolbar": {
+            "search_placeholder": "搜尋訊息內容或裝置名稱...",
+            "clear_search": "清除搜尋",
+            "search": "搜尋",
+            "delete_selected": "刪除已選"
+        },
+        "confirm_delete": "確認刪除",
+        "confirm_delete_message": "確定要刪除選取的 {{count}} 筆紀錄嗎？此操作無法還原。",
+        "table": {
+            "records_count": "共 {{count}} 筆紀錄",
+            "selected_count": "已選 {{count}} 筆",
+            "time": "時間",
+            "content": "訊息內容",
+            "device": "裝置",
+            "method": "方法",
+            "status": "狀態",
+            "encrypted": "加密",
+            "title_prefix": "標題"
+        },
+        "messages": {
+            "empty": "目前沒有歷史紀錄",
+            "no_search_results": "找不到符合的紀錄",
+            "load_failed": "載入歷史紀錄失敗",
+            "delete_success": "成功刪除 {{count}} 筆紀錄",
+            "delete_failed": "刪除失敗",
+            "export_success": "匯出成功",
+            "export_failed": "匯出失敗",
+            "import_failed": "匯入失敗",
+            "import_success_message": "匯入完成：成功 {{success}} 筆，已略過 {{skipped}} 筆，失敗 {{errors}} 筆"
+        }
     }
 }
