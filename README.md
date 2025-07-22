@@ -2,14 +2,6 @@
 
 [🇺🇸 English](#english-description) | [🇨🇳 中文说明](#中文说明)
 
----
-
-[▶️ Demo](docs/assets/demo_2025-07-23.mp4)
-
-<video width="640" autoplay muted loop playsinline controls src="docs/assets/demo_2025-07-23.mp4"></video>
-
----
-
 ## English Description
 
 Bark Sender is a browser extension that allows you to quickly push selected text from a webpage or clipboard content to any iOS device with the [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) installed.
@@ -31,6 +23,13 @@ You must install the [ Bark App ](https://apps.apple.com/app/bark-custom-notific
 
 ---
 
+## Demo
+
+https://github.com/user-attachments/assets/4e1cef2b-660d-45f8-ab79-699f6e9696c5
+
+[https://www.youtube.com/watch?v=0aw8F1Wo-n4](https://www.youtube.com/watch?v=0aw8F1Wo-n4)
+
+---
 ## 中文说明
 
 Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 PC 剪贴板中的文本，快速推送到安装了 [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) 的 iOS 设备上。
