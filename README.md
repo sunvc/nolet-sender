@@ -2,6 +2,13 @@
 
 [🇺🇸 English](#english-description) | [🇨🇳 中文说明](#中文说明)
 
+---
+
+[▶️ Demo](docs/assets/demo_2025-07-23.mp4)
+
+<video width="640" autoplay muted loop playsinline controls src="docs/assets/demo_2025-07-23.mp4"></video>
+
+---
 
 ## English Description
 
