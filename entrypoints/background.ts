@@ -118,7 +118,7 @@ export default defineBackground(() => {
 
         browser.notifications.create({
           type: 'basic',
-          iconUrl: '/icon/48.png',
+          iconUrl: '/icon/128.png',
           title: 'Bark推送',
           message: '未找到默认设备，请先添加设备'
         });
@@ -148,7 +148,7 @@ export default defineBackground(() => {
           // 如果发送消息失败，显示通知
           browser.notifications.create({
             type: 'basic',
-            iconUrl: '/icon/48.png',
+            iconUrl: '/icon/128.png',
             title: 'Bark推送',
             message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
           });
@@ -159,7 +159,7 @@ export default defineBackground(() => {
       console.error('快捷键处理失败:', error);
       browser.notifications.create({
         type: 'basic',
-        iconUrl: '/icon/48.png',
+        iconUrl: '/icon/128.png',
         title: 'Bark推送',
         message: '快捷键触发失败，请手动打开扩展'
       });
@@ -254,8 +254,7 @@ export default defineBackground(() => {
       const response = await fetch(apiURL, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'User-Agent': 'Bark-Sender-Browser-Extension/0.1.1'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: formData.toString()
       });
@@ -362,7 +361,7 @@ export default defineBackground(() => {
         // 显示通知
         browser.notifications.create({
           type: 'basic',
-          iconUrl: '/icon/48.png',
+          iconUrl: '/icon/128.png',
           title: 'Bark推送',
           message: '未找到默认设备，请先添加设备'
         });
@@ -450,7 +449,7 @@ export default defineBackground(() => {
         // 显示通知
         browser.notifications.create({
           type: 'basic',
-          iconUrl: '/icon/48.png',
+          iconUrl: '/icon/128.png',
           title: 'Bark推送',
           message: `已发送到 ${defaultDevice.alias}`
         });
@@ -501,7 +500,7 @@ export default defineBackground(() => {
 
       browser.notifications.create({
         type: 'basic',
-        iconUrl: '/icon/48.png',
+        iconUrl: '/icon/128.png',
         title: 'Bark推送',
         message: '发送失败，请检查网络连接'
       });
@@ -528,10 +527,7 @@ export default defineBackground(() => {
     console.debug('Background 发送请求到:', requestUrl);
 
     const response = await fetch(requestUrl, {
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Bark-Browser-Extension/1.0'
-      }
+      method: 'GET'
     });
 
     if (!response.ok) {

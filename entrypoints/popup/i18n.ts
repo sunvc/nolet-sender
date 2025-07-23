@@ -28,7 +28,7 @@ i18n
     .use(initReactI18next)
     .init({
         resources,
-        lng: 'zh-CN', // 默认语言
+        lng: 'en', // 默认语言
         fallbackLng: {
             'zh-HK': ['zh-TW', 'zh-CN', 'en'],
             'zh-TW': ['zh-HK', 'zh-CN', 'en'],

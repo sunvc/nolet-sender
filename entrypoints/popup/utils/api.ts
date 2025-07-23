@@ -106,10 +106,7 @@ async function sendPlainPushMessage(apiURL: string, message: string, sound?: str
         const response = await fetch(url, {
             method: 'GET',
             mode: 'cors',
-            cache: 'no-cache',
-            headers: {
-                'User-Agent': 'Bark-Browser-Extension/1.0'
-            }
+            cache: 'no-cache'
         });
 
         if (!response.ok) {
@@ -175,8 +172,7 @@ async function sendEncryptedPushMessage(apiURL: string, message: string, encrypt
             mode: 'cors',
             cache: 'no-cache',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'User-Agent': 'Bark-Browser-Extension/1.0'
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: formData.toString()
         });
