@@ -72,7 +72,7 @@ function AppContent() {
   // 等待 i18n 和其他资源加载完成
   if (!i18n.isInitialized || devicesLoading || themeLoading || settingsLoading) {
     return (
-      <ThemeProvider theme={createAppTheme(effectiveTheme, i18n.language === 'zh' ? 'zh' : 'en')}>
+      <ThemeProvider theme={createAppTheme(effectiveTheme, i18n.language?.startsWith('zh') ? 'zh' : 'en')}>
         <CssBaseline />
         {/* 加载中，此时需要等待i18n和其他资源 */}
         <div style={{
@@ -90,7 +90,7 @@ function AppContent() {
   }
 
   // 创建动态主题
-  const theme = createAppTheme(effectiveTheme, i18n.language === 'zh' ? 'zh' : 'en');
+  const theme = createAppTheme(effectiveTheme, i18n.language?.startsWith('zh') ? 'zh' : 'en');
 
   // 渲染当前页面内容
   const renderCurrentPage = () => {

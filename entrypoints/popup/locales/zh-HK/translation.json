@@ -46,10 +46,14 @@
     "settings": {
         "title": "其他設定",
         "theme": {
-            "title": "主題設定",
+            "title": "主題設置",
             "light": "淺色",
             "dark": "深色",
             "system": "跟隨系統"
+        },
+        "language": {
+            "title": "語言設置",
+            "current": "當前語言"
         },
         "context_menu": {
             "title": "右鍵選單",
@@ -58,7 +62,8 @@
         "shortcuts": {
             "title": "快捷鍵",
             "edit": "修改快捷鍵",
-            "open_window": "開啟訊息視窗: {{key}}"
+            "open_window": "開啟訊息視窗: {{key}}",
+            "firefox_guide": "Firefox 不支援直接跳轉，請手動開啟地址列輸入：about:addons → 設定齒輪圖示 → 管理擴充套件快速鍵; 快速鍵僅在 Firefox 聚焦時生效"
         },
         "sound": {
             "title": "鈴聲設定",
@@ -160,10 +165,13 @@
         "send_clipboard": "發送剪貼板內容",
         "reading_clipboard": "正在讀取剪貼板內容...",
         "shortcuts_tip": "快捷鍵提示",
-        "send_key": "{{key}} 發送訊息",
-        "open_key": "{{key}} 快速開啟訊息視窗",
-        "open_extension": "開啟訊息視窗",
-        "success": "傳送成功！",
+        "send_key": "{{key}} 發送",
+        "open_key": "{{key}} 快速開啟推送視窗",
+        "open_extension": "開啟推送視窗",
+        "shortcut_enter_prefix": "按",
+        "shortcut_esc_prefix": "發送; 按",
+        "shortcut_esc_suffix": "取消",
+        "success": "發送成功！",
         "clipboard_empty": "剪貼板為空或沒有有效內容",
         "errors": {
             "no_device": "請選擇一個裝置",

@@ -2,18 +2,15 @@ import React, { useState } from 'react';
 import { IconButton, Menu, MenuItem, ListItemText, Tooltip } from '@mui/material';
 import TranslateIcon from '@mui/icons-material/Translate';
 import { useTranslation } from 'react-i18next';
-
-const LANGUAGES = [
-    { code: 'zh-CN', label: '简体中文' },
-    { code: 'zh-HK', label: '繁體中文（HK）' },
-    { code: 'zh-TW', label: '繁體中文（TW）' },
-    { code: 'en', label: 'English' }
-];
+import { getSupportedLanguages } from '../utils/languages';
 
 export default function LanguageSelect() {
     const { i18n } = useTranslation();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
+
+    // 获取支持的语言列表
+    const supportedLanguages = getSupportedLanguages();
 
     const handleClick = (event: React.MouseEvent<HTMLElement>) => {
         setAnchorEl(event.currentTarget);
@@ -59,7 +56,7 @@ export default function LanguageSelect() {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-                {LANGUAGES.map((language) => (
+                {supportedLanguages.map((language) => (
                     <MenuItem
                         key={language.code}
                         selected={i18n.language === language.code}

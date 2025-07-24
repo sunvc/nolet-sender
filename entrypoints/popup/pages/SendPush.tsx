@@ -439,8 +439,8 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
                         <Alert severity="info" icon={<KeyboardIcon />}>
                             <Typography variant="body2">
-                                {/* 按 Enter 发送推送，按 Esc 取消 */}
-                                按 <strong>Enter</strong> {t('push.send')}，按 <strong>Esc</strong> {t('common.cancel')}
+                                {/* 按 Enter 发送，按 Esc 取消 */}
+                                {t('push.shortcut_enter_prefix')} <strong>Enter</strong> {t('push.shortcut_esc_prefix')} <strong>Esc</strong> {t('push.shortcut_esc_suffix')}
                             </Typography>
                         </Alert>
                     </Stack>

@@ -1,4 +1,10 @@
+import { initBackgroundI18n, watchLanguageChanges, getMessage } from './background/i18n-helper';
+
 export default defineBackground(() => {
+  // 初始化 i18n
+  initBackgroundI18n();
+  watchLanguageChanges();
+
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'sendPush') {
@@ -53,10 +59,13 @@ export default defineBackground(() => {
 
       await browser.storage.local.set({ bark_history: existingHistory });
 
-      console.debug('历史记录已保存:', record);
-      console.debug('当前历史记录总数:', existingHistory.length);
+      // console.debug('历史记录已保存:', record);
+      // console.debug('当前历史记录总数:', existingHistory.length);
+      console.debug(getMessage('save_history_record'), record);
+      console.debug(getMessage('current_history_total', [existingHistory.length.toString()]));
     } catch (error) {
-      console.error('保存历史记录失败:', error);
+      // console.error('保存历史记录失败:', error);
+      console.error(getMessage('save_history_failed'), error);
     }
   }
 
@@ -75,14 +84,16 @@ export default defineBackground(() => {
       const text = await navigator.clipboard.readText();
       return text || '';
     } catch (error) {
-      console.error('读取剪切板失败:', error);
+      // console.error('读取剪切板失败:', error);
+      console.error(getMessage('read_clipboard_failed'), error);
       return '';
     }
   }
 
   // 监听快捷键命令
   browser.commands.onCommand.addListener(async (command) => {
-    console.debug('收到快捷键命令:', command);
+    // console.debug('收到快捷键命令:', command);
+    console.debug(getMessage('shortcut_triggered'), command);
     if (command === 'send-clipboard') {
       await handleClipboardShortcut();
     }
@@ -91,7 +102,8 @@ export default defineBackground(() => {
   // 处理剪切板快捷键
   async function handleClipboardShortcut() {
     try {
-      console.debug('收到全局快捷键触发');
+      // console.debug('收到全局快捷键触发');
+      console.debug(getMessage('shortcut_triggered'));
 
       // 获取默认设备
       const [devicesResult, defaultDeviceResult] = await Promise.all([
@@ -104,7 +116,8 @@ export default defineBackground(() => {
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
 
       if (!defaultDevice) {
-        console.debug('未找到默认设备，但仍打开窗口让用户配置');
+        // console.debug('未找到默认设备，但仍打开窗口让用户配置');
+        console.debug(getMessage('device_not_found_window'));
         // 仍然打开小窗口，让用户可以添加设备，补充 URL 插叙参数（autoAddDevice=true），自动打开添加设备对话框
         await browser.windows.create({
           url: browser.runtime.getURL('/popup.html?mode=window&autoAddDevice=true'),
@@ -119,14 +132,17 @@ export default defineBackground(() => {
         browser.notifications.create({
           type: 'basic',
           iconUrl: '/icon/128.png',
-          title: 'Bark推送',
-          message: '未找到默认设备，请先添加设备'
+          // title: 'Bark Sender',
+          // message: '未找到默认设备，请先添加设备'
+          title: getMessage('bark_sender_title'),
+          message: getMessage('device_not_found')
         });
         return;
       }
 
       // 直接创建小窗口
-      console.debug('创建小窗口');
+      // console.debug('创建小窗口');
+      console.debug(getMessage('creating_small_window'));
       await browser.windows.create({
         url: browser.runtime.getURL('/popup.html?mode=window'),
         type: 'popup',
@@ -144,24 +160,30 @@ export default defineBackground(() => {
           action: 'shortcut-triggered',
           defaultDevice: defaultDevice
         }).catch(error => {
-          console.debug('发送消息到窗口失败:', error);
+          // console.debug('发送消息到窗口失败:', error);
+          console.debug(getMessage('send_message_to_window_failed', [error.toString()]));
           // 如果发送消息失败，显示通知
           browser.notifications.create({
             type: 'basic',
             iconUrl: '/icon/128.png',
-            title: 'Bark推送',
-            message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
+            // title: 'Bark Sender',
+            // message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
+            title: getMessage('bark_sender_title'),
+            message: getMessage('notification_shortcut_with_device', [defaultDevice.alias])
           });
         });
       }, 300); // 给窗口足够时间加载
 
     } catch (error) {
-      console.error('快捷键处理失败:', error);
+      // console.error('快捷键处理失败:', error);
+      console.error(getMessage('shortcut_processing_failed'), error);
       browser.notifications.create({
         type: 'basic',
         iconUrl: '/icon/128.png',
-        title: 'Bark推送',
-        message: '快捷键触发失败，请手动打开扩展'
+        // title: 'Bark Sender',
+        // message: '快捷键触发失败，请手动打开扩展'
+        title: getMessage('bark_sender_title'),
+        message: getMessage('shortcut_processing_failed')
       });
     }
   }
@@ -172,7 +194,8 @@ export default defineBackground(() => {
       const response = await sendPushMessage(apiURL, message, sound, url, title);
       return response;
     } catch (error) {
-      console.error('Background发送推送失败:', error);
+      // console.error('Background发送推送失败:', error);
+      console.error(getMessage('background_send_push_failed'), error);
       throw error;
     }
   }
@@ -244,7 +267,8 @@ export default defineBackground(() => {
       const plaintext = JSON.stringify(encryptData);
       const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv);
 
-      console.debug('Background 发送加密请求到:', apiURL);
+      // console.debug('Background 发送加密请求到:', apiURL);
+      console.debug(getMessage('background_send_encrypted_request_to', [apiURL]));
 
       const formData = new URLSearchParams();
       formData.append('iv', iv);
@@ -264,17 +288,20 @@ export default defineBackground(() => {
       }
 
       const result = await response.json();
-      console.debug('Background 加密请求成功:', result);
+      // console.debug('Background 加密请求成功:', result);
+      console.debug(getMessage('background_encrypted_request_success'), result);
       return result;
     } catch (error) {
-      console.error('Background 发送加密推送失败:', error);
+      // console.error('Background 发送加密推送失败:', error);
+      console.error(getMessage('background_send_encrypted_push_failed'), error);
       throw error;
     }
   }
 
   // 监听扩展安装和启动
   browser.runtime.onInstalled.addListener(() => {
-    console.debug('Bark 推送助手已安装');
+    // console.debug('Bark Sender 已安装');
+    console.debug(getMessage('extension_installed'));
     updateContextMenus();
   });
 
@@ -322,18 +349,21 @@ export default defineBackground(() => {
       // 创建右键菜单项
       browser.contextMenus.create({
         id: 'send-selection',
-        title: `发送所选内容给 ${defaultDevice.alias}`,
+        // title: `发送所选内容给 ${defaultDevice.alias}`,
+        title: getMessage('send_selection_to_device', [defaultDevice.alias]),
         contexts: ['selection']
       });
 
       browser.contextMenus.create({
         id: 'send-page',
-        title: `发送页面链接给 ${defaultDevice.alias}`,
+        // title: `发送页面链接给 ${defaultDevice.alias}`,
+        title: getMessage('send_page_to_device', [defaultDevice.alias]),
         contexts: ['page']
       });
 
     } catch (error) {
-      console.error('更新右键菜单失败:', error);
+      // console.error('更新右键菜单失败:', error);
+      console.error(getMessage('update_context_menus_failed'), error);
     }
   }
 
@@ -357,13 +387,16 @@ export default defineBackground(() => {
       settings = settingsResult.bark_app_settings || { enableEncryption: false };
 
       if (!defaultDevice) {
-        console.error('未找到默认设备');
+        // console.error('未找到默认设备');
+        console.error(getMessage('device_not_found'));
         // 显示通知
         browser.notifications.create({
           type: 'basic',
           iconUrl: '/icon/128.png',
-          title: 'Bark推送',
-          message: '未找到默认设备，请先添加设备'
+          // title: 'Bark Sender',
+          // message: '未找到默认设备，请先添加设备'
+          title: getMessage('bark_sender_title'),
+          message: getMessage('device_not_found')
         });
         return;
       }
@@ -450,20 +483,24 @@ export default defineBackground(() => {
         browser.notifications.create({
           type: 'basic',
           iconUrl: '/icon/128.png',
-          title: 'Bark推送',
-          message: `已发送到 ${defaultDevice.alias}`
+          // title: 'Bark Sender',
+          // message: `已发送到 ${defaultDevice.alias}`
+          title: getMessage('bark_sender_title'),
+          message: getMessage('sent_to_device', [defaultDevice.alias])
         });
       }
 
     } catch (error) {
-      console.error('发送推送失败:', error);
+      // console.error('发送推送失败:', error);
+      console.error(getMessage('send_failed_check_network'), error);
 
       // 即使发送失败也要记录历史
       if (message && defaultDevice) {
         const requestTimestamp = Date.now();
         const errorResponse = {
           code: -1,
-          message: error instanceof Error ? error.message : '未知错误',
+          // message: error instanceof Error ? error.message : '未知错误',
+          message: error instanceof Error ? error.message : getMessage('error_unknown'),
           timestamp: Date.now()
         };
 
@@ -501,8 +538,10 @@ export default defineBackground(() => {
       browser.notifications.create({
         type: 'basic',
         iconUrl: '/icon/128.png',
-        title: 'Bark推送',
-        message: '发送失败，请检查网络连接'
+        // title: 'Bark Sender',
+        // message: '发送失败，请检查网络连接'
+        title: getMessage('bark_sender_title'),
+        message: getMessage('send_failed_check_network')
       });
     }
   });
@@ -524,7 +563,8 @@ export default defineBackground(() => {
     if (url) {
       requestUrl += `&url=${encodeURIComponent(url)}`;
     }
-    console.debug('Background 发送请求到:', requestUrl);
+    // console.debug('Background 发送请求到:', requestUrl);
+    console.debug(getMessage('background_send_request_to', [requestUrl]));
 
     const response = await fetch(requestUrl, {
       method: 'GET'
@@ -535,7 +575,8 @@ export default defineBackground(() => {
     }
 
     const result = await response.json();
-    console.debug('Background 请求成功:', result);
+    // console.debug('Background 请求成功:', result);
+    console.debug(getMessage('background_request_success'), result);
     return result;
   }
 });

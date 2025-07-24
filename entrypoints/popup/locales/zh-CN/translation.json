@@ -51,6 +51,10 @@
             "dark": "深色",
             "system": "跟随系统"
         },
+        "language": {
+            "title": "语言设置",
+            "current": "当前语言"
+        },
         "context_menu": {
             "title": "右键菜单",
             "enable": "启用右键上下文菜单"
@@ -58,7 +62,8 @@
         "shortcuts": {
             "title": "快捷键",
             "edit": "修改快捷键",
-            "open_window": "打开推送窗口: {{key}}"
+            "open_window": "打开推送窗口: {{key}}",
+            "firefox_guide": "Firefox 不支持直接跳转，请手动打开地址栏输入：about:addons → 设置齿轮图标 → 管理扩展快捷键; 快捷键仅在 Firefox 聚焦时生效"
         },
         "sound": {
             "title": "铃声设置",
@@ -163,6 +168,9 @@
         "send_key": "{{key}} 发送",
         "open_key": "{{key}} 快速打开推送窗口",
         "open_extension": "打开推送窗口",
+        "shortcut_enter_prefix": "按",
+        "shortcut_esc_prefix": "发送; 按",
+        "shortcut_esc_suffix": "取消",
         "success": "发送成功！",
         "clipboard_empty": "剪切板为空或无有效内容",
         "errors": {

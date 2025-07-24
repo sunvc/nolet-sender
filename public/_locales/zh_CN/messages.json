@@ -1,0 +1,80 @@
+{
+    "extension_installed": {
+        "message": "Bark Sender 已安装"
+    },
+    "shortcut_triggered": {
+        "message": "收到全局快捷键触发"
+    },
+    "device_not_found_window": {
+        "message": "未找到默认设备，但仍打开窗口让用户配置"
+    },
+    "device_not_found": {
+        "message": "未找到默认设备，请先添加设备"
+    },
+    "creating_small_window": {
+        "message": "创建小窗口"
+    },
+    "send_message_to_window_failed": {
+        "message": "发送消息到窗口失败：$1"
+    },
+    "notification_shortcut_with_device": {
+        "message": "已打开推送窗口，点击\"发送剪切板内容\"按钮 (默认设备：$1)"
+    },
+    "shortcut_processing_failed": {
+        "message": "快捷键触发失败，请手动打开扩展"
+    },
+    "background_send_push_failed": {
+        "message": "Background发送推送失败"
+    },
+    "background_send_encrypted_push_failed": {
+        "message": "Background 发送加密推送失败"
+    },
+    "background_send_encrypted_request_to": {
+        "message": "Background 发送加密请求到：$1"
+    },
+    "background_encrypted_request_success": {
+        "message": "Background 加密请求成功"
+    },
+    "update_context_menus_failed": {
+        "message": "更新右键菜单失败"
+    },
+    "send_selection_to_device": {
+        "message": "发送所选内容给 $1"
+    },
+    "send_page_to_device": {
+        "message": "发送页面链接给 $1"
+    },
+    "bark_sender_title": {
+        "message": "Bark Sender"
+    },
+    "sent_to_device": {
+        "message": "已发送到 $1"
+    },
+    "send_failed_check_network": {
+        "message": "发送失败，请检查网络连接"
+    },
+    "background_send_request_to": {
+        "message": "Background 发送请求到：$1"
+    },
+    "background_request_success": {
+        "message": "Background 请求成功"
+    },
+    "save_history_record": {
+        "message": "历史记录已保存"
+    },
+    "current_history_total": {
+        "message": "当前历史记录总数：$1"
+    },
+    "save_history_failed": {
+        "message": "保存历史记录失败"
+    },
+    "read_clipboard_failed": {
+        "message": "读取剪切板失败"
+    },
+    "error_unknown": {
+        "message": "未知错误"
+    },
+    "shortcut_send_clipboard_description": {
+        "message": "发送剪切板内容到默认设备"
+    }
+}

@@ -46,10 +46,14 @@
     "settings": {
         "title": "Other Settings",
         "theme": {
-            "title": "Theme Settings",
+            "title": "Theme",
             "light": "Light",
             "dark": "Dark",
             "system": "System"
+        },
+        "language": {
+            "title": "Language",
+            "current": "Current Language"
         },
         "context_menu": {
             "title": "Right-click Menu",
@@ -58,7 +62,8 @@
         "shortcuts": {
             "title": "Shortcuts",
             "edit": "Edit Shortcuts",
-            "open_window": "Open push window: {{key}}"
+            "open_window": "Open push window: {{key}}",
+            "firefox_guide": "Firefox doesn't support direct navigation. Please manually open address bar and enter: about:addons → gear icon → Manage Extension Shortcuts; Shortcuts only work when Firefox is focused"
         },
         "sound": {
             "title": "Sound Settings",
@@ -163,6 +168,9 @@
         "send_key": "{{key}} to send",
         "open_key": "{{key}} to open push window",
         "open_extension": "Open push window",
+        "shortcut_enter_prefix": "Press",
+        "shortcut_esc_prefix": "to send, press",
+        "shortcut_esc_suffix": "to cancel",
         "success": "Sent successfully!",
         "clipboard_empty": "Clipboard is empty or contains no valid content",
         "errors": {

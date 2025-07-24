@@ -51,4 +51,38 @@ export function getShortcutKeys(platform: PlatformType) {
         send: isApple ? '⌘ + ↩' : 'Ctrl + Enter',
         openExtension: isApple ? '⌘ + ⇧ + 8' : 'Ctrl + Shift + 8'
     };
+}
+
+/**
+ * 检测浏览器类型
+ * @returns 'firefox' | 'chrome' | 'edge' | 'safari' | 'unknown'
+ */
+export function detectBrowser(): 'firefox' | 'chrome' | 'edge' | 'safari' | 'unknown' {
+    if (typeof navigator === 'undefined') {
+        return 'unknown';
+    }
+
+    const userAgent = navigator.userAgent.toLowerCase();
+
+    // Firefox
+    if (userAgent.includes('firefox')) {
+        return 'firefox';
+    }
+
+    // Edge
+    if (userAgent.includes('edg/') || userAgent.includes('edge/')) {
+        return 'edge';
+    }
+
+    // Chrome
+    if (userAgent.includes('chrome') && !userAgent.includes('edg')) {
+        return 'chrome';
+    }
+
+    // Safari
+    if (userAgent.includes('safari') && !userAgent.includes('chrome')) {
+        return 'safari';
+    }
+
+    return 'unknown';
 } 

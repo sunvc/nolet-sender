@@ -1,0 +1,80 @@
+{
+    "extension_installed": {
+        "message": "Bark Sender 已安裝"
+    },
+    "shortcut_triggered": {
+        "message": "收到全域快速鍵觸發"
+    },
+    "device_not_found_window": {
+        "message": "未找到預設裝置，但仍開啟視窗讓用戶設定"
+    },
+    "device_not_found": {
+        "message": "未找到預設裝置，請先新增裝置"
+    },
+    "creating_small_window": {
+        "message": "建立小視窗"
+    },
+    "send_message_to_window_failed": {
+        "message": "傳送訊息到視窗失敗：$1"
+    },
+    "notification_shortcut_with_device": {
+        "message": "已開啟推送視窗，點擊\"傳送剪貼簿內容\"按鈕 (預設裝置：$1)"
+    },
+    "shortcut_processing_failed": {
+        "message": "快速鍵觸發失敗，請手動開啟擴充功能"
+    },
+    "background_send_push_failed": {
+        "message": "Background傳送推送失敗"
+    },
+    "background_send_encrypted_push_failed": {
+        "message": "Background 傳送加密推送失敗"
+    },
+    "background_send_encrypted_request_to": {
+        "message": "Background 傳送加密請求到：$1"
+    },
+    "background_encrypted_request_success": {
+        "message": "Background 加密請求成功"
+    },
+    "update_context_menus_failed": {
+        "message": "更新右鍵選單失敗"
+    },
+    "send_selection_to_device": {
+        "message": "傳送所選內容給 $1"
+    },
+    "send_page_to_device": {
+        "message": "傳送頁面連結給 $1"
+    },
+    "bark_sender_title": {
+        "message": "Bark Sender"
+    },
+    "sent_to_device": {
+        "message": "已傳送到 $1"
+    },
+    "send_failed_check_network": {
+        "message": "傳送失敗，請檢查網絡連接"
+    },
+    "background_send_request_to": {
+        "message": "Background 傳送請求到：$1"
+    },
+    "background_request_success": {
+        "message": "Background 請求成功"
+    },
+    "save_history_record": {
+        "message": "歷史記錄已保存"
+    },
+    "current_history_total": {
+        "message": "目前歷史記錄總數：$1"
+    },
+    "save_history_failed": {
+        "message": "保存歷史記錄失敗"
+    },
+    "read_clipboard_failed": {
+        "message": "讀取剪貼簿失敗"
+    },
+    "error_unknown": {
+        "message": "未知錯誤"
+    },
+    "shortcut_send_clipboard_description": {
+        "message": "傳送剪貼簿內容到預設裝置"
+    }
+}

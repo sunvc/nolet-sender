@@ -17,7 +17,7 @@ import {
     useTheme,
     InputAdornment
 } from '@mui/material';
-import { Player } from '@lottiefiles/react-lottie-player';
+import LottiePlayer from '../components/LottiePlayer';
 import {
     Delete as DeleteIcon,
     Download as DownloadIcon,
@@ -465,7 +465,7 @@ export default function History() {
                     }}
                 >
                     <Stack spacing={2} alignItems="center">
-                        <Player
+                        <LottiePlayer
                             autoplay
                             loop
                             src="/lottie/coming-soon.json"

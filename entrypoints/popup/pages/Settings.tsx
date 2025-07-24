@@ -15,7 +15,7 @@ import {
     Switch,
     Link,
     Tooltip,
-    Divider
+    Popover
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -36,7 +36,9 @@ import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
+import { detectBrowser } from '../utils/platform';
 import ThemeSelector from '../components/ThemeSelector';
+import LanguageSelector from '../components/LanguageSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
@@ -73,6 +75,10 @@ export default function Settings({
     const [editingDevice, setEditingDevice] = useState<Device | undefined>();
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
+    const [firefoxGuideAnchor, setFirefoxGuideAnchor] = useState<HTMLElement | null>(null);
+
+    // 检测浏览器类型
+    const browserType = detectBrowser();
 
     const handleContextMenuToggle = async (enabled: boolean) => {
         try {
@@ -396,6 +402,14 @@ export default function Settings({
 
                         <Box>
                             <Typography variant="subtitle1" gutterBottom>
+                                {/* 语言设置 */}
+                                {t('settings.language.title')}
+                            </Typography>
+                            <LanguageSelector onLanguageChange={onSettingsChange} />
+                        </Box>
+
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
                                 {/* 右键菜单 */}
                                 {t('settings.context_menu.title')}
                             </Typography>
@@ -418,19 +432,52 @@ export default function Settings({
                                     {/* 快捷键 */}
                                     {t('settings.shortcuts.title')}
                                 </Typography>
-                                <Button
-                                    startIcon={<KeyboardIcon />}
-                                    onClick={openExtensionShortcuts}
-                                    size="small"
-                                    sx={{
-                                        px: 1.2,
-                                        mb: 1
+                                {browserType === 'firefox' ? (
+                                    <IconButton
+                                        onClick={(event) => setFirefoxGuideAnchor(event.currentTarget)}
+                                        size="small"
+                                        sx={{
+                                            mb: 1
+                                        }}
+                                    >
+                                        <InfoIcon />
+                                    </IconButton>
+                                ) : (
+                                    <Button
+                                        startIcon={<KeyboardIcon />}
+                                        onClick={openExtensionShortcuts}
+                                        size="small"
+                                        sx={{
+                                            px: 1.2,
+                                            mb: 1
+                                        }}
+                                    >
+                                        {/* 修改快捷键 */}
+                                        {t('settings.shortcuts.edit')}
+                                    </Button>
+                                )}
+                            </Stack>
+                            {browserType === 'firefox' && (
+                                <Popover
+                                    open={Boolean(firefoxGuideAnchor)}
+                                    anchorEl={firefoxGuideAnchor}
+                                    onClose={() => setFirefoxGuideAnchor(null)}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'left',
+                                    }}
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'left',
                                     }}
                                 >
-                                    {/* 修改快捷键 */}
-                                    {t('settings.shortcuts.edit')}
-                                </Button>
-                            </Stack>
+                                    <Box sx={{ p: 2, maxWidth: 280 }}>
+                                        <Typography variant="body2">
+                                            {t('settings.shortcuts.firefox_guide')}
+                                        </Typography>
+                                    </Box>
+                                </Popover>
+                            )}
                             <Alert
                                 icon={<InfoIcon />}
                                 severity="info"
@@ -564,7 +611,6 @@ export default function Settings({
                                     <OpenInNewIcon />
                                 </IconButton>
                             </ListItem>
-
 
                             <ListItem>
                                 <ListItemText

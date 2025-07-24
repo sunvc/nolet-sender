@@ -30,6 +30,26 @@ https://github.com/user-attachments/assets/4e1cef2b-660d-45f8-ab79-699f6e9696c5
 [https://www.youtube.com/watch?v=0aw8F1Wo-n4](https://www.youtube.com/watch?v=0aw8F1Wo-n4)
 
 ---
+
+## Build Instructions
+
+📋 **For Extension Build**
+
+To build this extension from source code, please refer to the detailed build instructions:
+
+**👉 [README-BUILD.md](./README-BUILD.md)**
+
+**Quick Build:**
+```bash
+./build.sh
+```
+
+The final extension packages will be generated at:
+- Firefox: `.output/bark-sender-<Version>-firefox.zip`
+- Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
+
+---
+
 ## 中文说明
 
 Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 PC 剪贴板中的文本，快速推送到安装了 [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) 的 iOS 设备上。
@@ -48,3 +68,20 @@ Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 P
 2. 点击任意服务器，选择“复制地址和 Key”； 
 3. 在扩展配置页里添加设备，格式为：`https://api.day.app/:key/`；
 4. 选中文字，右键发送文字；未选中文字时，右键将发送当前页面链接。
+
+## 构建说明
+
+📋 **扩展构建**
+
+要从源代码构建此扩展，请参考详细的构建说明文档：
+
+**👉 [README-BUILD.md](./README-BUILD.md)**
+
+**快速构建：**
+```bash
+./build.sh
+```
+
+最终的扩展包将在以下位置生成：
+- Firefox: `.output/bark-sender-<Version>-firefox.zip`
+- Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
