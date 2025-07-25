@@ -1,0 +1,95 @@
+name: Build and Release Extension
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-release:
+    name: Build and Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Make build.sh executable
+        run: chmod +x ./build.sh
+
+      - name: Run build script
+        run: ./build.sh
+
+      - name: Collect Git Info
+        id: gitinfo
+        run: |
+          echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "build_time=$(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_OUTPUT
+          
+          COMMIT_LOG=$(git log -n 5 --pretty=format:"- %s (%an)" | tr '\n' '~')
+          echo "commits=${COMMIT_LOG}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: false
+          files: |
+            .output/*-chrome.zip
+            .output/*-firefox.zip
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          body: |
+            ## 🍻 Bark Sender New Release | 新版发布
+
+            - **Firefox Extension**: `bark-sender-*-firefox.zip`  
+            - **Chrome/Edge Extension**: `bark-sender-*-chrome.zip`
+
+            ### 📋 Installation Guide
+            1. Download the appropriate extension zip  
+            2. Extract to a local folder  
+            3. Go to your browser's extension page, enable "Load unpacked"  
+            4. Select the extracted folder to install
+
+            ---
+
+            ✅ **Build Info**
+            - Commit: ${{ steps.gitinfo.outputs.sha_short }}
+            - Build Time: ${{ steps.gitinfo.outputs.build_time }}
+
+            ---
+
+            - **Firefox 扩展**: `bark-sender-*-firefox.zip`  
+            - **Chrome/Edge 扩展**: `bark-sender-*-chrome.zip`
+
+            ### 📋 安装说明
+            1. 下载对应浏览器的扩展包  
+            2. 解压缩到本地文件夹  
+            3. 在浏览器扩展管理页面选择"加载已解压的扩展程序"  
+            4. 选择解压后的文件夹即可安装
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bark-sender-extensions-${{ steps.gitinfo.outputs.sha_short }}
+          path: .output/*.zip
+          retention-days: 30
+          include-hidden-files: true
+
