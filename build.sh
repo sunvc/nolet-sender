@@ -9,6 +9,11 @@ echo "🚀 Starting Bark Sender Multi-Browser Extension Build..."
 echo "📦 目标浏览器 / Target Browsers: Firefox, Chrome, Edge"
 echo ""
 
+# 动态读取项目版本号
+PACKAGE_VERSION=$(node -pe "require('./package.json').version")
+echo "📋 项目版本 / Project Version: v$PACKAGE_VERSION"
+echo ""
+
 # 检查操作系统
 echo "📋 检查构建环境 / Checking build environment..."
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -157,7 +162,7 @@ echo "📋 检查构建输出 / Checking build output..."
 
 # 检查 Firefox 扩展
 FIREFOX_SUCCESS=false
-if [ -f ".output/bark-sender-0.1.3-firefox.zip" ]; then
+if [ -f ".output/bark-sender-$PACKAGE_VERSION-firefox.zip" ]; then
     echo "✅ Firefox 扩展构建成功"
     echo "✅ Firefox extension build successful"
     FIREFOX_SUCCESS=true
@@ -168,7 +173,7 @@ fi
 
 # 检查 Chrome/Edge 扩展
 CHROME_SUCCESS=false
-if [ -f ".output/bark-sender-0.1.3-chrome.zip" ]; then
+if [ -f ".output/bark-sender-$PACKAGE_VERSION-chrome.zip" ]; then
     echo "✅ Chrome/Edge 扩展构建成功"
     echo "✅ Chrome/Edge extension build successful"
     CHROME_SUCCESS=true
@@ -183,15 +188,15 @@ if [ "$FIREFOX_SUCCESS" = true ] || [ "$CHROME_SUCCESS" = true ]; then
     echo "📁 输出文件位置 / Output file locations:"
     
     if [ "$FIREFOX_SUCCESS" = true ]; then
-        echo "   📦 Firefox: .output/bark-sender-0.1.3-firefox.zip"
+        echo "   📦 Firefox: .output/bark-sender-$PACKAGE_VERSION-firefox.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-0.1.3-firefox.zip
+        ls -lh .output/bark-sender-$PACKAGE_VERSION-firefox.zip
     fi
     
     if [ "$CHROME_SUCCESS" = true ]; then
-        echo "   📦 Chrome/Edge: .output/bark-sender-0.1.3-chrome.zip"
+        echo "   📦 Chrome/Edge: .output/bark-sender-$PACKAGE_VERSION-chrome.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-0.1.3-chrome.zip
+        ls -lh .output/bark-sender-$PACKAGE_VERSION-chrome.zip
     fi
     
     echo ""
