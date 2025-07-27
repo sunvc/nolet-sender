@@ -117,7 +117,10 @@ export default function Layout({
                 elevation: 3,
                 width: '100%',
                 borderRadius: 0, // 覆盖主题的 borderRadius 
-                flexShrink: 0 // 防止 footer 被压缩
+                flexShrink: 0, // 防止 footer 被压缩
+                borderLeft: 'none',
+                borderRight: 'none',
+                borderBottom: 'none',
             }}>
                 <BottomNavigation
                     value={getTabIndex(currentTab)}

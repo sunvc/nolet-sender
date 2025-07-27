@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useLayoutEffect } from 'react';
 import {
     Box,
     TextField,
@@ -12,16 +12,22 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Slide
+    Slide,
+    IconButton,
+    Tooltip
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import SendIcon from '@mui/icons-material/Send';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
+import UndoIcon from '@mui/icons-material/Undo';
+import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import { sendPushMessage } from '../utils/api';
+import { generateUUID } from '../../shared/push-service';
 import { readClipboard } from '../utils/clipboard';
+import { getHistoryRecordByUuid, updateHistoryRecordStatus } from '../utils/database';
 import { useAppContext } from '../contexts/AppContext';
 import DeviceSelect from '../components/DeviceSelect';
 import DeviceDialog from '../components/DeviceDialog';
@@ -53,7 +59,35 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     const [shortcutDialogOpen, setShortcutDialogOpen] = useState(false);
     const [shortcutClipboardText, setShortcutClipboardText] = useState('');
     const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
+    const [lastPushUuid, setLastPushUuid] = useState<string | null>(null); // 记录最后一次推送的UUID
+    const [recallLoading, setRecallLoading] = useState(false); // 撤回操作加载状态
     const sendButtonRef = useRef<HTMLButtonElement>(null);
+
+    // 从本地存储恢复消息内容
+    useEffect(() => {
+        const savedMessage = localStorage.getItem('bark-sender-draft-message');
+        if (savedMessage) {
+            setMessage(savedMessage);
+        }
+    }, []);
+
+    // 消息输入变化时实时暂存到ls
+    const handleMessageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newMessage = event.target.value;
+        setMessage(newMessage);
+
+        // 暂存消息内容
+        if (newMessage.trim()) {
+            localStorage.setItem('bark-sender-draft-message', newMessage);
+        } else {
+            localStorage.removeItem('bark-sender-draft-message');
+        }
+    };
+
+    // 清除暂存
+    const clearDraftMessage = () => {
+        localStorage.removeItem('bark-sender-draft-message');
+    };
 
     // 设置默认选中设备
     useEffect(() => {
@@ -62,10 +96,14 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         }
     }, [defaultDevice, selectedDevice]);
 
+    // 检测是否是窗口模式
+    const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
+
     // 监听来自background的快捷键消息
     useEffect(() => {
         const handleMessage = (message: any) => {
-            if (message.action === 'shortcut-triggered') {
+            // 只有在窗口模式下才响应快捷键触发消息
+            if (message.action === 'shortcut-triggered' && isWindowMode) {
                 handleShortcutTriggered();
             }
         };
@@ -97,7 +135,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         } catch (error) {
             console.debug('添加消息监听器失败:', error);
         }
-    }, [selectedDevice]);
+    }, [selectedDevice, isWindowMode]);
 
     // 处理快捷键触发
     const handleShortcutTriggered = async () => {
@@ -135,13 +173,18 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setLoading(true);
 
         try {
-            const response = await sendPushMessage(selectedDevice.apiURL, shortcutClipboardText.trim(), selectedDevice.alias);
+            const pushUuid = generateUUID();
+            setLastPushUuid(pushUuid);
+
+            const response = await sendPushMessage(selectedDevice.apiURL, shortcutClipboardText.trim(), selectedDevice.alias, undefined, pushUuid);
 
             if (response.code === 200) {
                 setShortcutDialogOpen(false);
                 /* 推送发送成功！ */
                 setResult({ type: 'success', message: t('push.success') });
                 setMessage(shortcutClipboardText);
+                // 发送成功后清除暂存内容
+                clearDraftMessage();
             } else {
                 /* 发送失败: {{message}} */
                 setResult({ type: 'error', message: t('push.errors.send_failed', { message: response.message }) });
@@ -176,6 +219,59 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         }
     };
 
+    // 处理撤回操作
+    const handleRecall = async () => {
+        if (!lastPushUuid) {
+            setResult({ type: 'error', message: t('push.recall.no_record') });
+            return;
+        }
+
+        setRecallLoading(true);
+
+        try {
+            const historyRecord = await getHistoryRecordByUuid(lastPushUuid);
+
+            if (!historyRecord) {
+                setResult({ type: 'error', message: t('push.recall.record_not_found') });
+                return;
+            }
+
+            const recallUrl = `${historyRecord.apiUrl}?id=${encodeURIComponent(lastPushUuid)}&delete=1`;
+            console.debug('发送撤回请求到:', recallUrl);
+
+            const response = await fetch(recallUrl, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            console.debug('撤回请求结果:', result);
+
+            if (result.code === 200) {
+                setResult({ type: 'success', message: t('push.recall.success') });
+                // 更新数据库记录状态
+                await updateHistoryRecordStatus(lastPushUuid, 'recalled');
+                // 再清空UUID，防止重复撤回
+                setLastPushUuid(null);
+            } else {
+                setResult({ type: 'error', message: t('push.recall.failed', { message: result.message || '未知错误' }) });
+            }
+        } catch (error) {
+            console.error('撤回操作失败:', error);
+            setResult({
+                type: 'error',
+                message: t('push.recall.failed', { message: error instanceof Error ? error.message : '网络错误' })
+            });
+        } finally {
+            setRecallLoading(false);
+        }
+    };
+
     const handleSend = async () => {
         if (!selectedDevice) {
             /* 请选择一个设备 */
@@ -193,12 +289,17 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setResult(null);
 
         try {
-            const response = await sendPushMessage(selectedDevice.apiURL, message.trim(), selectedDevice.alias);
+            // 生成新的 UUID 记录
+            const pushUuid = generateUUID();
+            setLastPushUuid(pushUuid);
+
+            const response = await sendPushMessage(selectedDevice.apiURL, message.trim(), selectedDevice.alias, undefined, pushUuid);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
                 setResult({ type: 'success', message: t('push.success') });
                 setMessage('');
+                clearDraftMessage(); // 清除暂存
             } else {
                 /* 发送失败: {{message}} */
                 setResult({ type: 'error', message: t('push.errors.send_failed', { message: response.message }) });
@@ -233,12 +334,16 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 return;
             }
 
-            const response = await sendPushMessage(selectedDevice.apiURL, clipboardText.trim(), selectedDevice.alias);
+            const pushUuid = generateUUID();
+            setLastPushUuid(pushUuid);
+
+            const response = await sendPushMessage(selectedDevice.apiURL, clipboardText.trim(), selectedDevice.alias, undefined, pushUuid);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
                 setResult({ type: 'success', message: t('push.success') });
                 setMessage(clipboardText.trim());
+                localStorage.setItem('bark-sender-draft-message', clipboardText.trim()); // 更新暂存内容为剪切板内容
             } else {
                 /* 发送失败: {{message}} */
                 setResult({ type: 'error', message: t('push.errors.send_failed', { message: response.message }) });
@@ -278,36 +383,41 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         }
     };
 
-    // 检测是否是窗口模式
-    const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
-
     // 检测是否需要自动打开添加设备对话框
+    const [shouldAutoAddDevice, setShouldAutoAddDevice] = useState(false);
+
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const autoAddDevice = urlParams.get('autoAddDevice') === 'true';
 
         if (autoAddDevice && devices.length === 0) {
+            setShouldAutoAddDevice(true);
+            // 移除网址参数
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, [devices.length]);
+
+    useLayoutEffect(() => {
+        if (shouldAutoAddDevice) {
             // 读取剪切板内容到输入框
             const loadClipboardContent = async () => {
                 try {
                     const clipboardText = await readClipboard();
                     if (clipboardText && clipboardText.trim()) {
                         setMessage(clipboardText.trim());
+                        // 更新本地存储
+                        localStorage.setItem('bark-sender-draft-message', clipboardText.trim());
                     }
                 } catch (error) {
                     console.debug('读取剪切板失败:', error);
                 }
             };
 
-            // 延迟一下确保组件完全加载，然后读取剪切板并打开对话框
-            setTimeout(() => {
-                loadClipboardContent();
-                setDeviceDialogOpen(true);
-                // 移除网址参数
-                window.history.replaceState({}, '', window.location.pathname);
-            }, 600);
+            loadClipboardContent();
+            setDeviceDialogOpen(true);
+            setShouldAutoAddDevice(false); // 重置状态
         }
-    }, [devices.length]);
+    }, [shouldAutoAddDevice]);
 
     return (
         <>
@@ -333,7 +443,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         multiline
                         rows={3}
                         value={message}
-                        onChange={(e) => setMessage(e.target.value)}
+                        onChange={handleMessageChange}
                         onKeyDown={handleKeyDown}
                         variant="outlined"
                         size="small"
@@ -341,7 +451,43 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     />
 
                     {result && (
-                        <Alert severity={result.type} onClose={() => setResult(null)}>
+                        <Alert
+                            severity={result.type}
+                            action={
+                                result.type === 'success' && lastPushUuid ? (
+                                    <Stack direction="row" gap={1}>
+                                        <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button')}>
+                                            <IconButton
+                                                size="small"
+                                                aria-label="recall"
+                                                color="warning"
+                                                onClick={handleRecall}
+                                                disabled={recallLoading}
+                                            >
+                                                {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em' }} />}
+                                            </IconButton>
+                                        </Tooltip>
+                                        <IconButton
+                                            size="small"
+                                            aria-label="close"
+                                            color="inherit"
+                                            onClick={() => setResult(null)}
+                                        >
+                                            <CloseIcon fontSize="small" />
+                                        </IconButton>
+                                    </Stack>
+                                ) : (
+                                    <IconButton
+                                        size="small"
+                                        aria-label="close"
+                                        color="inherit"
+                                        onClick={() => setResult(null)}
+                                    >
+                                        <CloseIcon fontSize="small" />
+                                    </IconButton>
+                                )
+                            }
+                        >
                             {result.message}
                         </Alert>
                     )}

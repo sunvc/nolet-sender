@@ -173,6 +173,14 @@
         "shortcut_esc_suffix": "to cancel",
         "success": "Sent successfully!",
         "clipboard_empty": "Clipboard is empty or contains no valid content",
+        "recall": {
+            "button": "Try Recall",
+            "loading": "Recalling...",
+            "success": "Requested to recall",
+            "no_record": "No message to recall",
+            "record_not_found": "Push record not found",
+            "failed": "Recall failed: {{message}}"
+        },
         "errors": {
             "no_device": "Please select a device",
             "no_content": "Please enter message content",
@@ -219,12 +227,13 @@
             "records_count": "{{count}} record(s) total",
             "selected_count": "{{count}} selected",
             "time": "Time",
-            "content": "Message Content",
+            "content": "Content",
             "device": "Device",
             "method": "Method",
             "status": "Status",
             "encrypted": "Encrypted",
-            "title_prefix": "Title"
+            "title_prefix": "Title",
+            "recalled": "Recall Req."
         },
         "messages": {
             "empty": "No history available",

@@ -173,6 +173,14 @@
         "shortcut_esc_suffix": "取消",
         "success": "发送成功！",
         "clipboard_empty": "剪切板为空或无有效内容",
+        "recall": {
+            "button": "尝试撤回",
+            "loading": "撤回中...",
+            "success": "已请求撤回",
+            "no_record": "没有可撤回的推送记录",
+            "record_not_found": "未找到对应的推送记录",
+            "failed": "撤回失败: {{message}}"
+        },
         "errors": {
             "no_device": "请选择一个设备",
             "no_content": "请输入推送内容",
@@ -219,12 +227,13 @@
             "records_count": "共 {{count}} 条记录",
             "selected_count": "已选择 {{count}} 条",
             "time": "时间",
-            "content": "消息内容",
+            "content": "内容",
             "device": "设备",
             "method": "方法",
             "status": "状态",
             "encrypted": "加密",
-            "title_prefix": "标题"
+            "title_prefix": "标题",
+            "recalled": "已请求撤回"
         },
         "messages": {
             "empty": "暂无历史记录",

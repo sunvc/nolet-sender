@@ -20,6 +20,7 @@ export interface HistoryRecord {
     url?: string; // 链接（可选）
     isEncrypted: boolean; // 是否加密
     createdAt: string; // 创建时间字符串 YYYY-MM-DD HH:mm:ss
+    status?: string | null; // 状态标记: null=正常, 'recalled'=已撤回
 }
 
 // 数据库结构定义
@@ -59,7 +60,7 @@ class DatabaseManager {
     }
 
     // 添加历史记录
-    async addRecord(record: Omit<HistoryRecord, 'id' | 'uuid' | 'timestamp' | 'createdAt'>): Promise<HistoryRecord> {
+    async addRecord(record: Omit<HistoryRecord, 'id' | 'timestamp' | 'createdAt'> & { uuid?: string }): Promise<HistoryRecord> {
         await this.init();
         if (!this.db) throw new Error('数据库未初始化');
 
@@ -77,7 +78,7 @@ class DatabaseManager {
 
         const fullRecord: HistoryRecord = {
             ...record,
-            uuid: uuidv4(),
+            uuid: record.uuid,
             timestamp: now,
             timezone,
             createdAt,
@@ -130,6 +131,46 @@ class DatabaseManager {
         const promises = ids.map(id => tx.store.delete(id));
         await Promise.all(promises);
         await tx.done;
+    }
+
+    // 根据 UUID 查询对应记录
+    async getRecordByUuid(uuid: string): Promise<HistoryRecord | null> {
+        await this.init();
+        if (!this.db) throw new Error('数据库未初始化');
+
+        try {
+            const record = await this.db.getFromIndex('history', 'by-uuid', uuid);
+            return record || null;
+        } catch (error) {
+            console.error('根据UUID查询记录失败:', error);
+            return null;
+        }
+    }
+
+    // 根据UUID更新记录状态
+    async updateRecordStatus(uuid: string, status: string | null): Promise<boolean> {
+        await this.init();
+        if (!this.db) throw new Error('数据库未初始化');
+
+        try {
+            // 先通过UUID查询记录
+            const record = await this.db.getFromIndex('history', 'by-uuid', uuid);
+            if (!record) {
+                console.error('未找到UUID对应的记录:', uuid);
+                return false;
+            }
+
+            // 更新状态
+            const updatedRecord = { ...record, status };
+
+            // 保存更新后的记录
+            await this.db.put('history', updatedRecord);
+            // console.debug('成功更新记录状态:', uuid, status);
+            return true;
+        } catch (error) {
+            console.error('更新记录状态失败:', error);
+            return false;
+        }
     }
 
     // 导出所有记录
@@ -206,6 +247,16 @@ class DatabaseManager {
 // 导出单例实例
 export const dbManager = new DatabaseManager();
 
+// 根据 UUID 查询历史记录
+export async function getHistoryRecordByUuid(uuid: string): Promise<HistoryRecord | null> {
+    return await dbManager.getRecordByUuid(uuid);
+}
+
+// 根据UUID更新历史记录状态
+export async function updateHistoryRecordStatus(uuid: string, status: string | null): Promise<boolean> {
+    return await dbManager.updateRecordStatus(uuid, status);
+}
+
 // 记录推送历史
 export async function recordPushHistory(
     body: string,
@@ -219,6 +270,7 @@ export async function recordPushHistory(
         url?: string;
         isEncrypted?: boolean;
         parameters?: any[];
+        uuid?: string;
     } = {}
 ): Promise<HistoryRecord> {
     const requestTimestamp = Date.now();
@@ -226,6 +278,7 @@ export async function recordPushHistory(
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
     return await dbManager.addRecord({
+        uuid: options.uuid || uuidv4(),
         body,
         apiUrl,
         deviceName,

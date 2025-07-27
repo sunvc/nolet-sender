@@ -380,11 +380,56 @@ const getCommonTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
         MuiTooltip: {
             styleOverrides: {
                 tooltip: {
-                    borderRadius: 14,
-                    padding: '6px 12px',
+                    borderRadius: 12,
+                    padding: '4px 8px',
+                    fontSize: '0.75rem',
+                    fontWeight: 500,
+                    letterSpacing: '0.02em',
+                    maxWidth: 300,
+                    backgroundColor: mode === 'dark'
+                        ? 'rgba(30, 30, 30, 0.95)'
+                        : 'rgba(255, 255, 255, 0.95)',
+                    color: mode === 'dark'
+                        ? 'rgba(255, 255, 255, 0.9)'
+                        : 'rgba(0, 0, 0, 0.87)',
+                    border: mode === 'dark'
+                        ? '1px solid rgba(255, 255, 255, 0.2)'
+                        : '1px solid rgba(0, 0, 0, 0.15)',
                     boxShadow: mode === 'dark'
-                        ? '0 1px 4px rgba(0, 0, 0, 0.3)'
-                        : '0 1px 4px rgba(0, 0, 0, 0.1)'
+                        ? '0 4px 12px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3)'
+                        : '0 4px 12px rgba(0, 0, 0, 0.12), 0 1px 3px rgba(0, 0, 0, 0.08)',
+                    backdropFilter: 'blur(8px)',
+                    WebkitBackdropFilter: 'blur(8px)',
+                    backgroundImage: mode === 'dark'
+                        ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%)'
+                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0.6) 100%)',
+                },
+                // 箭头样式
+                arrow: {
+                    color: mode === 'dark'
+                        ? 'rgba(30, 30, 30, 0.95)'
+                        : 'rgba(255, 255, 255, 0.95)',
+                    '&::before': {
+                        border: mode === 'dark'
+                            ? '1px solid rgba(255, 255, 255, 0.2)'
+                            : '1px solid rgba(0, 0, 0, 0.15)',
+                        boxShadow: mode === 'dark'
+                            ? '0 2px 6px rgba(0, 0, 0, 0.3)'
+                            : '0 2px 6px rgba(0, 0, 0, 0.1)',
+                    },
+                },
+                // 不同位置的样式调整
+                tooltipPlacementTop: {
+                    marginBottom: '8px !important',
+                },
+                tooltipPlacementBottom: {
+                    marginTop: '8px !important',
+                },
+                tooltipPlacementLeft: {
+                    marginRight: '8px !important',
+                },
+                tooltipPlacementRight: {
+                    marginLeft: '8px !important',
                 },
             },
         },

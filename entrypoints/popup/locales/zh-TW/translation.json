@@ -173,6 +173,14 @@
         "shortcut_esc_suffix": "取消",
         "success": "發送成功！",
         "clipboard_empty": "剪貼簿為空或沒有可用內容",
+        "recall": {
+            "button": "嘗試撤回",
+            "loading": "撤回中...",
+            "success": "已請求撤回",
+            "no_record": "沒有可撤回的推送記錄",
+            "record_not_found": "未找到對應的推送記錄",
+            "failed": "撤回失敗：{{message}}"
+        },
         "errors": {
             "no_device": "請選擇一個裝置",
             "no_content": "請輸入通知內容",
@@ -219,12 +227,13 @@
             "records_count": "共 {{count}} 筆紀錄",
             "selected_count": "已選 {{count}} 筆",
             "time": "時間",
-            "content": "訊息內容",
+            "content": "內容",
             "device": "裝置",
             "method": "方法",
             "status": "狀態",
             "encrypted": "加密",
-            "title_prefix": "標題"
+            "title_prefix": "標題",
+            "recalled": "已請求撤回"
         },
         "messages": {
             "empty": "目前沒有歷史紀錄",

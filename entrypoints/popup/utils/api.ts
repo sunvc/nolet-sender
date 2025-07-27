@@ -1,7 +1,7 @@
 import { PushResponse } from '../types';
 import { getAppSettings } from './settings';
-import { encryptAESCBC, generateIV } from './crypto';
 import { recordPushHistory } from './database';
+import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from '../../shared/push-service';
 
 /**
  * 发送推送消息 - 通过background script
@@ -9,9 +9,9 @@ import { recordPushHistory } from './database';
  * @param message 消息内容
  * @param deviceName 设备名称
  * @param sound 铃声
+ * @param uuid 唯一标识符
  */
-export async function sendPushMessage(apiURL: string, message: string, deviceName?: string, sound?: string): Promise<PushResponse> {
-    const requestStartTime = Date.now();
+export async function sendPushMessage(apiURL: string, message: string, deviceName?: string, sound?: string, uuid?: string): Promise<PushResponse> {
     let response: PushResponse;
     let method: 'GET' | 'POST' = 'GET';
     let isEncrypted = false;
@@ -21,27 +21,28 @@ export async function sendPushMessage(apiURL: string, message: string, deviceNam
         // 检查是否启用加密
         const settings = await getAppSettings();
 
+        // 使用传入的UUID或生成新的
+        const pushUuid = uuid || generateUUID();
+
+        const pushParams: PushParams = {
+            apiURL,
+            message,
+            sound: sound || settings.sound,
+            uuid: pushUuid
+        };
+
+        // 根据是否启用加密选择发送方式
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
-            // 使用加密发送
             method = 'POST';
             isEncrypted = true;
-            response = await sendEncryptedPushMessage(apiURL, message, settings.encryptionConfig, sound || settings.sound);
-            parameters = [
-                { key: 'iv', value: '***' }, // 加密参数隐藏
-                { key: 'ciphertext', value: '***' },
-                { key: 'sound', value: sound || settings.sound || '' }
-            ];
+            response = await sendPushDirectly(pushParams, settings.encryptionConfig);
         } else {
-            // 使用原有的GET方式发送
             method = 'GET';
-            response = await sendPlainPushMessage(apiURL, message, sound || settings.sound);
-            parameters = [
-                { key: 'message', value: message },
-                { key: 'autoCopy', value: '1' },
-                { key: 'copy', value: message },
-                { key: 'sound', value: sound || settings.sound || '' }
-            ];
+            response = await sendPushDirectly(pushParams);
         }
+
+        // 获取请求参数（用于历史记录）
+        parameters = getRequestParameters(pushParams, isEncrypted);
 
         // 记录推送历史
         if (deviceName) {
@@ -54,7 +55,8 @@ export async function sendPushMessage(apiURL: string, message: string, deviceNam
                 {
                     sound: sound || settings.sound,
                     isEncrypted,
-                    parameters
+                    parameters,
+                    uuid: pushUuid // 传递UUID给历史记录
                 }
             );
         }
@@ -92,43 +94,34 @@ export async function sendPushMessage(apiURL: string, message: string, deviceNam
     }
 }
 
-// 发送明文推送消息
-async function sendPlainPushMessage(apiURL: string, message: string, sound?: string): Promise<PushResponse> {
+/**
+ * 直接发送推送（优先直接请求，失败时回退到background script）
+ */
+async function sendPushDirectly(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
     try {
-        // 构建URL，添加sound参数
-        let url = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
-        if (sound) {
-            url += `&sound=${encodeURIComponent(sound)}`;
-        }
-        console.debug('发送请求到:', url);
-
-        // 尝试直接请求
-        const response = await fetch(url, {
-            method: 'GET',
-            mode: 'cors',
-            cache: 'no-cache'
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: PushResponse = await response.json();
-        console.debug('请求成功:', data);
-        return data;
+        // 尝试直接发送
+        return await sendPush(params, encryptionConfig);
     } catch (error) {
         console.error('直接请求失败，尝试通过background script:', error);
 
         // 如果直接请求失败，通过background script发送
         try {
-            const response = await sendMessageToBackground({
-                action: 'sendPush',
-                apiURL,
-                message,
-                sound,
-                url: undefined, // 可选
-                title: undefined // 可选
-            });
+            const action = encryptionConfig ? 'sendEncryptedPush' : 'sendPush';
+            const message: any = {
+                action,
+                apiURL: params.apiURL,
+                message: params.message,
+                sound: params.sound,
+                url: params.url,
+                title: params.title,
+                uuid: params.uuid // 传递UUID给background script
+            };
+
+            if (encryptionConfig) {
+                message.encryptionConfig = encryptionConfig;
+            }
+
+            const response = await sendMessageToBackground(message);
 
             if (response.success) {
                 return response.data;
@@ -137,75 +130,6 @@ async function sendPlainPushMessage(apiURL: string, message: string, sound?: str
             }
         } catch (bgError) {
             console.error('Background script请求也失败:', bgError);
-            throw new Error('网络请求失败，请检查网络连接和API地址');
-        }
-    }
-}
-
-// 发送加密推送消息
-async function sendEncryptedPushMessage(apiURL: string, message: string, encryptionConfig: any, sound?: string): Promise<PushResponse> {
-    try {
-        // 生成随机 IV
-        const iv = generateIV();
-
-        const encryptData: any = {
-            body: message
-        };
-        if (sound) {
-            encryptData.sound = sound;
-        }
-
-        const plaintext = JSON.stringify(encryptData);
-        const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv); // 加密消息
-
-        console.debug('发送加密请求到:', apiURL);
-        console.debug('IV:', iv);
-        console.debug('Ciphertext:', ciphertext);
-
-        const formData = new URLSearchParams();
-        formData.append('iv', iv);
-        formData.append('ciphertext', ciphertext);
-
-        // 发送加密请求
-        const response = await fetch(`${apiURL}?sound=${sound}`, {
-            method: 'POST',
-            mode: 'cors',
-            cache: 'no-cache',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            body: formData.toString()
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data: PushResponse = await response.json();
-        console.debug('加密请求成功:', data);
-        return data;
-    } catch (error) {
-        console.error('加密请求失败，尝试通过background script:', error);
-
-        // 如果直接请求失败，通过background script发送
-        try {
-            const response = await sendMessageToBackground({
-                action: 'sendEncryptedPush',
-                apiURL,
-                message,
-                encryptionConfig,
-                sound,
-                url: undefined, // 可选
-                title: undefined // 可选
-            });
-
-            if (response.success) {
-                return response.data;
-            } else {
-                throw new Error(response.error || '未知错误');
-            }
-        } catch (bgError) {
-            console.error('Background script加密请求也失败:', bgError);
             throw new Error('网络请求失败，请检查网络连接和API地址');
         }
     }

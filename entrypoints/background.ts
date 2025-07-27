@@ -1,4 +1,5 @@
 import { initBackgroundI18n, watchLanguageChanges, getMessage } from './background/i18n-helper';
+import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from './shared/push-service';
 
 export default defineBackground(() => {
   // 初始化 i18n
@@ -8,7 +9,7 @@ export default defineBackground(() => {
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -19,7 +20,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendEncryptedPush') {
-      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title)
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -67,15 +68,6 @@ export default defineBackground(() => {
       // console.error('保存历史记录失败:', error);
       console.error(getMessage('save_history_failed'), error);
     }
-  }
-
-  // 生成 UUID 用于历史记录的唯一标识
-  function generateUUID() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-      const r = Math.random() * 16 | 0;
-      const v = c == 'x' ? r : (r & 0x3 | 0x8);
-      return v.toString(16);
-    });
   }
 
   // 处理剪切板读取
@@ -189,10 +181,11 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string) {
     try {
-      const response = await sendPushMessage(apiURL, message, sound, url, title);
-      return response;
+      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid };
+      const response = await sendPush(pushParams);
+      return response; // 返回PushResponse
     } catch (error) {
       // console.error('Background发送推送失败:', error);
       console.error(getMessage('background_send_push_failed'), error);
@@ -201,96 +194,11 @@ export default defineBackground(() => {
   }
 
   // 处理加密推送请求
-  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: any, sound?: string, url?: string, title?: string) {
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string) {
     try {
-      function generateAsciiString(len: number): string {
-        const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-        const arr = new Uint8Array(len);
-        crypto.getRandomValues(arr);
-        return Array.from(arr, b => charset[b % charset.length]).join('');
-      }
-
-      function generateIV(): string {
-        return generateAsciiString(16);
-      }
-
-      function toUtf8Bytes(str: string): Uint8Array {
-        return new TextEncoder().encode(str);
-      }
-
-      function arrayBufferToBase64(buffer: ArrayBuffer): string {
-        const binary = String.fromCharCode(...new Uint8Array(buffer));
-        return btoa(binary);
-      }
-
-      async function encryptAESCBC(plaintext: string, keyStr: string, ivStr: string): Promise<string> {
-        const keyBytes = toUtf8Bytes(keyStr);
-        const iv = toUtf8Bytes(ivStr);
-        const data = toUtf8Bytes(plaintext);
-
-        const cryptoKey = await crypto.subtle.importKey(
-          'raw',
-          keyBytes,
-          { name: 'AES-CBC' },
-          false,
-          ['encrypt']
-        );
-
-        const encryptedBuffer = await crypto.subtle.encrypt(
-          {
-            name: 'AES-CBC',
-            iv: iv
-          },
-          cryptoKey,
-          data
-        );
-
-        return arrayBufferToBase64(encryptedBuffer);
-      }
-
-      // 生成随机IV
-      const iv = generateIV();
-
-      // 构建加密内容
-      const encryptData: any = { body: message };
-      if (sound) {
-        encryptData.sound = sound;
-      }
-      if (url) {
-        encryptData.url = url;
-      }
-      if (title) {
-        encryptData.title = title;
-      }
-
-      // 加密消息
-      const plaintext = JSON.stringify(encryptData);
-      const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv);
-
-      // console.debug('Background 发送加密请求到:', apiURL);
-      console.debug(getMessage('background_send_encrypted_request_to', [apiURL]));
-
-      const formData = new URLSearchParams();
-      formData.append('iv', iv);
-      formData.append('ciphertext', ciphertext);
-
-      // 发送加密请求
-      const response = await fetch(apiURL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: formData.toString()
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      // console.debug('Background 加密请求成功:', result);
-      console.debug(getMessage('background_encrypted_request_success'), result);
-      return result;
+      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid };
+      const response = await sendPush(pushParams, encryptionConfig);
+      return response; // 返回 PushResponse
     } catch (error) {
       // console.error('Background 发送加密推送失败:', error);
       console.error(getMessage('background_send_encrypted_push_failed'), error);
@@ -416,32 +324,29 @@ export default defineBackground(() => {
         let isEncrypted = false;
         let parameters: any[] = [];
 
+        const pushUuid = generateUUID(); // 生成 UUID 用于请求参数 做 撤回 / 修改 请求用
+
+        const pushParams: PushParams = {
+          apiURL: defaultDevice.apiURL,
+          message,
+          sound: settings.sound,
+          url,
+          title,
+          uuid: pushUuid
+        };
+
         // 根据设置选择发送方式
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
           method = 'POST';
           isEncrypted = true;
-          response = await handleSendEncryptedPush(defaultDevice.apiURL, message, settings.encryptionConfig, settings.sound, url, title);
-          parameters = [
-            { key: 'iv', value: '***' },
-            { key: 'ciphertext', value: '***' },
-            { key: 'sound', value: settings.sound || '' }
-          ];
+          response = await sendPush(pushParams, settings.encryptionConfig);
         } else {
           method = 'GET';
-          response = await sendPushMessage(defaultDevice.apiURL, message, settings.sound, url, title);
-          parameters = [
-            { key: 'message', value: message },
-            { key: 'autoCopy', value: '1' },
-            { key: 'copy', value: message },
-            { key: 'sound', value: settings.sound || '' }
-          ];
-          if (title) {
-            parameters.push({ key: 'title', value: title });
-          }
-          if (url) {
-            parameters.push({ key: 'url', value: url });
-          }
+          response = await sendPush(pushParams);
         }
+
+        // 获取请求参数
+        parameters = getRequestParameters(pushParams, isEncrypted);
 
         const responseTimestamp = Date.now();
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -458,7 +363,7 @@ export default defineBackground(() => {
         // 创建历史记录对象
         const historyRecord = {
           id: Date.now(), // 使用时间戳作为ID
-          uuid: generateUUID(),
+          uuid: pushUuid, // 用于后续的 撤回 / 修改 请求
           timestamp: requestTimestamp,
           body: message,
           apiUrl: defaultDevice.apiURL,
@@ -545,38 +450,4 @@ export default defineBackground(() => {
       });
     }
   });
-
-  // 发送推送消息
-  async function sendPushMessage(apiURL: string, message: string, sound?: string, url?: string, title?: string) {
-    let requestUrl; // 如果有标题则插入到路径中
-    if (title) {
-      // 含标题格式: https://api.day.app/key/title/body?params
-      requestUrl = `${apiURL}${encodeURIComponent(title)}/${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
-    } else {
-      // 默认的格式: https://api.day.app/key/body?params  
-      requestUrl = `${apiURL}${encodeURIComponent(message)}?autoCopy=1&copy=${encodeURIComponent(message)}`;
-    }
-
-    if (sound) {
-      requestUrl += `&sound=${encodeURIComponent(sound)}`;
-    }
-    if (url) {
-      requestUrl += `&url=${encodeURIComponent(url)}`;
-    }
-    // console.debug('Background 发送请求到:', requestUrl);
-    console.debug(getMessage('background_send_request_to', [requestUrl]));
-
-    const response = await fetch(requestUrl, {
-      method: 'GET'
-    });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const result = await response.json();
-    // console.debug('Background 请求成功:', result);
-    console.debug(getMessage('background_request_success'), result);
-    return result;
-  }
 });

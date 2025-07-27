@@ -21,7 +21,7 @@ import { TransitionProps } from '@mui/material/transitions';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 import { EncryptionConfig, EncryptionAlgorithm, EncryptionMode, PaddingMode } from '../types';
-import { generateKey, generateIV } from '../utils/crypto';
+import { generateKey, generateIV } from '../../shared/push-service';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {

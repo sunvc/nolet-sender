@@ -29,7 +29,8 @@ import {
     Error as ErrorIcon,
     Help as HelpIcon,
     NavigateBefore as NavigateBeforeIcon,
-    NavigateNext as NavigateNextIcon
+    NavigateNext as NavigateNextIcon,
+    Undo as UndoIcon
 } from '@mui/icons-material';
 import { useTranslation } from 'react-i18next';
 import { HistoryRecord, dbManager } from '../utils/database';
@@ -38,6 +39,7 @@ export default function History() {
     const { t } = useTranslation();
     const theme = useTheme();
     const [records, setRecords] = useState<HistoryRecord[]>([]);
+    const [allRecordsCount, setAllRecordsCount] = useState(0);
     const [hasData, setHasData] = useState(false);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -149,6 +151,7 @@ export default function History() {
             // 更新当前页显示的记录
             const startIndex = (currentPage - 1) * pageSize;
             setRecords(data.slice(startIndex, startIndex + pageSize));
+            setAllRecordsCount(data.length);
         } catch (error) {
             console.error('加载历史记录失败:', error);
             setAlert({ type: 'error', message: t('history.messages.load_failed') }); // 加载历史记录失败
@@ -269,6 +272,13 @@ export default function History() {
 
     // 格式化响应状态
     const getStatusDisplay = (record: HistoryRecord) => {
+        if (record.status === 'recalled') {
+            return {
+                icon: <UndoIcon sx={{ fontSize: '16px', color: '#ff9800' }} />,
+                color: '#ff9800',
+                title: t('history.table.recalled')
+            };
+        }
         if (record.responseJson.code === 200) {
             return {
                 icon: <CheckCircleIcon sx={{ fontSize: '16px', color: '#4caf50' }} />,
@@ -482,8 +492,7 @@ export default function History() {
                     <Stack direction="row" gap={1} alignItems="flex-end" justifyContent="space-between" sx={{ mb: 1, mt: 0 }}>
                         {/* 记录统计 */}
                         < Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {t('history.table.records_count', { count: records.length })}
-                            {selectedIds.length > 0 && ` (${t('history.table.selected_count', { count: selectedIds.length })})`}
+                            {selectedIds.length > 0 ? `${t('history.table.selected_count', { count: selectedIds.length })}` : t('history.table.records_count', { count: allRecordsCount })}
                         </Typography>
 
                         {/* 分页控制 */}
@@ -597,22 +606,25 @@ export default function History() {
                                             padding: '8px',
                                             textAlign: 'left',
                                             width: '100px',
+                                            minWidth: '100px',
                                             backgroundColor: theme.palette.background.paper,
                                             color: theme.palette.text.primary
                                         }}>{t('history.table.device')}</th>
                                         {/* 状态 */}
                                         <th style={{
                                             padding: '8px',
-                                            textAlign: 'center',
-                                            width: '60px',
+                                            textAlign: 'left',
+                                            width: '100px',
+                                            minWidth: '100px',
                                             backgroundColor: theme.palette.background.paper,
                                             color: theme.palette.text.primary
                                         }}>{t('history.table.status')}</th>
                                         {/* 加密 */}
                                         <th style={{
                                             padding: '8px',
-                                            textAlign: 'center',
+                                            textAlign: 'left',
                                             width: '60px',
+                                            minWidth: '60px',
                                             backgroundColor: theme.palette.background.paper,
                                             color: theme.palette.text.primary
                                         }}>{t('history.table.encrypted')}</th>
@@ -639,7 +651,8 @@ export default function History() {
                                                     key={record.id}
                                                     style={{
                                                         borderBottom: `1px solid ${theme.palette.divider}`,
-                                                        backgroundColor: isSelected ? theme.palette.action.selected : 'transparent'
+                                                        backgroundColor: isSelected ? theme.palette.action.selected : 'transparent',
+                                                        opacity: record.status === 'recalled' ? 0.6 : 1 // 撤回的记录 透明度降低
                                                     }}
                                                 >
                                                     <td style={{ padding: '8px 4px', textAlign: 'center' }}>
@@ -678,16 +691,25 @@ export default function History() {
                                                         <div style={{
                                                             fontSize: '13px',
                                                             fontWeight: 500,
-                                                            color: theme.palette.text.primary
+                                                            color: theme.palette.text.primary,
+                                                            width: '100px',
+                                                            minWidth: '100px',
+                                                            overflow: 'hidden',
+                                                            textOverflow: 'ellipsis',
+                                                            whiteSpace: 'nowrap'
                                                         }}>
                                                             {record.deviceName}
                                                         </div>
                                                     </td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    <td style={{
+                                                        padding: '8px',
+                                                        width: '100px',
+                                                        minWidth: '100px'
+                                                    }}>
                                                         <div style={{
                                                             display: 'flex',
-                                                            alignItems: 'center',
-                                                            justifyContent: 'center',
+                                                            alignItems: 'flex-start',
+                                                            justifyContent: 'left',
                                                             gap: '4px'
                                                         }}>
                                                             <span style={{
@@ -702,7 +724,12 @@ export default function History() {
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td style={{ padding: '8px', textAlign: 'center' }}>
+                                                    <td style={{
+                                                        padding: '8px',
+                                                        textAlign: 'left',
+                                                        width: '60px',
+                                                        minWidth: '50px'
+                                                    }}>
                                                         <span style={{
                                                             fontSize: '12px',
                                                             color: record.isEncrypted ? '#4caf50' : theme.palette.text.disabled
