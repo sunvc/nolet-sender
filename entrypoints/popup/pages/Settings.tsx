@@ -33,6 +33,7 @@ import SecurityIcon from '@mui/icons-material/Security';
 import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
@@ -42,7 +43,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
-import { openExtensionShortcuts, openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp } from '../utils/extension';
+import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp } from '../utils/extension';
 
 interface SettingsProps {
     devices: Device[];
@@ -75,10 +76,22 @@ export default function Settings({
     const [editingDevice, setEditingDevice] = useState<Device | undefined>();
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
-    const [firefoxGuideAnchor, setFirefoxGuideAnchor] = useState<HTMLElement | null>(null);
+    const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
 
     // 检测浏览器类型
     const browserType = detectBrowser();
+
+    // 复制快捷键设置地址
+    const handleCopyShortcutUrl = async () => {
+        const url = browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`;
+        try {
+            await navigator.clipboard.writeText(url);
+            // 可以添加一个成功提示，但这里暂时省略
+        } catch (error) {
+            // 复制失败的处理，这里暂时省略
+            console.error('复制失败:', error);
+        }
+    };
 
     const handleContextMenuToggle = async (enabled: boolean) => {
         try {
@@ -432,52 +445,73 @@ export default function Settings({
                                     {/* 快捷键 */}
                                     {t('settings.shortcuts.title')}
                                 </Typography>
-                                {browserType === 'firefox' ? (
-                                    <IconButton
-                                        onClick={(event) => setFirefoxGuideAnchor(event.currentTarget)}
-                                        size="small"
-                                        sx={{
-                                            mb: 1
-                                        }}
-                                    >
-                                        <InfoIcon />
-                                    </IconButton>
-                                ) : (
-                                    <Button
-                                        startIcon={<KeyboardIcon />}
-                                        onClick={openExtensionShortcuts}
-                                        size="small"
-                                        sx={{
-                                            px: 1.2,
-                                            mb: 1
-                                        }}
-                                    >
-                                        {/* 修改快捷键 */}
-                                        {t('settings.shortcuts.edit')}
-                                    </Button>
-                                )}
-                            </Stack>
-                            {browserType === 'firefox' && (
-                                <Popover
-                                    open={Boolean(firefoxGuideAnchor)}
-                                    anchorEl={firefoxGuideAnchor}
-                                    onClose={() => setFirefoxGuideAnchor(null)}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'left',
+                                <IconButton
+                                    onClick={(event) => setShortcutGuideAnchor(event.currentTarget)}
+                                    size="small"
+                                    sx={{
+                                        mb: 1
                                     }}
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'left',
-                                    }}
+                                    color='inherit'
                                 >
-                                    <Box sx={{ p: 2, maxWidth: 280 }}>
-                                        <Typography variant="body2">
-                                            {t('settings.shortcuts.firefox_guide')}
+                                    <KeyboardIcon />
+                                </IconButton>
+                            </Stack>
+                            <Popover
+                                open={Boolean(shortcutGuideAnchor)}
+                                anchorEl={shortcutGuideAnchor}
+                                onClose={() => setShortcutGuideAnchor(null)}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                            >
+                                <Box sx={{ p: 2, maxWidth: 320 }}>
+                                    <Typography variant="body2" gutterBottom>
+                                        {t('settings.shortcuts.guide')}
+                                    </Typography>
+
+                                    {browserType === 'firefox' && (
+                                        <Typography variant="body2" gutterBottom>
+                                            {t('settings.shortcuts.guide_firefox')}
                                         </Typography>
+                                    )}
+
+                                    <Box sx={{
+                                        mt: 2,
+                                        p: 1,
+                                        backgroundColor: 'text.secondary',
+                                        color: 'background.paper',
+                                        borderRadius: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 1
+                                    }}>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.8rem',
+                                                wordBreak: 'break-all'
+                                            }}
+                                        >
+                                            {browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`}
+                                        </Typography>
+                                        <IconButton
+                                            size="small"
+                                            onClick={handleCopyShortcutUrl}
+                                            sx={{ flexShrink: 0 }}
+                                            color='inherit'
+                                        >
+                                            <ContentCopyIcon fontSize="small" />
+                                        </IconButton>
                                     </Box>
-                                </Popover>
-                            )}
+                                </Box>
+                            </Popover>
                             <Alert
                                 icon={<InfoIcon />}
                                 severity="info"

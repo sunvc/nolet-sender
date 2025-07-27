@@ -11,8 +11,7 @@ export default defineConfig({
       'contextMenus',
       'activeTab',
       'notifications',
-      'clipboardRead', // Firefox 不支持 clipboardRead 权限
-      'tabs'
+      'clipboardRead' // Firefox 不支持 clipboardRead 权限
     ],
     host_permissions: [
       'https://*/*',

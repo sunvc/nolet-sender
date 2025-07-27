@@ -61,9 +61,9 @@
         },
         "shortcuts": {
             "title": "Shortcuts",
-            "edit": "Edit Shortcuts",
             "open_window": "Open push window: {{key}}",
-            "firefox_guide": "Firefox doesn't support direct navigation. Please manually open address bar and enter: about:addons → gear icon → Manage Extension Shortcuts; Shortcuts only work when Firefox is focused"
+            "guide": "Due to browser policy restrictions, the extension cannot open the shortcut settings page directly. Please copy and paste the following address into the address bar to set up your shortcuts.",
+            "guide_firefox": "For Firefox, navigate to gear icon → Manage Extension Shortcuts; Shortcuts only work when the browser is focused."
         },
         "sound": {
             "title": "Sound Settings",

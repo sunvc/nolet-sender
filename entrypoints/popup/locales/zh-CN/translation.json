@@ -61,9 +61,9 @@
         },
         "shortcuts": {
             "title": "快捷键",
-            "edit": "修改快捷键",
             "open_window": "打开推送窗口: {{key}}",
-            "firefox_guide": "Firefox 不支持直接跳转，请手动打开地址栏输入：about:addons → 设置齿轮图标 → 管理扩展快捷键; 快捷键仅在 Firefox 聚焦时生效"
+            "guide": "由于浏览器政策限制，扩展暂时无法取得权限跳转到快捷键设置页面。请手动在地址栏输入以下地址进行设置。",
+            "guide_firefox": "对于 Firefox，导航到 设置齿轮图标 → 管理扩展快捷键；快捷键仅在浏览器聚焦时生效"
         },
         "sound": {
             "title": "铃声设置",

@@ -61,9 +61,9 @@
         },
         "shortcuts": {
             "title": "快捷鍵",
-            "edit": "修改快捷鍵",
             "open_window": "開啟訊息視窗: {{key}}",
-            "firefox_guide": "Firefox 不支援直接跳轉，請手動開啟地址列輸入：about:addons → 設定齒輪圖示 → 管理擴充套件快速鍵; 快速鍵僅在 Firefox 聚焦時生效"
+            "guide": "由於瀏覽器政策限制，擴展暫時無法取得權限跳轉到快捷鍵設置頁面。請手動在地址列輸入以下地址進行設置。",
+            "guide_firefox": "對於 Firefox，導航到 設定齒輪圖示 → 管理擴充套件快速鍵；快速鍵僅在瀏覽器聚焦時生效。"
         },
         "sound": {
             "title": "鈴聲設定",
