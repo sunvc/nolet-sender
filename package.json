@@ -2,7 +2,7 @@
   "name": "Bark Sender",
   "description": "A desktop browser extension that pushes text from webpages or clipboard to iOS devices using the Bark app.",
   "private": true,
-  "version": "0.1.4",
+  "version": "0.1.5",
   "type": "module",
   "scripts": {
     "dev": "wxt",
