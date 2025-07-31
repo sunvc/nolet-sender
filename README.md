@@ -1,8 +1,34 @@
-# bark-sender
+# Bark Sender
+
+### Quick Install | 快速上手
+Just click the badge below to install it from your browser's extension store!
+ 
+点击下方 对应浏览器的徽标 即可跳转至的扩展商店进行安装！
+
+<table>
+  <tr>
+    <td align="left">
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">
+        <img src="./docs/assets/badge-fx.png" alt="Firefox" height="75">
+      </a><br>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">For Mozilla Firefox</a>
+    </td>
+    <td align="left">
+      <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">
+        <img src="./docs/assets/badge-cr.png" alt="Chrome" height="75">
+      </a><br>
+      <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">For Google Chrome</a>
+    </td>
+  </tr>
+</table>
+
+---
 
 [🇺🇸 English](#english-description) | [🇨🇳 中文说明](#中文说明)
 
 ## English Description
+
+**Click the badges above to install the extension from your preferred store.**
 
 Bark Sender is a browser extension that allows you to quickly push selected text from a webpage or clipboard content to any iOS device with the [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) installed.
 
@@ -51,6 +77,8 @@ The final extension packages will be generated at:
 ---
 
 ## 中文说明
+
+**点击上方徽标从对应应用商店安装扩展。**
 
 Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 PC 剪贴板中的文本，快速推送到安装了 [ Bark App ](https://apps.apple.com/app/bark-custom-notifications/id1403753865) 的 iOS 设备上。
 
