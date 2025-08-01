@@ -1,17 +1,18 @@
-import { PushResponse } from '../types';
+import { PushResponse, Device } from '../types';
 import { getAppSettings } from './settings';
 import { recordPushHistory } from './database';
 import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from '../../shared/push-service';
 
 /**
  * 发送推送消息 - 通过background script
- * @param apiURL 设备API URL
+ * @param device 设备信息 (包含 apiURL, alias, authorization)
  * @param message 消息内容
- * @param deviceName 设备名称
  * @param sound 铃声
  * @param uuid 唯一标识符
+ * @param title 标题
+ * @param url 链接
  */
-export async function sendPushMessage(apiURL: string, message: string, deviceName?: string, sound?: string, uuid?: string): Promise<PushResponse> {
+export async function sendPushMessage(device: Device, message: string, sound?: string, uuid?: string, title?: string, url?: string): Promise<PushResponse> {
     let response: PushResponse;
     let method: 'GET' | 'POST' = 'GET';
     let isEncrypted = false;
@@ -25,10 +26,13 @@ export async function sendPushMessage(apiURL: string, message: string, deviceNam
         const pushUuid = uuid || generateUUID();
 
         const pushParams: PushParams = {
-            apiURL,
+            apiURL: device.apiURL,
             message,
             sound: sound || settings.sound,
-            uuid: pushUuid
+            uuid: pushUuid,
+            ...(title && { title }), // 标题 (可选)
+            ...(url && { url }), // 链接 (可选)
+            ...(device.authorization && { authorization: device.authorization }) // 认证信息 (可选)
         };
 
         // 根据是否启用加密选择发送方式
@@ -45,48 +49,56 @@ export async function sendPushMessage(apiURL: string, message: string, deviceNam
         parameters = getRequestParameters(pushParams, isEncrypted);
 
         // 记录推送历史
-        if (deviceName) {
-            await recordPushHistory(
-                message,
-                apiURL,
-                deviceName,
-                response,
-                method,
-                {
-                    sound: sound || settings.sound,
-                    isEncrypted,
-                    parameters,
-                    uuid: pushUuid // 传递UUID给历史记录
-                }
-            );
-        }
+        await recordPushHistory(
+            message,
+            device.apiURL,
+            device.alias,
+            response,
+            method,
+            {
+                title,
+                sound: sound || settings.sound,
+                url,
+                isEncrypted,
+                uuid: pushUuid,
+                parameters,
+                authorization: device.authorization // 添加authorization到历史记录
+            }
+        );
 
         return response;
     } catch (error) {
         console.error('发送推送失败:', error);
 
         // 记录失败的推送历史
-        if (deviceName) {
+        if (device) {
             const errorResponse = {
                 code: -1,
-                message: error instanceof Error ? error.message : '未知错误',
+                // message: error instanceof Error ? error.message : '未知错误',
+                message: error instanceof Error ? error.message : 'common.error_unknown',
                 timestamp: Date.now()
             };
 
+            // 记录推送历史（即使失败）
             try {
                 await recordPushHistory(
                     message,
-                    apiURL,
-                    deviceName,
+                    device.apiURL,
+                    device.alias,
                     errorResponse,
                     method,
                     {
+                        title,
+                        sound,
+                        url,
                         isEncrypted,
-                        parameters
+                        uuid: uuid || generateUUID(),
+                        parameters: [],
+                        authorization: device.authorization // 添加authorization到历史记录
                     }
                 );
-            } catch (dbError) {
-                console.error('记录历史失败:', dbError);
+            } catch (recordError) {
+                console.error('记录失败历史时出错:', recordError);
             }
         }
 
@@ -121,16 +133,22 @@ async function sendPushDirectly(params: PushParams, encryptionConfig?: Encryptio
                 message.encryptionConfig = encryptionConfig;
             }
 
+            if (params.authorization) {
+                message.authorization = params.authorization;
+            }
+
             const response = await sendMessageToBackground(message);
 
             if (response.success) {
                 return response.data;
             } else {
-                throw new Error(response.error || '未知错误');
+                // throw new Error(response.error || '未知错误');
+                throw new Error(response.error || 'common.error_unknown');
             }
         } catch (bgError) {
             console.error('Background script请求也失败:', bgError);
-            throw new Error('网络请求失败，请检查网络连接和API地址');
+            // throw new Error('网络请求失败，请检查网络连接和API地址');
+            throw new Error('utils.api.network_failed');
         }
     }
 }
@@ -142,7 +160,8 @@ async function sendMessageToBackground(message: any): Promise<any> {
         const runtime = (window as any).chrome?.runtime || (window as any).browser?.runtime;
 
         if (!runtime) {
-            reject(new Error('扩展运行时不可用'));
+            // reject(new Error('扩展运行时不可用'));
+            reject(new Error('utils.api.runtime_unavailable'));
             return;
         }
 
@@ -175,40 +194,21 @@ export function formatApiURL(url: string): string {
 
 // 验证API URL格式
 export function validateApiURL(url: string): boolean {
-    try {
-        // 首先格式化URL
-        const formattedUrl = formatApiURL(url);
-        const urlObj = new URL(formattedUrl);
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl) return false;
 
-        // 检查协议是否为http或https
-        if (!['http:', 'https:'].includes(urlObj.protocol)) {
-            return false;
-        }
+    const apiUrlPattern = /^(https?:\/\/)?([a-zA-Z0-9.-]+(\.[a-zA-Z]{2,})?|localhost|(\d{1,3}\.){3}\d{1,3})(:\d+)?\/[a-zA-Z0-9_-]+\/?.*$/;
 
-        // 检查是否有hostname
-        if (!urlObj.hostname) {
-            return false;
-        }
-
-        // 检查路径是否有内容（除了斜杠）
-        if (urlObj.pathname === '/') {
-            return false;
-        }
-
-        return true;
-    } catch {
+    // 检查基本格式
+    if (!apiUrlPattern.test(trimmedUrl)) {
         return false;
     }
-}
 
-// 生成预览URL
-export function generatePreviewURL(url: string): string {
-    if (!url.trim()) return '';
-
-    try {
-        const formattedUrl = formatApiURL(url);
-        return `${formattedUrl}[消息内容]?autoCopy=1&copy=[消息内容]`;
-    } catch {
-        return '无效的URL格式';
+    // 检查是否包含双斜杠 (除了协议后的双斜杠)
+    const withoutProtocol = trimmedUrl.replace(/^https?:\/\//, '');
+    if (withoutProtocol.includes('//')) {
+        return false;
     }
-} 
+
+    return true;
+}

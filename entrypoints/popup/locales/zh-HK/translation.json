@@ -17,7 +17,12 @@
         "other": "其他",
         "page": "頁",
         "previous_page": "上一頁",
-        "next_page": "下一頁"
+        "next_page": "下一頁",
+        "operation_failed": "操作失敗：{{message}}",
+        "add_device_failed": "新增裝置失敗：{{message}}",
+        "edit_device_failed": "編輯裝置失敗：{{message}}",
+        "delete_device_failed": "刪除裝置失敗：{{message}}",
+        "set_default_device_failed": "設定預設裝置失敗：{{message}}"
     },
     "nav": {
         "send": "發送訊息",
@@ -37,10 +42,18 @@
         "preview_url": "預覽網址：{{url}}",
         "test_message": "測試訊息",
         "no_devices": "暫時沒有裝置，請按『新增裝置』按鈕加入。",
+        "api_url_invalid": "API URL 格式不正確，請檢查格式",
         "common_names": {
             "iphone": "iPhone",
             "ipad": "iPad",
             "mac": "Mac"
+        },
+        "basic_auth": {
+            "title": "Basic Auth",
+            "username": "使用者名稱",
+            "username_placeholder": "輸入使用者名稱",
+            "password": "密碼",
+            "password_placeholder": "輸入密碼"
         }
     },
     "settings": {
@@ -64,6 +77,9 @@
             "open_window": "開啟訊息視窗: {{key}}",
             "guide": "由於瀏覽器政策限制，擴展暫時無法取得權限跳轉到快捷鍵設置頁面。請手動在地址列輸入以下地址進行設置。",
             "guide_firefox": "對於 Firefox，導航到 設定齒輪圖示 → 管理擴充套件快速鍵；快速鍵僅在瀏覽器聚焦時生效。"
+        },
+        "features": {
+            "title": "功能開關"
         },
         "sound": {
             "title": "鈴聲設定",
@@ -179,7 +195,8 @@
             "success": "已請求撤回",
             "no_record": "沒有可撤回的推送記錄",
             "record_not_found": "未找到對應的推送記錄",
-            "failed": "撤回失敗: {{message}}"
+            "failed": "撤回失敗: {{message}}",
+            "operation_failed": "撤回操作失敗"
         },
         "errors": {
             "no_device": "請選擇一個裝置",
@@ -245,6 +262,12 @@
             "export_failed": "匯出失敗",
             "import_failed": "匯入失敗",
             "import_success_message": "匯入完成：成功 {{success}} 筆，略過 {{skipped}} 筆，失敗 {{errors}} 筆"
+        }
+    },
+    "utils": {
+        "api": {
+            "network_failed": "網路請求失敗，請檢查網路連接和API地址",
+            "runtime_unavailable": "擴充套件執行時不可用"
         }
     }
 }

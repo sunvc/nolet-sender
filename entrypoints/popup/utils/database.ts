@@ -21,6 +21,12 @@ export interface HistoryRecord {
     isEncrypted: boolean; // 是否加密
     createdAt: string; // 创建时间字符串 YYYY-MM-DD HH:mm:ss
     status?: string | null; // 状态标记: null=正常, 'recalled'=已撤回
+    authorization?: {
+        type: 'basic'; // 认证类型
+        user: string; // 用户名 (用于显示)
+        pwd: string; // 密码 (用于显示)
+        value: string; // Basic <凭证> (用于请求)
+    }; // Basic Auth (可选)
 }
 
 // 数据库结构定义
@@ -271,6 +277,12 @@ export async function recordPushHistory(
         isEncrypted?: boolean;
         parameters?: any[];
         uuid?: string;
+        authorization?: {
+            type: 'basic';
+            user: string;
+            pwd: string;
+            value: string;
+        };
     } = {}
 ): Promise<HistoryRecord> {
     const requestTimestamp = Date.now();
@@ -292,5 +304,6 @@ export async function recordPushHistory(
         sound: options.sound,
         url: options.url,
         isEncrypted: options.isEncrypted || false,
+        authorization: options.authorization,
     });
 }

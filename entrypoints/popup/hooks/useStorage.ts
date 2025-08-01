@@ -26,8 +26,12 @@ export function useDevices() {
     };
 
     // 添加设备
-    const handleAddDevice = async (alias: string, apiURL: string): Promise<Device> => {
-        const newDevice = await addDevice(alias, apiURL);
+    const handleAddDevice = async (
+        alias: string,
+        apiURL: string,
+        authorization?: { type: 'basic'; user: string; pwd: string; value: string; }):
+        Promise<Device> => {
+        const newDevice = await addDevice(alias, apiURL, authorization);
         setDevices(prev => [...prev, newDevice]);
 
         // 如果是第一个设备，设为默认设备
@@ -57,9 +61,9 @@ export function useDevices() {
     };
 
     // 编辑设备
-    const handleEditDevice = async (oldDeviceId: string, alias: string, apiURL: string): Promise<Device> => {
+    const handleEditDevice = async (oldDeviceId: string, alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }): Promise<Device> => {
         const isDefault = defaultDeviceId === oldDeviceId;
-        const newDevice = await addDevice(alias, apiURL);
+        const newDevice = await addDevice(alias, apiURL, authorization);
 
         // 更新设备列表
         setDevices(prev => {
@@ -116,7 +120,8 @@ export function useAppSettings() {
             mode: 'CBC',
             padding: 'pkcs7',
             key: ''
-        }
+        },
+        enableBasicAuth: false
     });
     const [loading, setLoading] = useState(true);
 

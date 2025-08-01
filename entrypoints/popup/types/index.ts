@@ -5,6 +5,12 @@ export interface Device {
     apiURL: string; // API URL
     createdAt: string; // 创建时间 YYYY-MM-DD HH:mm:ss
     timestamp: number; // 时间戳
+    authorization?: {
+        type: 'basic';
+        user: string;
+        pwd: string;
+        value: string; // `basic btoa(${username}:${password})`
+    };
 }
 
 // 推送响应接口
@@ -51,6 +57,7 @@ export interface AppSettings {
     enableEncryption: boolean;
     encryptionConfig?: EncryptionConfig;
     sound?: string;
+    enableBasicAuth: boolean;
 }
 
 // 平台类型

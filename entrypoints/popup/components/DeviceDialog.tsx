@@ -10,12 +10,16 @@ import {
     Typography,
     Chip,
     Box,
-    Slide
+    Slide,
+    Collapse,
+    Card,
+    Divider
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import { validateApiURL } from '../utils/api';
+import { useAppContext } from '../contexts/AppContext';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -47,7 +51,7 @@ const truncateAfterFourthSlash = (url: string): string => {
 interface DeviceDialogProps {
     open: boolean;
     onClose: () => void;
-    onSubmit: (alias: string, apiURL: string) => Promise<void>;
+    onSubmit: (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string }) => Promise<void>;
     editDevice?: Device;
     title?: string;
 }
@@ -62,54 +66,40 @@ export default function DeviceDialog({
     const { t } = useTranslation();
     const [deviceAlias, setDeviceAlias] = useState('');
     const [deviceApiURL, setDeviceApiURL] = useState('');
+    const [basicAuthUsername, setBasicAuthUsername] = useState('');
+    const [basicAuthPassword, setBasicAuthPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-    const [previewURL, setPreviewURL] = useState('');
+    const [isBasicAuthCollapsed, setIsBasicAuthCollapsed] = useState(true);
+    const { appSettings } = useAppContext();
+
+    // 获取 enableBasicAuth 功能开关设置
+    const enableBasicAuth = appSettings?.enableBasicAuth || false;
 
     // 当编辑设备时，填充表单
     useEffect(() => {
         if (editDevice) {
             setDeviceAlias(editDevice.alias);
             setDeviceApiURL(editDevice.apiURL);
+            setBasicAuthUsername(editDevice.authorization?.user || '');
+            setBasicAuthPassword(editDevice.authorization?.pwd || '');
+            // 如果有认证信息，自动展开基本认证区域
+            setIsBasicAuthCollapsed(!editDevice.authorization);
         } else {
             setDeviceAlias('');
             setDeviceApiURL('');
+            setBasicAuthUsername('');
+            setBasicAuthPassword('');
+            setIsBasicAuthCollapsed(true);
         }
         setError('');
     }, [editDevice, open]);
 
-    // 当API URL变化时更新预览URL
-    useEffect(() => {
-        if (deviceApiURL.trim()) {
-            try {
-                const truncatedURL = truncateAfterFourthSlash(deviceApiURL.trim());
-                const formattedURL = validateApiURL(truncatedURL)
-                    ? truncatedURL
-                    : '';
-                setPreviewURL(formattedURL ? `${formattedURL}${t('device.test_message')}` : '');
-            } catch (error) {
-                setPreviewURL('');
-            }
-        } else {
-            setPreviewURL('');
-        }
-    }, [deviceApiURL]);
-
     const handleSubmit = async () => {
-        if (!deviceAlias.trim()) {
-            setError('请输入设备别名');
-            return;
-        }
-
-        if (!deviceApiURL.trim()) {
-            setError('请输入API URL');
-            return;
-        }
-
         const truncatedURL = truncateAfterFourthSlash(deviceApiURL.trim());
 
         if (!validateApiURL(truncatedURL)) {
-            setError('API URL格式不正确，请检查格式');
+            setError(t('device.api_url_invalid'));
             return;
         }
 
@@ -117,10 +107,23 @@ export default function DeviceDialog({
         setError('');
 
         try {
-            await onSubmit(deviceAlias.trim(), truncatedURL);
+
+            let authorization;
+            if (basicAuthUsername.trim() && basicAuthPassword.trim()) {
+                const credentials = btoa(`${basicAuthUsername.trim()}:${basicAuthPassword.trim()}`);
+                authorization = {
+                    type: 'basic' as const,
+                    user: basicAuthUsername.trim(),
+                    pwd: basicAuthPassword.trim(),
+                    value: `Basic ${credentials}`
+                };
+            }
+            // truncatedURL 是截取后的URL, 格式为 `https://api.day.app/<device_key>/`
+            await onSubmit(deviceAlias.trim(), truncatedURL, authorization);
             onClose();
         } catch (error) {
-            setError(`操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // setError(`操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            setError(t('common.operation_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
         } finally {
             setLoading(false);
         }
@@ -144,29 +147,19 @@ export default function DeviceDialog({
                         label={t('device.api_url')}
                         placeholder={t('device.api_url_placeholder')}
                         value={deviceApiURL}
-                        onChange={(e) => setDeviceApiURL(e.target.value)}
+                        onChange={(e) => {
+                            setDeviceApiURL(e.target.value);
+                            setError('');
+                        }}
                         variant="outlined"
                         fullWidth
                         multiline
                         rows={2}
-                        error={!!error && error.includes('API URL')}
+                        error={!!error && error === t('device.api_url_invalid')}
                         helperText={
-                            error && error.includes('API URL')
+                            error === t('device.api_url_invalid')
                                 ? error
-                                : previewURL
-                                    ? <Typography
-                                        variant="caption"
-                                        component="span"
-                                        sx={{
-                                            display: 'block',
-                                            wordBreak: 'break-all',
-                                            whiteSpace: 'pre-wrap'
-                                        }}
-                                    >
-                                        {/* 预览地址: {{url}} */}
-                                        {t('device.preview_url', { url: previewURL })}
-                                    </Typography>
-                                    : t('device.api_url_helper')
+                                : t('device.api_url_helper')
                         }
                     />
 
@@ -178,12 +171,7 @@ export default function DeviceDialog({
                             onChange={(e) => setDeviceAlias(e.target.value)}
                             variant="outlined"
                             fullWidth
-                            error={!!error && error.includes('设备别名')}
-                            helperText={
-                                error && error.includes('设备别名')
-                                    ? error
-                                    : t('device.name_helper')
-                            }
+                            helperText={t('device.name_helper')}
                         />
                         {!editDevice && (
                             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
@@ -201,11 +189,62 @@ export default function DeviceDialog({
                         )}
                     </Box>
 
-                    {error && !error.includes('API URL') && !error.includes('设备别名') && (
+                    {error && error !== t('device.api_url_invalid') && (
                         <Typography color="error" variant="body2">
                             {error}
                         </Typography>
                     )}
+
+                    {/* Basic Auth */}
+                    {/* Basic Auth 认证区域 */}
+                    <Box sx={{ display: enableBasicAuth ? 'block' : 'none' }}>
+                        <Divider sx={{ mb: .5, px: 1.5, userSelect: 'none' }} >
+                            <Box sx={{
+                                fontSize: '0.625rem', cursor: 'pointer',
+                            }} onClick={() => setIsBasicAuthCollapsed(!isBasicAuthCollapsed)}>
+                                {t('device.basic_auth.title')}
+                            </Box>
+                        </Divider>
+                        <Collapse in={!isBasicAuthCollapsed}>
+                            <Card>
+                                <Stack direction="column" gap={1.5} sx={{ px: 2, py: 1.5 }}>
+                                    <TextField
+                                        // label="用户名"
+                                        // placeholder="输入用户名"
+                                        label={t('device.basic_auth.username')}
+                                        placeholder={t('device.basic_auth.username_placeholder')}
+                                        value={basicAuthUsername}
+                                        onChange={(e) => setBasicAuthUsername(e.target.value)}
+                                        variant="standard"
+                                        size="small"
+                                        fullWidth
+                                        slotProps={{
+                                            inputLabel: {
+                                                shrink: true  // 禁用浮动
+                                            }
+                                        }}
+                                    />
+                                    <TextField
+                                        // label="密码"
+                                        // placeholder="输入密码"
+                                        label={t('device.basic_auth.password')}
+                                        placeholder={t('device.basic_auth.password_placeholder')}
+                                        type="text"
+                                        value={basicAuthPassword}
+                                        onChange={(e) => setBasicAuthPassword(e.target.value)}
+                                        variant="standard"
+                                        size="small"
+                                        fullWidth
+                                        slotProps={{
+                                            inputLabel: {
+                                                shrink: true  // 禁用浮动
+                                            }
+                                        }}
+                                    />
+                                </Stack>
+                            </Card>
+                        </Collapse>
+                    </Box>
                 </Stack>
             </DialogContent>
             <DialogActions>
@@ -219,6 +258,6 @@ export default function DeviceDialog({
                     {loading ? t('common.processing') : editDevice ? t('common.save') : t('common.add')}
                 </Button>
             </DialogActions>
-        </Dialog>
+        </Dialog >
     );
 } 

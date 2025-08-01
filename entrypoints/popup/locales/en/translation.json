@@ -17,7 +17,12 @@
         "other": "Other",
         "page": "Page",
         "previous_page": "Previous Page",
-        "next_page": "Next Page"
+        "next_page": "Next Page",
+        "operation_failed": "Operation failed: {{message}}",
+        "add_device_failed": "Failed to add device: {{message}}",
+        "edit_device_failed": "Failed to edit device: {{message}}",
+        "delete_device_failed": "Failed to delete device: {{message}}",
+        "set_default_device_failed": "Failed to set default device: {{message}}"
     },
     "nav": {
         "send": "Push",
@@ -37,10 +42,18 @@
         "preview_url": "Preview URL: {{url}}",
         "test_message": "Test Message",
         "no_devices": "No devices yet. Click the \"Add Device\" button to add one.",
+        "api_url_invalid": "Invalid API URL, please check the format",
         "common_names": {
             "iphone": "iPhone",
             "ipad": "iPad",
             "mac": "Mac"
+        },
+        "basic_auth": {
+            "title": "Basic Auth",
+            "username": "Username",
+            "username_placeholder": "Enter username",
+            "password": "Password",
+            "password_placeholder": "Enter password"
         }
     },
     "settings": {
@@ -64,6 +77,9 @@
             "open_window": "Open push window: {{key}}",
             "guide": "Due to browser policy restrictions, the extension cannot open the shortcut settings page directly. Please copy and paste the following address into the address bar to set up your shortcuts.",
             "guide_firefox": "For Firefox, navigate to gear icon → Manage Extension Shortcuts; Shortcuts only work when the browser is focused."
+        },
+        "features": {
+            "title": "Feature Toggles"
         },
         "sound": {
             "title": "Sound Settings",
@@ -179,7 +195,8 @@
             "success": "Requested to recall",
             "no_record": "No message to recall",
             "record_not_found": "Push record not found",
-            "failed": "Recall failed: {{message}}"
+            "failed": "Recall failed: {{message}}",
+            "operation_failed": "Recall operation failed"
         },
         "errors": {
             "no_device": "Please select a device",
@@ -245,6 +262,12 @@
             "export_failed": "Export failed",
             "import_failed": "Import failed",
             "import_success_message": "Import complete: {{success}} succeeded, {{skipped}} skipped, {{errors}} failed"
+        }
+    },
+    "utils": {
+        "api": {
+            "network_failed": "Network request failed, please check network connection and API address",
+            "runtime_unavailable": "Extension runtime unavailable"
         }
     }
 }

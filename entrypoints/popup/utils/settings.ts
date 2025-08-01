@@ -16,7 +16,8 @@ const DEFAULT_SETTINGS: AppSettings = {
         padding: 'pkcs7',
         key: ''
     },
-    sound: undefined // 推送铃声，默认不设置
+    sound: undefined, // 推送铃声，默认不设置
+    enableBasicAuth: false // Basic Auth，默认关闭
 };
 
 // 获取浏览器存储API

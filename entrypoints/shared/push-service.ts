@@ -10,6 +10,12 @@ export interface PushParams {
     url?: string;
     title?: string;
     uuid?: string; // 作为请求参数里的 id 作为唯一标识, 这个 id 后续修改撤回功能会用到
+    authorization?: {
+        type: 'basic';
+        user: string;
+        pwd: string;
+        value: string; // Basic <凭证>
+    };
 }
 
 /**
@@ -125,7 +131,7 @@ export async function encryptAESCBC(plaintext: string, keyStr: string, ivStr: st
  * 发送明文推送消息 (API v1)
  */
 export async function sendPlainPush(params: PushParams): Promise<PushResponse> {
-    const { apiURL, message, sound, url, title, uuid } = params;
+    const { apiURL, message, sound, url, title, uuid, authorization } = params;
 
     // 如果没有提供UUID，则生成一个（用于请求参数）
     const pushUuid = uuid || generateUUID();
@@ -154,10 +160,16 @@ export async function sendPlainPush(params: PushParams): Promise<PushResponse> {
 
     console.debug('发送明文请求到:', requestUrl);
 
+    const headers: Record<string, string> = {};
+    if (authorization && authorization.value) {
+        headers['Authorization'] = authorization.value;
+    }
+
     const response = await fetch(requestUrl, {
         method: 'GET',
         mode: 'cors',
-        cache: 'no-cache'
+        cache: 'no-cache',
+        ...(Object.keys(headers).length > 0 && { headers })
     });
 
     if (!response.ok) {
@@ -174,7 +186,7 @@ export async function sendPlainPush(params: PushParams): Promise<PushResponse> {
  * 发送加密推送消息 (API v1)
  */
 export async function sendEncryptedPush(params: EncryptedPushParams): Promise<PushResponse> {
-    const { apiURL, message, sound, url, title, encryptionConfig, uuid } = params;
+    const { apiURL, message, sound, url, title, encryptionConfig, uuid, authorization } = params;
 
     const pushUuid = uuid || generateUUID();
 
@@ -207,14 +219,19 @@ export async function sendEncryptedPush(params: EncryptedPushParams): Promise<Pu
     formData.append('ciphertext', ciphertext);
     formData.append('id', pushUuid);
 
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/x-www-form-urlencoded' // 表单数据 API v1 的(加密时)请求头, v2使用的是 application/json, bark-server 区别 API v1 和 v2 是根据 application/json
+    };
+    if (authorization && authorization.value) {
+        headers['Authorization'] = authorization.value;
+    }
+
     // 发送加密请求
     const response = await fetch(apiURL, {
         method: 'POST',
         mode: 'cors',
         cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
-        },
+        headers,
         body: formData.toString()
     });
 

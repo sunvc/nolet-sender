@@ -44,8 +44,8 @@ const Transition = forwardRef(function Transition(
 
 interface SendPushProps {
     devices: Device[];
-    defaultDevice?: Device | null;
-    onAddDevice: (alias: string, apiURL: string) => Promise<Device>;
+    defaultDevice: Device | null;
+    onAddDevice: (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => Promise<Device>;
 }
 
 export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPushProps) {
@@ -176,7 +176,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice.apiURL, shortcutClipboardText.trim(), selectedDevice.alias, undefined, pushUuid);
+            const response = await sendPushMessage(selectedDevice, shortcutClipboardText.trim(), undefined, pushUuid);
 
             if (response.code === 200) {
                 setShortcutDialogOpen(false);
@@ -191,9 +191,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             }
         } catch (error) {
             /* 发送失败: {{message}} */
+            const errorMessage = error instanceof Error ? error.message : t('common.error_unknown'); // 未知错误
+            const finalMessage = errorMessage.startsWith('utils.api.') ? t(errorMessage) : errorMessage;
             setResult({
                 type: 'error',
-                message: t('push.errors.send_failed', { message: error instanceof Error ? error.message : '未知错误' })
+                message: t('push.errors.send_failed', { message: finalMessage })
             });
         } finally {
             setLoading(false);
@@ -239,10 +241,16 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const recallUrl = `${historyRecord.apiUrl}?id=${encodeURIComponent(lastPushUuid)}&delete=1`;
             console.debug('发送撤回请求到:', recallUrl);
 
+            const headers: Record<string, string> = {};
+            if (historyRecord.authorization && historyRecord.authorization.value) {
+                headers['Authorization'] = historyRecord.authorization.value;
+            }
+
             const response = await fetch(recallUrl, {
                 method: 'GET',
                 mode: 'cors',
-                cache: 'no-cache'
+                cache: 'no-cache',
+                ...(Object.keys(headers).length > 0 && { headers })
             });
 
             if (!response.ok) {
@@ -262,7 +270,8 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 setResult({ type: 'error', message: t('push.recall.failed', { message: result.message || '未知错误' }) });
             }
         } catch (error) {
-            console.error('撤回操作失败:', error);
+            // console.error('撤回操作失败:', error);
+            console.error(t('push.recall.operation_failed'), error);
             setResult({
                 type: 'error',
                 message: t('push.recall.failed', { message: error instanceof Error ? error.message : '网络错误' })
@@ -293,7 +302,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice.apiURL, message.trim(), selectedDevice.alias, undefined, pushUuid);
+            const response = await sendPushMessage(selectedDevice, message.trim(), undefined, pushUuid);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -302,13 +311,17 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 clearDraftMessage(); // 清除暂存
             } else {
                 /* 发送失败: {{message}} */
-                setResult({ type: 'error', message: t('push.errors.send_failed', { message: response.message }) });
+                const errorMessage = response.message || t('common.error_unknown');
+                const finalMessage = errorMessage.startsWith('utils.api.') ? t(errorMessage) : errorMessage;
+                setResult({ type: 'error', message: t('push.errors.send_failed', { message: finalMessage }) });
             }
         } catch (error) {
             /* 发送失败: {{message}} */
+            const errorMessage = error instanceof Error ? error.message : t('common.error_unknown'); // 未知错误
+            const finalMessage = errorMessage.startsWith('utils.api.') ? t(errorMessage) : errorMessage;
             setResult({
                 type: 'error',
-                message: t('push.errors.send_failed', { message: error instanceof Error ? error.message : '未知错误' })
+                message: t('push.errors.send_failed', { message: finalMessage })
             });
         } finally {
             setLoading(false);
@@ -337,7 +350,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice.apiURL, clipboardText.trim(), selectedDevice.alias, undefined, pushUuid);
+            const response = await sendPushMessage(selectedDevice, clipboardText.trim(), undefined, pushUuid);
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -346,13 +359,17 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 localStorage.setItem('bark-sender-draft-message', clipboardText.trim()); // 更新暂存内容为剪切板内容
             } else {
                 /* 发送失败: {{message}} */
-                setResult({ type: 'error', message: t('push.errors.send_failed', { message: response.message }) });
+                const errorMessage = response.message || t('common.error_unknown');
+                const finalMessage = errorMessage.startsWith('utils.api.') ? t(errorMessage) : errorMessage;
+                setResult({ type: 'error', message: t('push.errors.send_failed', { message: finalMessage }) });
             }
         } catch (error) {
             /* 发送剪切板失败: {{message}} */
+            const errorMessage = error instanceof Error ? error.message : t('common.error_unknown'); // 未知错误
+            const finalMessage = errorMessage.startsWith('utils.api.') ? t(errorMessage) : errorMessage;
             setResult({
                 type: 'error',
-                message: t('push.errors.clipboard_failed', { message: error instanceof Error ? error.message : '未知错误' })
+                message: t('push.errors.clipboard_failed', { message: finalMessage })
             });
         } finally {
             setClipboardLoading(false);
@@ -370,9 +387,9 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         }
     };
 
-    const handleAddDevice = async (alias: string, apiURL: string) => {
+    const handleAddDevice = async (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => {
         try {
-            const newDevice = await onAddDevice(alias, apiURL);
+            const newDevice = await onAddDevice(alias, apiURL, authorization);
             setSelectedDevice(newDevice);
             setDeviceDialogOpen(false);
         } catch (error) {

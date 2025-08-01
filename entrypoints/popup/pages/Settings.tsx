@@ -15,7 +15,8 @@ import {
     Switch,
     Link,
     Tooltip,
-    Popover
+    Popover,
+    LinearProgress
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -48,8 +49,8 @@ import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBar
 interface SettingsProps {
     devices: Device[];
     defaultDeviceId: string;
-    onAddDevice: (alias: string, apiURL: string) => Promise<Device>;
-    onEditDevice: (oldDeviceId: string, alias: string, apiURL: string) => Promise<Device>;
+    onAddDevice: (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => Promise<Device>;
+    onEditDevice: (oldDeviceId: string, alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => Promise<Device>;
     onRemoveDevice: (deviceId: string) => Promise<void>;
     onSetDefaultDevice: (deviceId: string) => Promise<void>;
     themeMode: ThemeMode;
@@ -102,6 +103,15 @@ export default function Settings({
         }
     };
 
+    // 处理 Basic Auth 开关切换
+    const handleBasicAuthToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('enableBasicAuth', enabled);
+        } catch (error) {
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
     // 处理加密开关切换
     const handleEncryptionToggle = async (enabled: boolean) => {
         try {
@@ -132,31 +142,37 @@ export default function Settings({
         }
     };
 
-    const handleAddDevice = async (alias: string, apiURL: string) => {
+    const handleAddDevice = async (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => {
         setLoading(true);
         setError('');
         try {
-            await onAddDevice(alias, apiURL);
+            await onAddDevice(alias, apiURL, authorization);
             onSettingsChange?.();
+            setDeviceDialogOpen(false);
+            setError('');
         } catch (error) {
-            setError(`添加设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // setError(`添加设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            setError(t('common.add_device_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
             throw error;
         } finally {
             setLoading(false);
         }
     };
 
-    const handleEditDevice = async (alias: string, apiURL: string) => {
+    const handleEditDevice = async (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => {
         if (!editingDevice) return;
 
         setLoading(true);
         setError('');
         try {
-            await onEditDevice(editingDevice.id, alias, apiURL);
+            await onEditDevice(editingDevice.id, alias, apiURL, authorization);
             setEditingDevice(undefined);
             onSettingsChange?.();
+            setDeviceDialogOpen(false);
+            setError('');
         } catch (error) {
-            setError(`编辑设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // setError(`编辑设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            setError(t('common.edit_device_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
             throw error;
         } finally {
             setLoading(false);
@@ -168,7 +184,8 @@ export default function Settings({
             await onRemoveDevice(deviceId);
             onSettingsChange?.();
         } catch (error) {
-            setError(`删除设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // setError(`删除设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            setError(t('common.delete_device_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
         }
     };
 
@@ -177,7 +194,8 @@ export default function Settings({
             await onSetDefaultDevice(deviceId);
             onSettingsChange?.();
         } catch (error) {
-            setError(`设置默认设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            // setError(`设置默认设备失败: ${error instanceof Error ? error.message : '未知错误'}`);
+            setError(t('common.set_default_device_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
         }
     };
 
@@ -200,6 +218,8 @@ export default function Settings({
                     minHeight: 'min-content' // 确保内容可以撑开
                 }}
             >
+                {/* 顶部加载中进度条 绝对定位 */}
+                {loading && <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 1000 }} />}
                 {/* 设备管理卡片 */}
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Stack spacing={3}>
@@ -435,6 +455,24 @@ export default function Settings({
                                     />
                                 }
                                 label={t('settings.context_menu.enable')}
+                                sx={{ userSelect: 'none' }}
+                            />
+                        </Box>
+
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 功能开关 */}
+                                {t('settings.features.title')}
+                            </Typography>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={appSettings?.enableBasicAuth || false}
+                                        onChange={(e) => handleBasicAuthToggle(e.target.checked)}
+                                    />
+                                }
+                                // Basic Auth
+                                label={t('device.basic_auth.title')}
                                 sx={{ userSelect: 'none' }}
                             />
                         </Box>

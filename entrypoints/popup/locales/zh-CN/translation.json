@@ -17,7 +17,12 @@
         "other": "其他",
         "page": "页",
         "previous_page": "上一页",
-        "next_page": "下一页"
+        "next_page": "下一页",
+        "operation_failed": "操作失败: {{message}}",
+        "add_device_failed": "添加设备失败: {{message}}",
+        "edit_device_failed": "编辑设备失败: {{message}}",
+        "delete_device_failed": "删除设备失败: {{message}}",
+        "set_default_device_failed": "设置默认设备失败: {{message}}"
     },
     "nav": {
         "send": "发起推送",
@@ -37,10 +42,18 @@
         "preview_url": "预览地址: {{url}}",
         "test_message": "测试消息",
         "no_devices": "暂无设备，请点击 \"添加设备\" 按钮添加一个设备。",
+        "api_url_invalid": "API URL 格式不正确，请检查格式",
         "common_names": {
             "iphone": "iPhone",
             "ipad": "iPad",
             "mac": "Mac"
+        },
+        "basic_auth": {
+            "title": "Basic Auth",
+            "username": "用户名",
+            "username_placeholder": "输入用户名",
+            "password": "密码",
+            "password_placeholder": "输入密码"
         }
     },
     "settings": {
@@ -64,6 +77,9 @@
             "open_window": "打开推送窗口: {{key}}",
             "guide": "由于浏览器政策限制，扩展暂时无法取得权限跳转到快捷键设置页面。请手动在地址栏输入以下地址进行设置。",
             "guide_firefox": "对于 Firefox，导航到 设置齿轮图标 → 管理扩展快捷键；快捷键仅在浏览器聚焦时生效"
+        },
+        "features": {
+            "title": "功能开关"
         },
         "sound": {
             "title": "铃声设置",
@@ -179,7 +195,8 @@
             "success": "已请求撤回",
             "no_record": "没有可撤回的推送记录",
             "record_not_found": "未找到对应的推送记录",
-            "failed": "撤回失败: {{message}}"
+            "failed": "撤回失败: {{message}}",
+            "operation_failed": "撤回操作失败"
         },
         "errors": {
             "no_device": "请选择一个设备",
@@ -245,6 +262,12 @@
             "export_failed": "导出失败",
             "import_failed": "导入失败",
             "import_success_message": "导入完成：成功 {{success}} 条，跳过 {{skipped}} 条，失败 {{errors}} 条"
+        }
+    },
+    "utils": {
+        "api": {
+            "network_failed": "网络请求失败，请检查网络连接和API地址",
+            "runtime_unavailable": "扩展运行时不可用"
         }
     }
 }

@@ -9,7 +9,7 @@ export default defineBackground(() => {
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -20,7 +20,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendEncryptedPush') {
-      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid)
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -181,9 +181,9 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
     try {
-      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid };
+      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid, ...(authorization && { authorization }) };
       const response = await sendPush(pushParams);
       return response; // 返回PushResponse
     } catch (error) {
@@ -194,9 +194,9 @@ export default defineBackground(() => {
   }
 
   // 处理加密推送请求
-  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string) {
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
     try {
-      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid };
+      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid, ...(authorization && { authorization }) };
       const response = await sendPush(pushParams, encryptionConfig);
       return response; // 返回 PushResponse
     } catch (error) {
@@ -332,7 +332,8 @@ export default defineBackground(() => {
           sound: settings.sound,
           url,
           title,
-          uuid: pushUuid
+          uuid: pushUuid,
+          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization })
         };
 
         // 根据设置选择发送方式
@@ -378,7 +379,8 @@ export default defineBackground(() => {
           sound: settings.sound || undefined,
           url: url || undefined,
           isEncrypted: isEncrypted,
-          createdAt: createdAt
+          createdAt: createdAt,
+          authorization: defaultDevice.authorization
         };
 
         // 保存历史记录
@@ -434,7 +436,8 @@ export default defineBackground(() => {
             minute: '2-digit',
             second: '2-digit',
             hour12: false,
-          })
+          }),
+          authorization: defaultDevice.authorization
         };
 
         await saveHistoryRecord(historyRecord);

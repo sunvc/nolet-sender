@@ -72,7 +72,7 @@ export async function saveDevices(devices: Device[]): Promise<void> {
 }
 
 // 添加新设备
-export async function addDevice(alias: string, apiURL: string): Promise<Device> {
+export async function addDevice(alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }): Promise<Device> {
     const timestamp = Date.now();
     const date = new Date(timestamp);
 
@@ -90,7 +90,8 @@ export async function addDevice(alias: string, apiURL: string): Promise<Device> 
         alias,
         apiURL: formatApiURL(apiURL), // 使用格式化的URL
         createdAt,
-        timestamp
+        timestamp,
+        ...(authorization && { authorization }) // 如果提供了认证信息，则添加到设备中
     };
 
     const devices = await getDevices();
