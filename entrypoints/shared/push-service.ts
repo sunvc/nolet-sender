@@ -103,7 +103,7 @@ export async function encryptAESCBC(plaintext: string, keyStr: string, ivStr: st
 
     const cryptoKey = await crypto.subtle.importKey(
         'raw',
-        keyBytes,
+        new Uint8Array(keyBytes),
         { name: 'AES-CBC' },
         false,
         ['encrypt']
@@ -112,10 +112,10 @@ export async function encryptAESCBC(plaintext: string, keyStr: string, ivStr: st
     const encryptedBuffer = await crypto.subtle.encrypt(
         {
             name: 'AES-CBC',
-            iv: iv
+            iv: new Uint8Array(iv)
         },
         cryptoKey,
-        data
+        new Uint8Array(data)
     );
 
     return arrayBufferToBase64(encryptedBuffer);
