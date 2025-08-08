@@ -1,9 +1,9 @@
 # Bark Sender
 
 ### Quick Install | 快速上手
-Just click the badge below to install it from your browser's extension store!
+Just click the badge/ link below to install it from your browser's extension store!
  
-点击下方 对应浏览器的徽标 即可跳转至的扩展商店进行安装！
+点击下方 对应浏览器的 徽标/ 链接 即可跳转至的扩展商店进行安装！
 
 <table>
   <tr>
@@ -18,6 +18,9 @@ Just click the badge below to install it from your browser's extension store!
         <img src="./docs/assets/badge-cr.png" alt="Chrome" height="75">
       </a><br>
       <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">For Google Chrome</a>
+    </td>
+    <td align="left">
+      <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">For Edge Browser</a>
     </td>
   </tr>
 </table>
@@ -74,6 +77,10 @@ The final extension packages will be generated at:
 - Firefox: `.output/bark-sender-<Version>-firefox.zip`
 - Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
 
+## Acknowledgements
+
+The icons in this project are adapted from [Bark](https://github.com/Finb/bark), designed by [Finb](https://github.com/Finb), and were modified and used with the author’s permission granted before the public release on the browser store.
+
 ---
 
 ## 中文说明
@@ -113,3 +120,7 @@ Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 P
 最终的扩展包将在以下位置生成：
 - Firefox: `.output/bark-sender-<Version>-firefox.zip`
 - Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
+
+## 致谢
+
+本项目的图标基于 [Finb](https://github.com/Finb) 设计的 [Bark](https://github.com/Finb/bark) 二次创作，在浏览器商店公开前已获得原作者修改许可与使用。

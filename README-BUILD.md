@@ -12,11 +12,11 @@ This project uses **WXT** (Web Extension Toolkit) to build browser extensions fo
 
 #### Required Programs and Versions
 
-1. **Node.js**: Version 18.0.0 or higher
+1. **Node.js**: Version 20.0.0 or higher
    - Download from: https://nodejs.org/
    - Verify installation: `node --version`
 
-2. **pnpm**: Version 8.0.0 or higher (Package Manager)
+2. **pnpm**: Version 9.0.0 or higher (Package Manager)
    - Install via npm: `npm install -g pnpm`
    - Or install via standalone: https://pnpm.io/installation
    - Verify installation: `pnpm --version`
@@ -67,7 +67,7 @@ This script will:
 - Create ZIP packages for all browsers
 - Output the following files in the `.output` folder:
   - `bark-sender-<Version>-firefox.zip` (Firefox)
-  - `bark-sender-<Version>-chrome.zip` (Chrome/Edge)
+  - `bark-sender-<Version>-chrome.zip` (Chrome/ Edge)
 
 #### Final Output
 
