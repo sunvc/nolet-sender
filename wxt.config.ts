@@ -1,9 +1,21 @@
 import { defineConfig } from 'wxt';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   modules: ['@wxt-dev/module-react'],
   manifestVersion: 3,
+  vite: () => ({
+    build: {
+      minify: 'terser',
+      rollupOptions: {
+        output: {
+          minifyInternalExports: true
+        }
+      }
+    }
+  }),
   manifest: {
     default_locale: 'en',
     permissions: [
@@ -32,6 +44,55 @@ export default defineConfig({
     }
   },
   hooks: {
+    'build:done': (wxt, output) => {
+      // console.log('构建完成, Node 正在处理 content-scripts 中的模版字符串里代码缩进导致的空格');
+      const outputDir = path.resolve(process.cwd(), '.output');
+
+      fs.readdirSync(outputDir).forEach(browser => {
+        const browserDir = path.join(outputDir, browser);
+
+        if (fs.statSync(browserDir).isDirectory()) {
+          const contentScriptsDir = path.join(browserDir, 'content-scripts');
+
+          if (fs.existsSync(contentScriptsDir)) {
+            // 处理 content-scripts 目录中的所有 js
+            fs.readdirSync(contentScriptsDir).forEach(file => {
+              if (file.endsWith('.js')) {
+                const filePath = path.join(contentScriptsDir, file);
+
+                let content = fs.readFileSync(filePath, 'utf8');
+                const originalContent = content;
+
+                // 处理 \n 后面跟着空格的情况
+                content = content.replace(/\\n\s+/g, '');
+
+                // 匹配 css 注释 /* css start */ ... /* css end */ 中间的 css 内容, 并压缩 CSS
+                content = content.replace(/\/\*\s*css\s+start\s*\*\/([\s\S]*?)\/\*\s*css\s+end\s*\*\//g, (match, cssContent) => {
+                  // 移除 CSS 内容中的所有 \n 并压缩 CSS
+                  let processedMatch = match
+                    .replace(/\\n/g, '')                  // 移除所有换行符
+                    .replace(/(\s)*{\s*/g, "{")           // 压缩花括号前后的空格
+                    .replace(/(\s)*}\s*/g, "}")           // 压缩花括号后的空格
+                    .replace(/(\s)*;\s*/g, ";")           // 压缩分号前后的空格
+                    .replace(/:(\s)*/g, ":")              // 压缩冒号后的空格
+                    .replace(/;}/g, "}");                 // 移除花括号前的分号
+                  // 这里实现参考: https://www.zhangxinxu.com/sp/css-compress-mini.html
+                  return processedMatch;
+                });
+
+                // 匹配 /* ... */ css 注释, 移除注释内容
+                content = content.replace(/\/\*\s+.+?\s\*\//g, '');
+
+                if (content !== originalContent) {
+                  fs.writeFileSync(filePath, content, 'utf8');
+                  // console.log(`已处理文件: ${filePath}`);
+                }
+              }
+            });
+          }
+        }
+      });
+    },
     'build:manifestGenerated': (wxt, manifest) => {
       /*
         如果是 Firefox: 

@@ -53,6 +53,7 @@ export interface Sound {
 // 应用设置接口
 export interface AppSettings {
     enableContextMenu: boolean;
+    enableInspectSend: boolean;
     themeMode: ThemeMode;
     enableEncryption: boolean;
     encryptionConfig?: EncryptionConfig;

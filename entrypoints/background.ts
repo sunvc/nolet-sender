@@ -41,7 +41,173 @@ export default defineBackground(() => {
         });
       return true;
     }
+
+    // 处理来自 content script 的发送内容请求
+    if (message.action === 'send_content') {
+      console.log('收到发送内容请求:', message.contentType, message.content);
+
+      // 获取默认设备和设置
+      Promise.all([
+        browser.storage.local.get('bark_devices'),
+        browser.storage.local.get('bark_default_device'),
+        browser.storage.local.get('bark_app_settings')
+      ]).then(([devicesResult, defaultDeviceResult, settingsResult]) => {
+        const devices = devicesResult.bark_devices || [];
+        const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+        const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
+        const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+        if (!defaultDevice) {
+          console.error(getMessage('device_not_found'));
+          browser.notifications.create({
+            type: 'basic',
+            iconUrl: '/icon/128.png',
+            title: getMessage('bark_sender_title'),
+            message: getMessage('device_not_found')
+          });
+          sendResponse({ success: false, error: getMessage('device_not_found') });
+          return;
+        }
+
+        // 准备发送参数
+        let title = message.title || '';
+        let content = message.content || '';
+        let url = '';
+
+        // 根据内容类型设置 URL
+        if (message.contentType === 'image' || message.contentType === 'url') {
+          url = message.content;
+        }
+
+        // 发送推送
+        const pushUuid = generateUUID();
+        const pushParams: PushParams = {
+          apiURL: defaultDevice.apiURL,
+          message: content,
+          sound: settings.sound,
+          url,
+          title,
+          uuid: pushUuid,
+          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization })
+        };
+
+        // 根据设置选择发送方式
+        let method: 'GET' | 'POST' = 'GET';
+        let isEncrypted = false;
+
+        const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
+          ? (method = 'POST', isEncrypted = true, sendPush(pushParams, settings.encryptionConfig))
+          : (method = 'GET', sendPush(pushParams));
+
+        sendPushPromise
+          .then(response => {
+            console.log('发送成功:', response);
+
+            // 记录历史
+            const requestTimestamp = Date.now();
+            const parameters = getRequestParameters(pushParams, isEncrypted);
+            const historyRecord = {
+              id: Date.now(),
+              uuid: pushUuid,
+              timestamp: requestTimestamp,
+              body: content,
+              apiUrl: defaultDevice.apiURL,
+              deviceName: defaultDevice.alias,
+              parameters: parameters,
+              responseJson: response,
+              requestTimestamp: requestTimestamp,
+              responseTimestamp: Date.now(),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              method: method,
+              title: title || undefined,
+              sound: settings.sound || undefined,
+              url: url || undefined,
+              isEncrypted: isEncrypted,
+              createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+              }),
+              authorization: defaultDevice.authorization
+            };
+
+            saveHistoryRecord(historyRecord);
+
+            // 显示通知
+            browser.notifications.create({
+              type: 'basic',
+              iconUrl: '/icon/128.png',
+              title: getMessage('bark_sender_title'),
+              message: getMessage('sent_to_device', [defaultDevice.alias])
+            });
+
+            // 返回成功响应给content script
+            sendResponse({ success: true, data: response });
+          })
+          .catch(error => {
+            console.error('发送失败:', error);
+
+            // 记录失败的历史记录
+            const requestTimestamp = Date.now();
+            const errorResponse = {
+              code: -1,
+              message: error instanceof Error ? error.message : getMessage('error_unknown'),
+              timestamp: Date.now()
+            };
+
+            const historyRecord = {
+              id: Date.now(),
+              uuid: pushUuid,
+              timestamp: requestTimestamp,
+              body: content,
+              apiUrl: defaultDevice.apiURL,
+              deviceName: defaultDevice.alias,
+              parameters: [],
+              responseJson: errorResponse,
+              requestTimestamp: requestTimestamp,
+              responseTimestamp: Date.now(),
+              timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              method: method,
+              title: title || undefined,
+              sound: settings.sound || undefined,
+              url: url || undefined,
+              isEncrypted: isEncrypted,
+              createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false,
+              }),
+              authorization: defaultDevice.authorization
+            };
+
+            saveHistoryRecord(historyRecord);
+
+            browser.notifications.create({
+              type: 'basic',
+              iconUrl: '/icon/128.png',
+              title: getMessage('bark_sender_title'),
+              message: getMessage('send_failed_check_network')
+            });
+
+            // 返回错误响应给 content script
+            sendResponse({ success: false, data: errorResponse });
+          });
+      });
+
+      return true; // 保持消息通道开放
+    }
   });
+
+  // 存储最后一次右键点击的元素信息
+  let lastRightClickedElementInfo: any = null;
 
   // 保存历史记录到 chrome.storage.local 进行暂存 ，在打开历史页面时，再从 chrome.storage.local 写入历史记录
   async function saveHistoryRecord(record: any) {
@@ -232,7 +398,10 @@ export default defineBackground(() => {
 
       // 获取设置
       const settingsResult = await browser.storage.local.get('bark_app_settings');
-      const settings = settingsResult.bark_app_settings || { enableContextMenu: true };
+      const settings = settingsResult.bark_app_settings || { enableContextMenu: true, enableInspectSend: true };
+
+      // 老用户没有这项，这里默认启用
+      const enableInspectSend = settings.enableInspectSend ?? true; // 是否启用 inspect-send 菜单项
 
       if (!settings.enableContextMenu) {
         return;
@@ -254,23 +423,36 @@ export default defineBackground(() => {
       // 找到默认设备
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
 
-      // 创建右键菜单项
-      browser.contextMenus.create({
-        id: 'send-selection',
-        // title: `发送所选内容给 ${defaultDevice.alias}`,
-        title: getMessage('send_selection_to_device', [defaultDevice.alias]),
-        contexts: ['selection']
-      });
+      // 根据 enableInspectSend 设置决定 如果开启则使用新版的 inspect-send 否则使用旧版的 send-selection, send-page, send-link
+      if (enableInspectSend) {
+        // 创建新版右键菜单项 - inspect-send
+        browser.contextMenus.create({
+          id: 'inspect-send',
+          title: getMessage('inspect_send', [defaultDevice.alias]),
+          contexts: ['all']
+        });
+      } else {
+        // 创建传统右键菜单项 - send-selection, send-page, send-link
+        browser.contextMenus.create({
+          id: 'send-selection',
+          title: getMessage('send_selection_to_device', [defaultDevice.alias]),
+          contexts: ['selection']
+        });
 
-      browser.contextMenus.create({
-        id: 'send-page',
-        // title: `发送页面链接给 ${defaultDevice.alias}`,
-        title: getMessage('send_page_to_device', [defaultDevice.alias]),
-        contexts: ['page']
-      });
+        browser.contextMenus.create({
+          id: 'send-page',
+          title: getMessage('send_page_to_device', [defaultDevice.alias]),
+          contexts: ['page']
+        });
+
+        // browser.contextMenus.create({
+        //   id: 'send-link',
+        //   title: getMessage('send_link_to_device', [defaultDevice.alias]),
+        //   contexts: ['link']
+        // });
+      }
 
     } catch (error) {
-      // console.error('更新右键菜单失败:', error);
       console.error(getMessage('update_context_menus_failed'), error);
     }
   }
@@ -308,13 +490,78 @@ export default defineBackground(() => {
         });
         return;
       }
-
+      console.debug('info', info);
       if (info.menuItemId === 'send-selection' && info.selectionText) {
         message = info.selectionText;
       } else if (info.menuItemId === 'send-page' && tab?.url) {
         title = tab.title || 'Web'; // 网页标题作为推送标题
         message = tab.url; // 网页 URL 作为推送内容
         url = tab.url; // 同时保留url参数
+      } else if (info.menuItemId === 'send-link' && info.linkUrl) {
+        title = info.linkText || 'Link'; // 链接文本作为推送标题
+        message = info.linkUrl; // 链接URL作为推送内容
+        url = info.linkUrl; // 同时保留url参数
+      }
+      //  else if (info.menuItemId === 'send-image' && info.srcUrl) {
+      //   title = 'Image'; // 图片标题
+      //   message = info.srcUrl; // 图片URL作为推送内容
+      //   url = info.srcUrl; // 同时保留url参数
+      // }
+      else if (info.menuItemId === 'inspect-send') {
+        // 打印完整的右键菜单信息到控制台
+        console.log('Right Click Context Info:', {
+          info,
+          tab,
+          mediaType: info.mediaType,
+          pageUrl: info.pageUrl,
+          frameUrl: info.frameUrl,
+          srcUrl: info.srcUrl,
+          linkUrl: info.linkUrl,
+          linkText: info.linkText,
+          selectionText: info.selectionText,
+          editable: info.editable,
+          menuItemId: info.menuItemId,
+          modifiers: info.modifiers,
+          button: info.button,
+          // 添加来自content script的元素信息
+          elementInfo: lastRightClickedElementInfo
+        });
+        // pageUrl 必须是http或者是https协议的 使用正则表达式
+        if (info.pageUrl && !info.pageUrl.startsWith('http://') && !info.pageUrl.startsWith('https://')) {
+          return;
+        }
+
+        // 向 content script 发送消息，显示选择对话框
+        if (tab && tab.id) {
+          browser.tabs.sendMessage(tab.id, {
+            action: 'show_dialog',
+            contextInfo: info, // 右键菜单信息
+          }).catch(error => {
+            // 将URL相关参数存储到storage.local
+            const urlData = {
+              url: tab.url,
+              title: tab.title,
+              selectionText: info.selectionText,
+              linkText: info.linkText,
+              linkUrl: info.linkUrl
+            };
+
+            browser.storage.local.set({ bark_url_data: urlData }).then(() => {
+              browser.windows.create({
+                url: browser.runtime.getURL('/popup.html?mode=window&useUrlDialog=true'),
+                type: 'popup',
+                width: 380,
+                height: 660,
+                left: 0,
+                top: 0,
+                focused: true,
+              });
+            });
+            return;
+          });
+        }
+
+        return; // 不执行发送操作
       }
 
       if (message) {

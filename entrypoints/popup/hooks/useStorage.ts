@@ -113,6 +113,7 @@ export function useDevices() {
 export function useAppSettings() {
     const [settings, setSettings] = useState<AppSettings>({
         enableContextMenu: true,
+        enableInspectSend: true,
         themeMode: 'system',
         enableEncryption: false,
         encryptionConfig: {

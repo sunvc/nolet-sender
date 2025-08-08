@@ -70,7 +70,12 @@
         },
         "context_menu": {
             "title": "右鍵選單",
-            "enable": "啟用右鍵選單"
+            "enable": "啟用右鍵選單",
+            "enable_inspect_send": "啟用右鍵解析網頁內容",
+            "send_selection_to_device": "傳送選取的文字給 {{device}}",
+            "send_page_to_device": "傳送目前頁面網址給 {{device}}",
+            "send_link_to_device": "傳送目標網址給 {{device}}",
+            "inspect_send": "解析並傳送給 {{device}}"
         },
         "shortcuts": {
             "title": "快速鍵",
@@ -145,16 +150,21 @@
         "title": "關於",
         "github": {
             "title": "GitHub",
-            "description": "查看原始碼、回報問題",
-            "description2": "如果喜歡這個項目，歡迎 Star 或 Fork~"
+            "description": "檢視原始碼或回報問題",
+            "description2": "❤️ 如果你喜歡這個專案，歡迎點星星或 Fork～"
         },
         "feedback": {
-            "title": "問題回報",
-            "description": "遇到問題？點此回報"
+            "title": "意見回饋",
+            "description": "遇到問題？快來 GitHub 給我反饋吧！",
+            "description2": "跳轉 GitHub 提交問題, 或郵箱聯繫我～"
+        },
+        "store_rating": {
+            "title": "商店評分",
+            "description": "喜歡的話給我評分鼓勵！"
         },
         "telegram": {
             "title": "Telegram 頻道",
-            "description": "加入頻道獲取動態"
+            "description": "加入頻道獲得最新消息"
         },
         "contact": {
             "title": "聯絡方式",
@@ -203,6 +213,13 @@
             "no_content": "請輸入通知內容",
             "send_failed": "傳送失敗：{{message}}",
             "clipboard_failed": "傳送剪貼簿失敗：{{message}}"
+        },
+        "url_dialog": {
+            "title": "選擇要發送的內容",
+            "send_current_page": "發送當前頁面",
+            "send_selected_text": "發送選取的文字",
+            "send_link": "發送鏈接",
+            "info": "由於該頁面無法被解析，請在點擊上方的選項確認需要發送的內容"
         }
     },
     "encryption": {

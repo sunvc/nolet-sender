@@ -1,4 +1,7 @@
 {
+    "ext_desc": {
+        "message": "A desktop browser extension that pushes text from webpages or clipboard to iOS devices using the Bark app."
+    },
     "extension_installed": {
         "message": "Bark Sender installed"
     },
@@ -36,13 +39,19 @@
         "message": "Background encrypted request successful"
     },
     "update_context_menus_failed": {
-        "message": "Failed to update context menus"
+        "message": "Failed to update context menu"
     },
     "send_selection_to_device": {
-        "message": "Send selected content to $1"
+        "message": "Send selected text to $1"
     },
     "send_page_to_device": {
-        "message": "Send page link to $1"
+        "message": "Send current page URL to $1"
+    },
+    "send_link_to_device": {
+        "message": "Send target URL to $1"
+    },
+    "inspect_send": {
+        "message": "Inspect and send to $1"
     },
     "bark_sender_title": {
         "message": "Bark Sender"
@@ -52,12 +61,6 @@
     },
     "send_failed_check_network": {
         "message": "Send failed, please check network connection"
-    },
-    "background_send_request_to": {
-        "message": "Background sending request to: $1"
-    },
-    "background_request_success": {
-        "message": "Background request successful"
     },
     "save_history_record": {
         "message": "History record saved"
@@ -76,5 +79,95 @@
     },
     "shortcut_send_clipboard_description": {
         "message": "Send clipboard content to default device"
+    },
+    "background_image": {
+        "message": "Background image"
+    },
+    "image_content": {
+        "message": "Image Content"
+    },
+    "image_link": {
+        "message": "Image Link"
+    },
+    "send_image_link": {
+        "message": "Send Image Link"
+    },
+    "image_link_invalid": {
+        "message": "Only http or https protocol image links are allowed"
+    },
+    "alt_text": {
+        "message": "Alt Text"
+    },
+    "send_alt_text": {
+        "message": "Send Alt Text"
+    },
+    "image": {
+        "message": "Image"
+    },
+    "image_source": {
+        "message": "Image source"
+    },
+    "reload_preview": {
+        "message": "Reload Preview"
+    },
+    "text_content": {
+        "message": "Text Content"
+    },
+    "tag": {
+        "message": "Tag"
+    },
+    "no_parent_element": {
+        "message": "No parent element"
+    },
+    "current_element": {
+        "message": "Current Element"
+    },
+    "parent_element": {
+        "message": "Parent Element"
+    },
+    "current_element_text": {
+        "message": "Current Element Text"
+    },
+    "send_current_element_text": {
+        "message": "Send Current Element Text"
+    },
+    "parent_element_text": {
+        "message": "Parent Element Text"
+    },
+    "send_parent_element_text": {
+        "message": "Send Parent Element Text"
+    },
+    "page_link": {
+        "message": "Page Link"
+    },
+    "page_title": {
+        "message": "Page Title"
+    },
+    "send_page_link": {
+        "message": "Send Page Link"
+    },
+    "target_info": {
+        "message": "Target Info"
+    },
+    "link_address": {
+        "message": "Link Address"
+    },
+    "send_link": {
+        "message": "Send Link"
+    },
+    "selected_text": {
+        "message": "Selected Text"
+    },
+    "send_selected_text": {
+        "message": "Send Selected Text"
+    },
+    "select_content_to_send": {
+        "message": "Select Content to Send"
+    },
+    "close": {
+        "message": "Close"
+    },
+    "parse_html_error": {
+        "message": "Error occurred while parsing HTML"
     }
 }

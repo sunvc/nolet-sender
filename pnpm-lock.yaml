@@ -62,13 +62,13 @@ importers:
         version: 19.1.6(@types/react@19.1.8)
       '@wxt-dev/module-react':
         specifier: ^1.1.3
-        version: 1.1.3(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2))(wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1))
+        version: 1.1.3(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1))(wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)(terser@5.43.1))
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
       wxt:
         specifier: ^0.20.6
-        version: 0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)
+        version: 0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)(terser@5.43.1)
 
 packages:
 
@@ -417,6 +417,9 @@ packages:
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
     engines: {node: '>=6.0.0'}
+
+  '@jridgewell/source-map@0.3.10':
+    resolution: {integrity: sha512-0pPkgz9dY+bijgistcTTJ5mR+ocqRXLuhXHYdzoMmmoJ2C9S46RCm2GMUbatPEUK9Yjy26IrAy8D/M00lLkv+Q==}
 
   '@jridgewell/sourcemap-codec@1.5.4':
     resolution: {integrity: sha512-VT2+G1VQs/9oz078bLrYbecdZKs912zQlkelYpuf+SXF+QvZDYJlbx/LSx+meSAwdDFnF8FVXW92AVjjkVmgFw==}
@@ -938,6 +941,9 @@ packages:
 
   colorette@2.0.20:
     resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
+
+  commander@2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
 
   commander@2.9.0:
     resolution: {integrity: sha512-bmkUukX8wAOjHdN26xj5c4ctEV22TQ7dQYhSmuckKhToXrkUn0iIaolHdIxYYqD55nhpSPA9zPQ1yP57GdXP2A==}
@@ -2157,6 +2163,11 @@ packages:
     resolution: {integrity: sha512-ot0WnXS9fgdkgIcePe6RHNk1WA8+muPa6cSjeR3V8K27q9BB1rTE3R1p7Hv0z1ZyAc8s6Vvv8DIyWf681MAt0w==}
     engines: {node: '>= 0.4'}
 
+  terser@5.43.1:
+    resolution: {integrity: sha512-+6erLbBm0+LROX2sPXlUYx/ux5PyE9K/a92Wrt6oA+WDAoFTdpHE5tCYCI5PNzq2y8df4rA+QgHLJuR4jNymsg==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
     engines: {node: '>=0.8'}
@@ -2751,6 +2762,12 @@ snapshots:
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
+  '@jridgewell/source-map@0.3.10':
+    dependencies:
+      '@jridgewell/gen-mapping': 0.3.12
+      '@jridgewell/trace-mapping': 0.3.29
+    optional: true
+
   '@jridgewell/sourcemap-codec@1.5.4': {}
 
   '@jridgewell/trace-mapping@0.3.29':
@@ -2993,7 +3010,7 @@ snapshots:
       '@types/node': 24.0.14
     optional: true
 
-  '@vitejs/plugin-react@4.6.0(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2))':
+  '@vitejs/plugin-react@4.6.0(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1))':
     dependencies:
       '@babel/core': 7.28.0
       '@babel/plugin-transform-react-jsx-self': 7.27.1(@babel/core@7.28.0)
@@ -3001,7 +3018,7 @@ snapshots:
       '@rolldown/pluginutils': 1.0.0-beta.19
       '@types/babel__core': 7.20.5
       react-refresh: 0.17.0
-      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)
+      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1)
     transitivePeerDependencies:
       - supports-color
 
@@ -3020,10 +3037,10 @@ snapshots:
       '@types/filesystem': 0.0.36
       '@types/har-format': 1.2.16
 
-  '@wxt-dev/module-react@1.1.3(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2))(wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1))':
+  '@wxt-dev/module-react@1.1.3(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1))(wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)(terser@5.43.1))':
     dependencies:
-      '@vitejs/plugin-react': 4.6.0(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2))
-      wxt: 0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)
+      '@vitejs/plugin-react': 4.6.0(vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1))
+      wxt: 0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)(terser@5.43.1)
     transitivePeerDependencies:
       - supports-color
       - vite
@@ -3244,6 +3261,9 @@ snapshots:
   color-name@1.1.4: {}
 
   colorette@2.0.20: {}
+
+  commander@2.20.3:
+    optional: true
 
   commander@2.9.0:
     dependencies:
@@ -4453,6 +4473,14 @@ snapshots:
 
   supports-preserve-symlinks-flag@1.0.0: {}
 
+  terser@5.43.1:
+    dependencies:
+      '@jridgewell/source-map': 0.3.10
+      acorn: 8.15.0
+      commander: 2.20.3
+      source-map-support: 0.5.21
+    optional: true
+
   thenify-all@1.6.0:
     dependencies:
       thenify: 3.3.1
@@ -4555,13 +4583,13 @@ snapshots:
 
   uuid@8.3.2: {}
 
-  vite-node@3.2.4(@types/node@24.0.14)(jiti@2.4.2):
+  vite-node@3.2.4(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1):
     dependencies:
       cac: 6.7.14
       debug: 4.4.1
       es-module-lexer: 1.7.0
       pathe: 2.0.3
-      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)
+      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1)
     transitivePeerDependencies:
       - '@types/node'
       - jiti
@@ -4576,7 +4604,7 @@ snapshots:
       - tsx
       - yaml
 
-  vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2):
+  vite@6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1):
     dependencies:
       esbuild: 0.25.6
       fdir: 6.4.6(picomatch@4.0.3)
@@ -4588,6 +4616,7 @@ snapshots:
       '@types/node': 24.0.14
       fsevents: 2.3.3
       jiti: 2.4.2
+      terser: 5.43.1
 
   void-elements@3.1.0: {}
 
@@ -4669,7 +4698,7 @@ snapshots:
     dependencies:
       is-wsl: 3.1.0
 
-  wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1):
+  wxt@0.20.7(@types/node@24.0.14)(jiti@2.4.2)(rollup@4.45.1)(terser@5.43.1):
     dependencies:
       '@1natsu/wait-element': 4.1.2
       '@aklinker1/rollup-plugin-visualizer': 5.12.0(rollup@4.45.1)
@@ -4713,8 +4742,8 @@ snapshots:
       publish-browser-extension: 3.0.1
       scule: 1.3.0
       unimport: 5.1.0
-      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)
-      vite-node: 3.2.4(@types/node@24.0.14)(jiti@2.4.2)
+      vite: 6.3.5(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1)
+      vite-node: 3.2.4(@types/node@24.0.14)(jiti@2.4.2)(terser@5.43.1)
       web-ext-run: 0.2.3
     transitivePeerDependencies:
       - '@types/node'

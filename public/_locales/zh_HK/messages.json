@@ -1,72 +1,75 @@
 {
+    "ext_desc": {
+        "message": "一個桌面瀏覽器擴充功能，可將網頁或剪貼簿中的文字通過 Bark 應用推送到 iOS 裝置。"
+    },
     "extension_installed": {
         "message": "Bark Sender 已安裝"
     },
     "shortcut_triggered": {
-        "message": "收到全域快速鍵觸發"
+        "message": "已接收到全域快捷鍵觸發"
     },
     "device_not_found_window": {
-        "message": "未找到預設裝置，但仍開啟視窗讓用戶設定"
+        "message": "未能找到預設裝置，但仍會開啟視窗以供用戶設定"
     },
     "device_not_found": {
-        "message": "未找到預設裝置，請先新增裝置"
+        "message": "未能找到預設裝置，請先新增裝置"
     },
     "creating_small_window": {
-        "message": "建立小視窗"
+        "message": "正在建立小型視窗"
     },
     "send_message_to_window_failed": {
-        "message": "傳送訊息到視窗失敗：$1"
+        "message": "傳送訊息至視窗失敗：$1"
     },
     "notification_shortcut_with_device": {
-        "message": "已開啟推送視窗，點擊\"傳送剪貼簿內容\"按鈕 (預設裝置：$1)"
+        "message": "已開啟推送視窗，請點擊「傳送剪貼簿內容」按鈕（預設裝置：$1）"
     },
     "shortcut_processing_failed": {
-        "message": "快速鍵觸發失敗，請手動開啟擴充功能"
+        "message": "快捷鍵觸發失敗，請手動開啟擴充功能"
     },
     "background_send_push_failed": {
-        "message": "Background傳送推送失敗"
+        "message": "背景推送傳送失敗"
     },
     "background_send_encrypted_push_failed": {
-        "message": "Background 傳送加密推送失敗"
+        "message": "背景傳送加密推送失敗"
     },
     "background_send_encrypted_request_to": {
-        "message": "Background 傳送加密請求到：$1"
+        "message": "背景發出加密請求至：$1"
     },
     "background_encrypted_request_success": {
-        "message": "Background 加密請求成功"
+        "message": "背景加密請求成功"
     },
     "update_context_menus_failed": {
-        "message": "更新右鍵選單失敗"
+        "message": "更新右鍵功能表失敗"
     },
     "send_selection_to_device": {
-        "message": "傳送所選內容給 $1"
+        "message": "傳送選取文字至 $1"
     },
     "send_page_to_device": {
-        "message": "傳送頁面連結給 $1"
+        "message": "傳送目前頁面網址至 $1"
+    },
+    "send_link_to_device": {
+        "message": "傳送目標連結至 $1"
+    },
+    "inspect_send": {
+        "message": "分析並傳送至 $1"
     },
     "bark_sender_title": {
         "message": "Bark Sender"
     },
     "sent_to_device": {
-        "message": "已傳送到 $1"
+        "message": "已傳送至 $1"
     },
     "send_failed_check_network": {
-        "message": "傳送失敗，請檢查網絡連接"
-    },
-    "background_send_request_to": {
-        "message": "Background 傳送請求到：$1"
-    },
-    "background_request_success": {
-        "message": "Background 請求成功"
+        "message": "傳送失敗，請檢查網絡連線"
     },
     "save_history_record": {
-        "message": "歷史記錄已保存"
+        "message": "已儲存歷史紀錄"
     },
     "current_history_total": {
-        "message": "目前歷史記錄總數：$1"
+        "message": "目前歷史紀錄總數：$1"
     },
     "save_history_failed": {
-        "message": "保存歷史記錄失敗"
+        "message": "儲存歷史紀錄失敗"
     },
     "read_clipboard_failed": {
         "message": "讀取剪貼簿失敗"
@@ -75,6 +78,96 @@
         "message": "未知錯誤"
     },
     "shortcut_send_clipboard_description": {
-        "message": "傳送剪貼簿內容到預設裝置"
+        "message": "傳送剪貼簿內容至預設裝置"
+    },
+    "background_image": {
+        "message": "背景圖片"
+    },
+    "image_content": {
+        "message": "圖片內容"
+    },
+    "image_link": {
+        "message": "圖片連結"
+    },
+    "send_image_link": {
+        "message": "傳送圖片連結"
+    },
+    "image_link_invalid": {
+        "message": "僅支援傳送 http 或 https 協定的圖片連結"
+    },
+    "alt_text": {
+        "message": "替代文字"
+    },
+    "send_alt_text": {
+        "message": "傳送替代文字"
+    },
+    "image": {
+        "message": "圖片"
+    },
+    "image_source": {
+        "message": "圖片來源"
+    },
+    "reload_preview": {
+        "message": "重新載入圖片"
+    },
+    "text_content": {
+        "message": "文字內容"
+    },
+    "tag": {
+        "message": "標籤"
+    },
+    "no_parent_element": {
+        "message": "無父元素"
+    },
+    "current_element": {
+        "message": "目前元素"
+    },
+    "parent_element": {
+        "message": "父元素"
+    },
+    "current_element_text": {
+        "message": "目前元素文字"
+    },
+    "send_current_element_text": {
+        "message": "傳送目前元素文字"
+    },
+    "parent_element_text": {
+        "message": "父元素文字"
+    },
+    "send_parent_element_text": {
+        "message": "傳送父元素文字"
+    },
+    "page_link": {
+        "message": "頁面連結"
+    },
+    "page_title": {
+        "message": "頁面標題"
+    },
+    "send_page_link": {
+        "message": "傳送頁面連結"
+    },
+    "target_info": {
+        "message": "目標資訊"
+    },
+    "link_address": {
+        "message": "連結地址"
+    },
+    "send_link": {
+        "message": "傳送連結"
+    },
+    "selected_text": {
+        "message": "選取文字"
+    },
+    "send_selected_text": {
+        "message": "傳送選取文字"
+    },
+    "select_content_to_send": {
+        "message": "請選擇要傳送的內容"
+    },
+    "close": {
+        "message": "關閉"
+    },
+    "parse_html_error": {
+        "message": "解析 HTML 時出現錯誤"
     }
 }

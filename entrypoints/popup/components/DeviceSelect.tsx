@@ -4,7 +4,6 @@ import {
     InputLabel,
     Select,
     MenuItem,
-    Button,
     Box,
     Typography,
     SelectChangeEvent,
@@ -70,7 +69,7 @@ export default function DeviceSelect({
                 onClose={() => setOpen(false)}
                 value={selectedDevice?.id || ''}
                 onChange={handleChange}
-                label={t('push.target_device')}
+                label={showLabel ? t('push.target_device') : undefined}
                 displayEmpty
                 notched
                 MenuProps={{

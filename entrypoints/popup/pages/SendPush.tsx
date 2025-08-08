@@ -32,6 +32,7 @@ import { useAppContext } from '../contexts/AppContext';
 import DeviceSelect from '../components/DeviceSelect';
 import DeviceDialog from '../components/DeviceDialog';
 import ShortcutTips from '../components/ShortcutTips';
+import UrlDialog from '../components/UrlDialog';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -62,6 +63,12 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     const [lastPushUuid, setLastPushUuid] = useState<string | null>(null); // 记录最后一次推送的UUID
     const [recallLoading, setRecallLoading] = useState(false); // 撤回操作加载状态
     const sendButtonRef = useRef<HTMLButtonElement>(null);
+    const [urlDialogOpen, setUrlDialogOpen] = useState(false);
+    const [urlParams, setUrlParams] = useState<{
+        url?: string;
+        title?: string;
+        selectionText?: string;
+    }>({});
 
     // 从本地存储恢复消息内容
     useEffect(() => {
@@ -436,6 +443,38 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         }
     }, [shouldAutoAddDevice]);
 
+    // 检测URL参数
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const useUrlDialog = params.get('useUrlDialog') === 'true';
+
+        if (useUrlDialog) {
+            // 从 storage.local 读取 URL 数据
+            browser.storage.local.get('bark_url_data').then((result) => {
+                if (result.bark_url_data) {
+                    setUrlParams(result.bark_url_data);
+                    setUrlDialogOpen(true);
+                    // 使用完后清除数据
+                    browser.storage.local.remove('bark_url_data');
+                }
+            });
+            // 清除 URL 参数
+            window.history.replaceState({}, '', window.location.pathname);
+        }
+    }, []);
+
+    // URL Dialog 成功发送
+    const handleUrlDialogSuccess = (message: string, uuid: string) => {
+        setLastPushUuid(uuid);
+        setResult({ type: 'success', message: t('push.success') });
+        setMessage(message);
+    };
+
+    // URL Dialog 发送错误
+    const handleUrlDialogError = (error: string) => {
+        setResult({ type: 'error', message: error });
+    };
+
     return (
         <>
             <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -624,6 +663,22 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     </Button>
                 </DialogActions>
             </Dialog>
+
+            {/* URL选择Dialog */}
+            <UrlDialog
+                open={urlDialogOpen}
+                onClose={() => setUrlDialogOpen(false)}
+                urlParams={urlParams}
+                selectedDevice={selectedDevice}
+                devices={devices}
+                onDeviceChange={setSelectedDevice}
+                onDeviceAdd={() => {
+                    setUrlDialogOpen(false);
+                    setDeviceDialogOpen(true);
+                }}
+                onSuccess={handleUrlDialogSuccess}
+                onError={handleUrlDialogError}
+            />
 
             {/* 添加设备Dialog */}
             <DeviceDialog

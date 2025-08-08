@@ -16,7 +16,8 @@ import {
     Link,
     Tooltip,
     Popover,
-    LinearProgress
+    LinearProgress,
+    Divider
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -26,6 +27,8 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
 import BugReportIcon from '@mui/icons-material/BugReport';
 import EmailIcon from '@mui/icons-material/Email';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -35,6 +38,7 @@ import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
@@ -44,7 +48,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
-import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp } from '../utils/extension';
+import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
 
 interface SettingsProps {
     devices: Device[];
@@ -99,6 +103,15 @@ export default function Settings({
             await updateAppSetting('enableContextMenu', enabled);
         } catch (error) {
             // 更新设置失败: {{message}}
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 处理右键解析网页内容开关切换
+    const handleInspectSendToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('enableInspectSend', enabled);
+        } catch (error) {
             setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
         }
     };
@@ -452,11 +465,26 @@ export default function Settings({
                                         disabled={devices.length === 0}
                                         checked={appSettings?.enableContextMenu || false}
                                         onChange={(e) => handleContextMenuToggle(e.target.checked)}
+                                        color='primary'
                                     />
                                 }
                                 label={t('settings.context_menu.enable')}
                                 sx={{ userSelect: 'none' }}
                             />
+                            {appSettings?.enableContextMenu && (
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            disabled={devices.length === 0}
+                                            checked={appSettings?.enableInspectSend || false}
+                                            onChange={(e) => handleInspectSendToggle(e.target.checked)}
+                                            color='warning'
+                                        />
+                                    }
+                                    label={t('settings.context_menu.enable_inspect_send')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                            )}
                         </Box>
 
                         <Box>
@@ -628,7 +656,7 @@ export default function Settings({
                         </Typography>
 
                         <List>
-                            <ListItem>
+                            <ListItem sx={{ px: 0 }}>
                                 <ListItemText
                                     primary={
                                         <Stack direction="row" alignItems="center" spacing={1}>
@@ -640,15 +668,17 @@ export default function Settings({
                                         </Stack>
                                     }
                                     secondary={t('about.github.description')}
+                                    onClick={openGitHub}
+                                    sx={{ cursor: 'pointer' }}
                                 />
                                 <Tooltip title={t('about.github.description2')}>
                                     <IconButton edge="end" onClick={openGitHub}>
-                                        <OpenInNewIcon />
+                                        <FavoriteBorderIcon />
                                     </IconButton>
                                 </Tooltip>
                             </ListItem>
 
-                            <ListItem sx={{ display: 'none' }}>
+                            <ListItem sx={{ px: 0 }}>
                                 <ListItemText
                                     primary={
                                         <Stack direction="row" alignItems="center" spacing={1}>
@@ -660,13 +690,39 @@ export default function Settings({
                                         </Stack>
                                     }
                                     secondary={t('about.feedback.description')}
+                                    onClick={openGitHub}
+                                    sx={{ cursor: 'pointer' }}
                                 />
-                                <IconButton edge="end" onClick={openFeedback}>
+                                <Tooltip title={t('about.feedback.description2')}>
+                                    <IconButton edge="end" onClick={openFeedback}>
+                                        <ChatBubbleOutlineIcon />
+                                    </IconButton>
+                                </Tooltip>
+                            </ListItem>
+
+                            <Divider sx={{ my: 1 }} />
+
+                            <ListItem sx={{ px: 0 }}>
+                                <ListItemText
+                                    primary={
+                                        <Stack direction="row" alignItems="center" spacing={1}>
+                                            <StarBorderIcon fontSize="small" />
+                                            <Typography variant="body1">
+                                                {/* 商店评分 */}
+                                                {t('about.store_rating.title')}
+                                            </Typography>
+                                        </Stack>
+                                    }
+                                    secondary={t('about.store_rating.description')}
+                                    onClick={openStoreRating}
+                                    sx={{ cursor: 'pointer' }}
+                                />
+                                <IconButton edge="end" onClick={openStoreRating}>
                                     <OpenInNewIcon />
                                 </IconButton>
                             </ListItem>
 
-                            <ListItem>
+                            <ListItem sx={{ px: 0 }}>
                                 <ListItemText
                                     primary={
                                         <Stack direction="row" alignItems="center" spacing={1}>
@@ -678,13 +734,15 @@ export default function Settings({
                                         </Stack>
                                     }
                                     secondary={t('about.telegram.description')}
+                                    onClick={openTelegramChannel}
+                                    sx={{ cursor: 'pointer' }}
                                 />
                                 <IconButton edge="end" onClick={openTelegramChannel}>
                                     <OpenInNewIcon />
                                 </IconButton>
                             </ListItem>
 
-                            <ListItem>
+                            <ListItem sx={{ px: 0 }}>
                                 <ListItemText
                                     primary={
                                         <Stack direction="row" alignItems="center" spacing={1}>

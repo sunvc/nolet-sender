@@ -1,4 +1,7 @@
 {
+    "ext_desc": {
+        "message": "一个桌面浏览器扩展，可将网页或剪贴板中的文本通过 Bark 应用推送到 iOS 设备。"
+    },
     "extension_installed": {
         "message": "Bark Sender 已安装"
     },
@@ -39,10 +42,16 @@
         "message": "更新右键菜单失败"
     },
     "send_selection_to_device": {
-        "message": "发送所选内容给 $1"
+        "message": "发送选中的文本给 $1"
     },
     "send_page_to_device": {
-        "message": "发送页面链接给 $1"
+        "message": "发送当前页面的网址给 $1"
+    },
+    "send_link_to_device": {
+        "message": "发送目标网址给 $1"
+    },
+    "inspect_send": {
+        "message": "解析并发送给 $1"
     },
     "bark_sender_title": {
         "message": "Bark Sender"
@@ -52,12 +61,6 @@
     },
     "send_failed_check_network": {
         "message": "发送失败，请检查网络连接"
-    },
-    "background_send_request_to": {
-        "message": "Background 发送请求到：$1"
-    },
-    "background_request_success": {
-        "message": "Background 请求成功"
     },
     "save_history_record": {
         "message": "历史记录已保存"
@@ -76,5 +79,95 @@
     },
     "shortcut_send_clipboard_description": {
         "message": "发送剪切板内容到默认设备"
+    },
+    "background_image": {
+        "message": "背景图片"
+    },
+    "image_content": {
+        "message": "图片内容"
+    },
+    "image_link": {
+        "message": "图片链接"
+    },
+    "send_image_link": {
+        "message": "发送图片链接"
+    },
+    "image_link_invalid": {
+        "message": "只能发送 http 或 https 协议的图片链接"
+    },
+    "alt_text": {
+        "message": "替代文本"
+    },
+    "send_alt_text": {
+        "message": "发送替代文本"
+    },
+    "image": {
+        "message": "图片"
+    },
+    "image_source": {
+        "message": "图片来源"
+    },
+    "reload_preview": {
+        "message": "重新加载图片"
+    },
+    "text_content": {
+        "message": "文字内容"
+    },
+    "tag": {
+        "message": "标签"
+    },
+    "no_parent_element": {
+        "message": "无父元素"
+    },
+    "current_element": {
+        "message": "当前元素"
+    },
+    "parent_element": {
+        "message": "父元素"
+    },
+    "current_element_text": {
+        "message": "当前元素文本"
+    },
+    "send_current_element_text": {
+        "message": "发送当前元素文本"
+    },
+    "parent_element_text": {
+        "message": "父元素文本"
+    },
+    "send_parent_element_text": {
+        "message": "发送父元素文本"
+    },
+    "page_link": {
+        "message": "页面链接"
+    },
+    "page_title": {
+        "message": "页面标题"
+    },
+    "send_page_link": {
+        "message": "发送页面链接"
+    },
+    "target_info": {
+        "message": "目标信息"
+    },
+    "link_address": {
+        "message": "链接地址"
+    },
+    "send_link": {
+        "message": "发送链接"
+    },
+    "selected_text": {
+        "message": "选中文本"
+    },
+    "send_selected_text": {
+        "message": "发送选中文本"
+    },
+    "select_content_to_send": {
+        "message": "选择要发送的内容"
+    },
+    "close": {
+        "message": "关闭"
+    },
+    "parse_html_error": {
+        "message": "解析 HTML 时出错"
     }
 }

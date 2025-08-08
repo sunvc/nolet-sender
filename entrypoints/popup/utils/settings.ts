@@ -8,6 +8,7 @@ const SETTINGS_KEY = 'bark_app_settings';
 // 默认设置
 const DEFAULT_SETTINGS: AppSettings = {
     enableContextMenu: true,
+    enableInspectSend: true,
     themeMode: 'system',
     enableEncryption: false,
     encryptionConfig: {
@@ -37,7 +38,16 @@ export async function getAppSettings(): Promise<AppSettings> {
         const storage = await getStorage();
         const result = await storage.local.get(SETTINGS_KEY);
         const settings = result[SETTINGS_KEY];
-        return settings ? { ...DEFAULT_SETTINGS, ...settings } : DEFAULT_SETTINGS;
+
+        // 如果没有设置，直接返回默认设置
+        if (!settings) {
+            return DEFAULT_SETTINGS;
+        }
+
+        /* 使用默认设置填充缺失的字段
+        // 后续新增设置项时，使用 DEFAULT_SETTINGS 兜底
+        // 避免存储操作 */
+        return { ...DEFAULT_SETTINGS, ...settings };
     } catch (error) {
         console.error('获取应用设置失败:', error);
         return DEFAULT_SETTINGS;
