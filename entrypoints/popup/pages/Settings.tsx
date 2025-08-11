@@ -451,7 +451,7 @@ export default function Settings({
                                 {/* 语言设置 */}
                                 {t('settings.language.title')}
                             </Typography>
-                            <LanguageSelector onLanguageChange={onSettingsChange} />
+                            <LanguageSelector />
                         </Box>
 
                         <Box>
