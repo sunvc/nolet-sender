@@ -88,7 +88,8 @@ export default defineBackground(() => {
           url,
           title,
           uuid: pushUuid,
-          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization })
+          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
+          ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };
 
         // 根据设置选择发送方式
@@ -349,7 +350,20 @@ export default defineBackground(() => {
   // 处理推送请求
   async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
     try {
-      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid, ...(authorization && { authorization }) };
+      // 获取应用设置
+      const settingsResult = await browser.storage.local.get('bark_app_settings');
+      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      const pushParams: PushParams = {
+        apiURL,
+        message,
+        sound,
+        url,
+        title,
+        uuid,
+        ...(authorization && { authorization }),
+        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+      };
       const response = await sendPush(pushParams);
       return response; // 返回PushResponse
     } catch (error) {
@@ -362,7 +376,20 @@ export default defineBackground(() => {
   // 处理加密推送请求
   async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
     try {
-      const pushParams: PushParams = { apiURL, message, sound, url, title, uuid, ...(authorization && { authorization }) };
+      // 获取应用设置
+      const settingsResult = await browser.storage.local.get('bark_app_settings');
+      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      const pushParams: PushParams = {
+        apiURL,
+        message,
+        sound,
+        url,
+        title,
+        uuid,
+        ...(authorization && { authorization }),
+        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+      };
       const response = await sendPush(pushParams, encryptionConfig);
       return response; // 返回 PushResponse
     } catch (error) {
@@ -580,7 +607,8 @@ export default defineBackground(() => {
           url,
           title,
           uuid: pushUuid,
-          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization })
+          ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
+          ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };
 
         // 根据设置选择发送方式

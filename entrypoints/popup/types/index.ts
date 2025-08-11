@@ -59,6 +59,8 @@ export interface AppSettings {
     encryptionConfig?: EncryptionConfig;
     sound?: string;
     enableBasicAuth: boolean;
+    enableCustomAvatar?: boolean; // 是否启用自定义头像
+    barkAvatarUrl?: string; // 自定义头像URL
 }
 
 // 平台类型

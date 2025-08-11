@@ -130,6 +130,15 @@
             "typewriters": "Typewriters",
             "update": "Update"
         },
+        "avatar": {
+            "enable": "Enable Custom Avatar",
+            "url": "Avatar URL",
+            "url_invalid": "Invalid avatar URL, please check and try again",
+            "url_help": "Please enter a valid and stable image URL, leave blank to use Bark's app icon, supporting PNG / JPG formats",
+            "preview": "Preview",
+            "save_failed": "Failed to save avatar settings",
+            "dialog_title": "Set Custom Avatar"
+        },
         "encryption": {
             "title": "Encryption Settings",
             "enable": "Enable Encryption",

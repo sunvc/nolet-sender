@@ -32,7 +32,8 @@ export async function sendPushMessage(device: Device, message: string, sound?: s
             uuid: pushUuid,
             ...(title && { title }), // 标题 (可选)
             ...(url && { url }), // 链接 (可选)
-            ...(device.authorization && { authorization: device.authorization }) // 认证信息 (可选)
+            ...(device.authorization && { authorization: device.authorization }), // 认证信息 (可选)
+            ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }) // 自定义头像 (可选)
         };
 
         // 根据是否启用加密选择发送方式

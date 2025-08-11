@@ -48,6 +48,7 @@ import LanguageSelector from '../components/LanguageSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
+import AvatarSetting from '../components/AvatarSetting';
 import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
 
 interface SettingsProps {
@@ -454,6 +455,7 @@ export default function Settings({
                             <LanguageSelector />
                         </Box>
 
+                        <Divider />
                         <Box>
                             <Typography variant="subtitle1" gutterBottom>
                                 {/* 右键菜单 */}
@@ -492,18 +494,25 @@ export default function Settings({
                                 {/* 功能开关 */}
                                 {t('settings.features.title')}
                             </Typography>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={appSettings?.enableBasicAuth || false}
-                                        onChange={(e) => handleBasicAuthToggle(e.target.checked)}
-                                    />
-                                }
-                                // Basic Auth
-                                label={t('device.basic_auth.title')}
-                                sx={{ userSelect: 'none' }}
-                            />
+
+                            <Stack direction="column" alignItems="flex-start" gap={1}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={appSettings?.enableBasicAuth || false}
+                                            onChange={(e) => handleBasicAuthToggle(e.target.checked)}
+                                        />
+                                    }
+                                    // Basic Auth
+                                    label={t('device.basic_auth.title')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                                {/* 自定义头像 */}
+                                <AvatarSetting />
+                            </Stack>
                         </Box>
+
+                        <Divider />
 
                         <Box>
                             <Stack direction="row" alignItems="center" justifyContent="space-between">

@@ -130,6 +130,15 @@
             "typewriters": "敲打字机",
             "update": "整点新闻"
         },
+        "avatar": {
+            "enable": "启用自定义头像",
+            "url": "头像 URL",
+            "url_invalid": "头像 URL 无效，请检查后重试",
+            "url_help": "请输入有效且稳定的图片 URL 地址, 关闭则使用 Bark 的应用图标, 支持 PNG / JPG 格式",
+            "preview": "效果预览",
+            "save_failed": "保存头像设置失败",
+            "dialog_title": "设置自定义头像"
+        },
         "encryption": {
             "title": "加密设置",
             "enable": "启用加密",
