@@ -153,6 +153,11 @@
                 "update_failed": "更新加密設定失敗：{{message}}",
                 "config_save_failed": "儲存加密配置失敗：{{message}}"
             }
+        },
+        "api_v2": {
+            "title": "啟用 API v2",
+            "update_success": "API v2 已啟用，現在可以批量傳送了。",
+            "update_failed": "更新裝置失敗: {{message}}"
         }
     },
     "about": {

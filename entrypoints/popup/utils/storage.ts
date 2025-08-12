@@ -85,13 +85,33 @@ export async function addDevice(alias: string, apiURL: string, authorization?: {
     const seconds = String(date.getSeconds()).padStart(2, '0');
     const createdAt = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 
+    // 格式化 URL
+    const formattedApiURL = formatApiURL(apiURL);
+
+    let server: string | undefined;
+    let deviceKey: string | undefined;
+
+    try {
+        const url = new URL(formattedApiURL);
+        server = `${url.protocol}//${url.host}`;
+
+        const pathParts = url.pathname.split('/').filter(part => part);
+        if (pathParts.length > 0) {
+            deviceKey = pathParts[pathParts.length - 1];
+        }
+    } catch (error) {
+        console.error('解析API URL失败:', error);
+    }
+
     const device: Device = {
         id: timestamp.toString(),
         alias,
-        apiURL: formatApiURL(apiURL), // 使用格式化的URL
+        apiURL: formattedApiURL,
         createdAt,
         timestamp,
-        ...(authorization && { authorization }) // 如果提供了认证信息，则添加到设备中
+        ...(authorization && { authorization }), // 如果提供了认证信息，则添加到设备中
+        ...(server && { server }), // 服务器地址
+        ...(deviceKey && { deviceKey }) // deviceKey
     };
 
     const devices = await getDevices();

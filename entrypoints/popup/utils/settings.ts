@@ -18,7 +18,8 @@ const DEFAULT_SETTINGS: AppSettings = {
         key: ''
     },
     sound: undefined, // 推送铃声，默认不设置
-    enableBasicAuth: false // Basic Auth，默认关闭
+    enableBasicAuth: false, // Basic Auth，默认关闭
+    enableApiV2: false // API v2，默认关闭
 };
 
 // 获取浏览器存储API

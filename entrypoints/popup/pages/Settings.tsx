@@ -17,7 +17,8 @@ import {
     Tooltip,
     Popover,
     LinearProgress,
-    Divider
+    Divider,
+    Snackbar
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -50,6 +51,7 @@ import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
 import AvatarSetting from '../components/AvatarSetting';
 import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
+import { saveDevices } from '../utils/storage';
 
 interface SettingsProps {
     devices: Device[];
@@ -83,6 +85,7 @@ export default function Settings({
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
     const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
+    const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
 
     // 检测浏览器类型
     const browserType = detectBrowser();
@@ -153,6 +156,69 @@ export default function Settings({
         } catch (error) {
             // 保存铃声设置失败: {{message}}
             setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 处理 API v2 开关切换
+    const handleApiV2Toggle = async (enabled: boolean) => {
+        try {
+            setLoading(true);
+            await updateAppSetting('enableApiV2', enabled);
+
+            // 如果开启API v2，更新现有设备数据
+            if (enabled && devices.length > 0) {
+                try {
+                    // 解析 apiURL 为 server 和 deviceKey
+                    const updatedDevices = devices.map(device => {
+                        // 如果设备已经有 server 和 deviceKey 不需要更新
+                        if (device.server && device.deviceKey) {
+                            return device;
+                        }
+
+                        try {
+                            const url = new URL(device.apiURL);
+                            const server = `${url.protocol}//${url.host}`;
+
+                            // 移除开头和结尾的斜杠，获取 deviceKey
+                            const pathParts = url.pathname.split('/').filter(part => part);
+                            let deviceKey: string | undefined;
+                            if (pathParts.length > 0) {
+                                deviceKey = pathParts[pathParts.length - 1];
+                            }
+
+                            if (server && deviceKey) {
+                                return {
+                                    ...device,
+                                    server,
+                                    deviceKey
+                                };
+                            }
+                        } catch (error) {
+                            console.error('解析API URL失败:', error, device.apiURL);
+                        }
+
+                        return device;
+                    });
+
+                    await saveDevices(updatedDevices); // 保存更新后的设备列表
+
+                    // 显示Toast提示
+                    setToast({
+                        open: true,
+                        message: t('settings.api_v2.update_success')
+                    });
+                } catch (error) {
+                    console.error('更新设备数据失败:', error);
+                    setToast({
+                        open: true,
+                        message: t('settings.api_v2.update_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') })
+                    });
+                }
+            }
+        } catch (error) {
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        } finally {
+            setLoading(false); // 顶部进度条
         }
     };
 
@@ -509,6 +575,26 @@ export default function Settings({
                                 />
                                 {/* 自定义头像 */}
                                 <AvatarSetting />
+                                {/* API v2 开关 */}
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={appSettings?.enableApiV2 || false}
+                                            onChange={(e) => handleApiV2Toggle(e.target.checked)}
+                                        />
+                                    }
+                                    label={t('settings.api_v2.title')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                                {/* 启用完整的参数配置 */}
+                                {/* <FormControlLabel
+                                    control={
+                                        <Switch
+                                        />
+                                    }
+                                    label="启用完整的参数配置"
+                                    sx={{ userSelect: 'none' }}
+                                /> */}
                             </Stack>
                         </Box>
 
@@ -806,6 +892,14 @@ export default function Settings({
                 onClose={() => setSoundDialogOpen(false)}
                 onSave={handleSoundSave}
                 currentSound={appSettings?.sound || ''}
+            />
+
+            {/* Toast提示 */}
+            <Snackbar
+                open={toast.open}
+                autoHideDuration={3000}
+                onClose={() => setToast({ ...toast, open: false })}
+                message={toast.message}
             />
         </Box>
     );

@@ -153,6 +153,11 @@
                 "update_failed": "Failed to update encryption settings: {{message}}",
                 "config_save_failed": "Failed to save encryption config: {{message}}"
             }
+        },
+        "api_v2": {
+            "title": "Enable API v2",
+            "update_success": "API v2 enabled, now you can batch push messages.",
+            "update_failed": "Failed to update devices: {{message}}"
         }
     },
     "about": {

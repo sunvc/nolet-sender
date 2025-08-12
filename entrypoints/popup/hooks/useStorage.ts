@@ -17,6 +17,7 @@ export function useDevices() {
                 getDefaultDevice()
             ]);
             setDevices(deviceList);
+            // console.debug('deviceList', deviceList);
             setDefaultDeviceId(defaultId);
         } catch (error) {
             console.error('加载设备数据失败:', error);

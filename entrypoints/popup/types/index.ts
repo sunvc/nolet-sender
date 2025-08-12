@@ -11,6 +11,8 @@ export interface Device {
         pwd: string;
         value: string; // `basic btoa(${username}:${password})`
     };
+    server?: string; // 服务器地址 为 API v2 批量推送使用
+    deviceKey?: string; // 设备密钥 为 API v2 批量推送使用
 }
 
 // 推送响应接口
@@ -61,6 +63,7 @@ export interface AppSettings {
     enableBasicAuth: boolean;
     enableCustomAvatar?: boolean; // 是否启用自定义头像
     barkAvatarUrl?: string; // 自定义头像URL
+    enableApiV2?: boolean; // 是否启用API v2
 }
 
 // 平台类型
