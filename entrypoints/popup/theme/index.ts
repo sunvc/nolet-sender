@@ -216,6 +216,14 @@ const getCommonTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
                     },
                 },
             },
+            defaultProps: {
+                slotProps: {
+                    htmlInput: {
+                        spellCheck: false, // 禁用拼写检查
+                        autoComplete: 'off',
+                    },
+                },
+            },
         },
         // 切换按钮组件样式 
         MuiToggleButton: {

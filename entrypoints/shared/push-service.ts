@@ -55,6 +55,20 @@ export interface PushParams {
         pwd: string;
         value: string; // Basic <凭证>
     };
+    // 添加其他 MessagePayload 参数
+    subtitle?: string;
+    device_key?: string;
+    device_keys?: string[];
+    level?: 'critical' | 'active' | 'timeSensitive' | 'passive';
+    volume?: number;
+    badge?: number;
+    call?: '1';
+    autoCopy?: '1';
+    copy?: string;
+    group?: string;
+    isArchive?: '1';
+    action?: 'none';
+    delete?: '1';
 }
 
 /**
@@ -270,14 +284,27 @@ export async function sendEncryptedPush(msgPayload: MessagePayload, apiURL: stri
 export async function sendPush(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
     // 构建消息体
     const msgPayload: MessagePayload = {
+        // 基础参数
         id: params.uuid || generateUUID(),
         body: params.message,
         title: params.title,
         sound: params.sound,
         url: params.url,
-        copy: params.message,
-        autoCopy: "1", // 开启自动复制推送内容
+        copy: params.copy || params.message,
+        autoCopy: params.autoCopy || "1", // 默认开启自动复制推送内容
         icon: params.icon,
+        // 其他参数
+        subtitle: params.subtitle,
+        device_key: params.device_key,
+        device_keys: params.device_keys,
+        level: params.level,
+        volume: params.volume,
+        badge: params.badge,
+        call: params.call,
+        group: params.group,
+        isArchive: params.isArchive,
+        action: params.action,
+        delete: params.delete
     };
 
     if (encryptionConfig?.key) {
@@ -293,29 +320,48 @@ export async function sendPush(params: PushParams, encryptionConfig?: Encryption
  * 获取请求参数列表（用于历史记录）
  */
 export function getRequestParameters(params: PushParams, isEncrypted: boolean): Array<{ key: string; value: string }> {
+    // 构建基本参数对象
+    const paramMap: Record<string, string | undefined> = {
+        message: params.message,
+        autoCopy: params.autoCopy || '1',
+        copy: params.copy || params.message,
+        id: params.uuid || '',
+        sound: params.sound || '',
+        title: params.title,
+        url: params.url,
+        subtitle: params.subtitle,
+        device_key: params.device_key,
+        device_keys: params.device_keys?.join(','),
+        level: params.level,
+        volume: params.volume?.toString(),
+        badge: params.badge?.toString(),
+        call: params.call,
+        icon: params.icon,
+        group: params.group,
+        isArchive: params.isArchive,
+        action: params.action,
+        delete: params.delete
+    };
+
+    // 过滤有效参数并转换为数组格式
+    const filteredParams = Object.entries(paramMap)
+        .filter(([_, value]) => value !== undefined)
+        .map(([key, value]) => ({ key, value: value as string }));
+
+    // 如果是加密模式，添加加密相关参数
     if (isEncrypted) {
+        // 保留id和sound参数
+        const baseParams = filteredParams.filter(param =>
+            param.key === 'id' || param.key === 'sound'
+        );
+
+        // 添加加密特有参数
         return [
-            { key: 'iv', value: '***' }, // 加密参数隐藏
+            { key: 'iv', value: '***' },
             { key: 'ciphertext', value: '***' },
-            { key: 'id', value: params.uuid || '' },
-            { key: 'sound', value: params.sound || '' }
+            ...baseParams
         ];
-    } else {
-        const parameters = [
-            { key: 'message', value: params.message },
-            { key: 'autoCopy', value: '1' },
-            { key: 'copy', value: params.message },
-            { key: 'id', value: params.uuid || '' },
-            { key: 'sound', value: params.sound || '' }
-        ];
-
-        if (params.title) {
-            parameters.push({ key: 'title', value: params.title });
-        }
-        if (params.url) {
-            parameters.push({ key: 'url', value: params.url });
-        }
-
-        return parameters;
     }
+
+    return filteredParams;
 } 

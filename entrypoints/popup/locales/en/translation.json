@@ -162,6 +162,7 @@
     },
     "about": {
         "title": "About",
+        "version": "Version",
         "github": {
             "title": "GitHub",
             "description": "View source code or submit an issue",

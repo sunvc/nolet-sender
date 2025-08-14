@@ -86,6 +86,7 @@ export default function Settings({
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
     const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
     const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
+    const [version, setVersion] = useState<string | null>(null);
 
     // 检测浏览器类型
     const browserType = detectBrowser();
@@ -278,6 +279,15 @@ export default function Settings({
             setError(t('common.set_default_device_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') }));
         }
     };
+
+    useEffect(() => {
+        try {
+            const v = (window as any)?.chrome?.runtime?.getManifest?.()?.version ?? null;
+            setVersion(v);
+        } catch {
+            setVersion(null);
+        }
+    }, []);
 
     return (
         <Box
@@ -735,133 +745,153 @@ export default function Settings({
                     </Stack>
                 </Paper>
 
-                {/* 关于卡片 */}
-                <Paper
-                    elevation={2}
-                    sx={{
-                        p: 3,
-                        mb: 8 // 底部外边距
-                    }}
-                >
-                    <Stack spacing={3}>
-                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <InfoIcon />
-                            {/* 关于 */}
-                            {t('about.title')}
-                        </Typography>
+                <Box>
+                    {/* 关于卡片 */}
+                    <Paper
+                        elevation={2}
+                        sx={{
+                            p: 3,
+                            mb: 6, // 底部外边距
+                            zIndex: 2,
+                            position: 'relative'
+                        }}
+                    >
+                        <Stack spacing={3}>
+                            <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <InfoIcon />
+                                {/* 关于 */}
+                                {t('about.title')}
+                            </Typography>
 
-                        <List>
-                            <ListItem sx={{ px: 0 }}>
-                                <ListItemText
-                                    primary={
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <GitHubIcon fontSize="small" />
-                                            <Typography variant="body1">
-                                                {/* GitHub */}
-                                                {t('about.github.title')}
-                                            </Typography>
-                                        </Stack>
-                                    }
-                                    secondary={t('about.github.description')}
-                                    onClick={openGitHub}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <Tooltip title={t('about.github.description2')}>
-                                    <IconButton edge="end" onClick={openGitHub}>
-                                        <FavoriteBorderIcon />
+                            <List>
+                                <ListItem sx={{ px: 0 }}>
+                                    <ListItemText
+                                        primary={
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <GitHubIcon fontSize="small" />
+                                                <Typography variant="body1">
+                                                    {/* GitHub */}
+                                                    {t('about.github.title')}
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                        secondary={t('about.github.description')}
+                                        onClick={openGitHub}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Tooltip title={t('about.github.description2')}>
+                                        <IconButton edge="end" onClick={openGitHub}>
+                                            <FavoriteBorderIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </ListItem>
+
+                                <ListItem sx={{ px: 0 }}>
+                                    <ListItemText
+                                        primary={
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <BugReportIcon fontSize="small" />
+                                                <Typography variant="body1">
+                                                    {/* 问题反馈 */}
+                                                    {t('about.feedback.title')}
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                        secondary={t('about.feedback.description')}
+                                        onClick={openGitHub}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <Tooltip title={t('about.feedback.description2')}>
+                                        <IconButton edge="end" onClick={openFeedback}>
+                                            <ChatBubbleOutlineIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                </ListItem>
+
+                                <Divider sx={{ my: 1 }} />
+
+                                <ListItem sx={{ px: 0 }}>
+                                    <ListItemText
+                                        primary={
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <StarBorderIcon fontSize="small" />
+                                                <Typography variant="body1">
+                                                    {/* 商店评分 */}
+                                                    {t('about.store_rating.title')}
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                        secondary={t('about.store_rating.description')}
+                                        onClick={openStoreRating}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <IconButton edge="end" onClick={openStoreRating}>
+                                        <OpenInNewIcon />
                                     </IconButton>
-                                </Tooltip>
-                            </ListItem>
+                                </ListItem>
 
-                            <ListItem sx={{ px: 0 }}>
-                                <ListItemText
-                                    primary={
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <BugReportIcon fontSize="small" />
-                                            <Typography variant="body1">
-                                                {/* 问题反馈 */}
-                                                {t('about.feedback.title')}
-                                            </Typography>
-                                        </Stack>
-                                    }
-                                    secondary={t('about.feedback.description')}
-                                    onClick={openGitHub}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <Tooltip title={t('about.feedback.description2')}>
-                                    <IconButton edge="end" onClick={openFeedback}>
-                                        <ChatBubbleOutlineIcon />
+                                <ListItem sx={{ px: 0 }}>
+                                    <ListItemText
+                                        primary={
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <TelegramIcon fontSize="small" />
+                                                <Typography variant="body1">
+                                                    {/* Telegram 频道 */}
+                                                    {t('about.telegram.title')}
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                        secondary={t('about.telegram.description')}
+                                        onClick={openTelegramChannel}
+                                        sx={{ cursor: 'pointer' }}
+                                    />
+                                    <IconButton edge="end" onClick={openTelegramChannel}>
+                                        <OpenInNewIcon />
                                     </IconButton>
-                                </Tooltip>
-                            </ListItem>
+                                </ListItem>
 
-                            <Divider sx={{ my: 1 }} />
+                                <ListItem sx={{ px: 0 }}>
+                                    <ListItemText
+                                        primary={
+                                            <Stack direction="row" alignItems="center" spacing={1}>
+                                                <EmailIcon fontSize="small" />
+                                                <Typography variant="body1">
+                                                    {/* 联系方式 */}
+                                                    {t('about.contact.title')}
+                                                </Typography>
+                                            </Stack>
+                                        }
+                                        secondary={
+                                            <Link
+                                                href={`mailto:${t('about.contact.email')}`}
+                                                underline="hover"
+                                                color="inherit"
+                                            >
+                                                {t('about.contact.email')}
+                                            </Link>
+                                        }
+                                    />
+                                </ListItem>
+                            </List>
+                        </Stack>
+                    </Paper>
+                    {/* 版本 */}
+                    {version && (
+                        <Stack sx={{
+                            textAlign: 'center',
+                            position: 'sticky',
+                            width: '100%',
+                            bottom: '8px',
+                            zIndex: 1,
+                            opacity: 0.5
+                        }}>
+                            <Typography variant="caption" color="text.secondary">
+                                {`${t('about.version')}: v${version}`}
+                            </Typography>
+                        </Stack>
+                    )}
+                </Box>
 
-                            <ListItem sx={{ px: 0 }}>
-                                <ListItemText
-                                    primary={
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <StarBorderIcon fontSize="small" />
-                                            <Typography variant="body1">
-                                                {/* 商店评分 */}
-                                                {t('about.store_rating.title')}
-                                            </Typography>
-                                        </Stack>
-                                    }
-                                    secondary={t('about.store_rating.description')}
-                                    onClick={openStoreRating}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <IconButton edge="end" onClick={openStoreRating}>
-                                    <OpenInNewIcon />
-                                </IconButton>
-                            </ListItem>
-
-                            <ListItem sx={{ px: 0 }}>
-                                <ListItemText
-                                    primary={
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <TelegramIcon fontSize="small" />
-                                            <Typography variant="body1">
-                                                {/* Telegram 频道 */}
-                                                {t('about.telegram.title')}
-                                            </Typography>
-                                        </Stack>
-                                    }
-                                    secondary={t('about.telegram.description')}
-                                    onClick={openTelegramChannel}
-                                    sx={{ cursor: 'pointer' }}
-                                />
-                                <IconButton edge="end" onClick={openTelegramChannel}>
-                                    <OpenInNewIcon />
-                                </IconButton>
-                            </ListItem>
-
-                            <ListItem sx={{ px: 0 }}>
-                                <ListItemText
-                                    primary={
-                                        <Stack direction="row" alignItems="center" spacing={1}>
-                                            <EmailIcon fontSize="small" />
-                                            <Typography variant="body1">
-                                                {/* 联系方式 */}
-                                                {t('about.contact.title')}
-                                            </Typography>
-                                        </Stack>
-                                    }
-                                    secondary={
-                                        <Link
-                                            href={`mailto:${t('about.contact.email')}`}
-                                            underline="hover"
-                                            color="inherit"
-                                        >
-                                            {t('about.contact.email')}
-                                        </Link>
-                                    }
-                                />
-                            </ListItem>
-                        </List>
-                    </Stack>
-                </Paper>
             </Box>
 
             <DeviceDialog

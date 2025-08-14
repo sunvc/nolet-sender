@@ -250,14 +250,14 @@ export default defineContentScript({
                                 <div class="form-area">
                                     <div class="input-group img-input-container">
                                         <label for="img-src">${i18n.imageLink || '图片链接'}:</label>
-                                        <textarea id="img-src" class="textarea">${imgSrc}</textarea>
+                                        <textarea id="img-src" class="textarea" spellcheck="false" autocomplete="off">${imgSrc}</textarea>
                                         <button class="btn btn-primary send-img-src">${i18n.sendImageLink || '发送图片链接'}</button>
                                         <div class="img-message" style="visibility: hidden; color: #f44336; font-size: 0.75em; margin-top: 0.25em;">${i18n.imageLinkInvalid || '只能发送http或https开头的图片链接'}</div>
                                     </div>
                                     ${imgAlt ? `
                                     <div class="input-group">
                                         <label for="img-alt">${i18n.altText || '替代文本'}:</label>
-                                        <textarea id="img-alt" class="textarea">${imgAlt}</textarea>
+                                        <textarea id="img-alt" class="textarea" spellcheck="false" autocomplete="off">${imgAlt}</textarea>
                                         <button class="btn btn-primary send-img-alt">${i18n.sendAltText || '发送替代文本'}</button>
                                     </div>
                                     ` : ''}
@@ -293,14 +293,14 @@ export default defineContentScript({
                                 <div class="tab-pane current-content active">
                                     <div class="input-group">
                                         <label for="current-text">${i18n.currentElementText || '当前元素文本'}:</label>
-                                        <textarea id="current-text" class="textarea">${clickedElement.innerText}</textarea>
+                                        <textarea id="current-text" class="textarea" spellcheck="false" autocomplete="off">${clickedElement.innerText}</textarea>
                                         <button class="btn btn-primary send-current-text">${i18n.sendCurrentElementText || '发送当前元素文本'}</button>
                                     </div>
                                 </div>
                                 <div class="tab-pane parent-content">
                                     <div class="input-group">
                                         <label for="parent-text">${i18n.parentElementText || '父元素文本'}:</label>
-                                        <textarea id="parent-text" class="textarea">${parentText}</textarea>
+                                        <textarea id="parent-text" class="textarea" spellcheck="false" autocomplete="off">${parentText}</textarea>
                                         <button class="btn btn-primary send-parent-text">${i18n.sendParentElementText || '发送父元素文本'}</button>
                                     </div>
                                 </div>
@@ -315,11 +315,11 @@ export default defineContentScript({
                         <div class="section-title">${i18n.pageLink || '页面链接'}</div>
                         <div class="input-group">
                             <label for="page-title">${i18n.pageTitle || '页面标题'}:</label>
-                            <input type="text" id="page-title" class="input" value="${document.title}">
+                            <input type="text" id="page-title" class="input" value="${document.title}" spellcheck="false" autocomplete="off">
                         </div>
                         <div class="input-group">
                             <label for="page-url">${i18n.pageLink || '页面链接'}:</label>
-                            <textarea id="page-url" class="textarea">${pageUrl}</textarea>
+                            <textarea id="page-url" class="textarea" spellcheck="false" autocomplete="off">${pageUrl}</textarea>
                             <button class="btn btn-primary send-page-url">${i18n.sendPageLink || '发送页面链接'}</button>
                         </div>
                     </div>
@@ -339,7 +339,7 @@ export default defineContentScript({
                                 ${hasLinkInfo ? `
                                 <div class="input-group">
                                     <label for="context-link-url">${i18n.linkAddress || '链接地址'}:</label>
-                                    <textarea id="context-link-url" class="textarea">${contextInfo.linkUrl || ''}</textarea>
+                                    <textarea id="context-link-url" class="textarea" spellcheck="false" autocomplete="off">${contextInfo.linkUrl || ''}</textarea>
                                     ${contextInfo.linkUrl ? `<button class="btn btn-primary send-context-link">${i18n.sendLink || '发送链接'}</button>` : ''}
                                 </div>
                                 ` : ''}
@@ -347,7 +347,7 @@ export default defineContentScript({
                                 ${hasSelectionText ? `
                                 <div class="input-group">
                                     <label for="context-selection">${i18n.selectedText || '选中文本'}:</label>
-                                    <textarea id="context-selection" class="textarea">${contextInfo.selectionText || ''}</textarea>
+                                    <textarea id="context-selection" class="textarea" spellcheck="false" autocomplete="off">${contextInfo.selectionText || ''}</textarea>
                                     ${contextInfo.selectionText ? `<button class="btn btn-primary send-context-selection">${i18n.sendSelectedText || '发送选中文本'}</button>` : ''}
                                 </div>
                                 ` : ''}

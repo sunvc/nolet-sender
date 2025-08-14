@@ -162,6 +162,7 @@
     },
     "about": {
         "title": "關於",
+        "version": "版本",
         "github": {
             "title": "GitHub",
             "description": "瀏覽原始碼或提交問題",

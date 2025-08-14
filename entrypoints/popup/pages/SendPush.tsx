@@ -504,6 +504,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         variant="outlined"
                         size="small"
                         fullWidth
+                        autoFocus
                     />
 
                     {result && (
