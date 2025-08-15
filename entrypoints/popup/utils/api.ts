@@ -11,8 +11,17 @@ import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionCon
  * @param uuid 唯一标识符
  * @param title 标题
  * @param url 链接
+ * @param advancedParams 自定义参数
  */
-export async function sendPushMessage(device: Device, message: string, sound?: string, uuid?: string, title?: string, url?: string): Promise<PushResponse> {
+export async function sendPushMessage(
+    device: Device,
+    message: string,
+    sound?: string,
+    uuid?: string,
+    title?: string,
+    url?: string,
+    advancedParams?: Record<string, any>
+): Promise<PushResponse> {
     let response: PushResponse;
     let method: 'GET' | 'POST' = 'GET';
     let isEncrypted = false;
@@ -25,15 +34,33 @@ export async function sendPushMessage(device: Device, message: string, sound?: s
         // 使用传入的UUID或生成新的
         const pushUuid = uuid || generateUUID();
 
+        // 处理自定义参数
+        let processedAdvancedParams: Record<string, any> | undefined;
+        if (advancedParams) {
+            // 过滤掉值为空字符串或null的属性
+            processedAdvancedParams = Object.fromEntries(
+                Object.entries(advancedParams).filter(([_, value]) =>
+                    value !== "" && value !== null && value !== undefined
+                )
+            );
+        }
+
         const pushParams: PushParams = {
             apiURL: device.apiURL,
             message,
             sound: sound || settings.sound,
             uuid: pushUuid,
-            ...(title && { title }), // 标题 (可选)
-            ...(url && { url }), // 链接 (可选)
+            // 优先使用自定义参数中的 title, url
+            title: processedAdvancedParams?.title || title,
+            url: processedAdvancedParams?.url || url,
             ...(device.authorization && { authorization: device.authorization }), // 认证信息 (可选)
-            ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }) // 自定义头像 (可选)
+            ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }), // 自定义头像 (可选)
+            // 添加其他自定义参数，但排除已经处理过的 title, url
+            ...(processedAdvancedParams && Object.fromEntries(
+                Object.entries(processedAdvancedParams).filter(([key]) =>
+                    !['title', 'url'].includes(key)
+                )
+            ))
         };
 
         // 根据是否启用加密选择发送方式
@@ -57,9 +84,9 @@ export async function sendPushMessage(device: Device, message: string, sound?: s
             response,
             method,
             {
-                title,
+                title: pushParams.title, // 使用最终的 title 值
                 sound: sound || settings.sound,
-                url,
+                url: pushParams.url, // 使用最终的 url 值
                 isEncrypted,
                 uuid: pushUuid,
                 parameters,

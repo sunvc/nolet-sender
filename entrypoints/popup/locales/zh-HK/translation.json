@@ -158,6 +158,11 @@
             "title": "啟用 API v2",
             "update_success": "API v2 已啟用，現在可以批量發送了。",
             "update_failed": "更新裝置失敗: {{message}}"
+        },
+        "advanced_params": {
+            "enable": "啟用自訂參數",
+            "success_message": "已啟用自訂參數，可在發送頁面設定更多參數",
+            "reset_message": "已關閉自訂參數，參數設定已重置"
         }
     },
     "about": {
@@ -235,6 +240,33 @@
             "send_selected_text": "發送選取的文字",
             "send_link": "發送鏈接",
             "info": "由於該頁面無法被解析，請在點擊上方的選項確認需要發送的內容"
+        },
+        "advanced_params": {
+            "title": "自訂參數",
+            "p_title": "標題",
+            "p_subtitle": "副標題",
+            "p_badge": "角標",
+            "p_call": "提示聲",
+            "p_volume": "音量",
+            "p_level": "中斷級別",
+            "p_isArchive": "是否存檔",
+            "p_group": "通知分組",
+            "p_autoCopy": "自動複製",
+            "p_copy": "複製內容",
+            "p_url": "跳轉 URL",
+            "p_action": "點擊操作類型",
+            "tips": "Tips:",
+            "tips_1": "如需設定提示聲及加密參數，請點擊底部導航欄中的「設定」。",
+            "tips_2": "底部的分頁顯示已修改的參數，點擊可跳轉，按右鍵可重設。",
+            "tips_3": "點擊跳轉至參數｜右鍵還原為預設",
+            "tips_4": "部分參數需要組合使用, 例如: 音量需要配合重要警告, 活躍, 時效性的級別才可生效。",
+            "not_set": "未設定",
+            "critical": "重要警告",
+            "active": "活躍",
+            "timeSensitive": "時效性",
+            "passive": "被動",
+            "1": "1",
+            "0": "0"
         }
     },
     "encryption": {

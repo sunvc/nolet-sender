@@ -1,6 +1,6 @@
 {
     "ext_desc": {
-        "message": "A desktop browser extension that pushes text from webpages or clipboard to iOS devices using the Bark app."
+        "message": "Bark Sender is an open-source extension that sends webpage or clipboard text to iOS device with encryption and custom parameters."
     },
     "extension_installed": {
         "message": "Bark Sender installed"

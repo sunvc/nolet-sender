@@ -52,6 +52,7 @@ import SoundDialog from '../components/SoundDialog';
 import AvatarSetting from '../components/AvatarSetting';
 import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
 import { saveDevices } from '../utils/storage';
+import { DEFAULT_ADVANCED_PARAMS } from '../utils/settings';
 
 interface SettingsProps {
     devices: Device[];
@@ -220,6 +221,32 @@ export default function Settings({
             setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
         } finally {
             setLoading(false); // 顶部进度条
+        }
+    };
+
+    // 处理完整参数配置开关切换
+    const handleAdvancedParamsToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('enableAdvancedParams', enabled);
+
+            if (enabled) {
+                setToast({
+                    open: true,
+                    // 已启用自定义参数，可在发送页面设置更多参数
+                    message: t('settings.advanced_params.success_message')
+                });
+            } else {
+                // 关闭时，重置参数配置为默认值
+                const defaultParamsJson = JSON.stringify(DEFAULT_ADVANCED_PARAMS, null, 2);
+                await updateAppSetting('advancedParamsJson', defaultParamsJson);
+
+                setToast({
+                    open: true,
+                    message: t('settings.advanced_params.reset_message')
+                });
+            }
+        } catch (error) {
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
         }
     };
 
@@ -594,17 +621,20 @@ export default function Settings({
                                         />
                                     }
                                     label={t('settings.api_v2.title')}
-                                    sx={{ userSelect: 'none' }}
+                                    sx={{ userSelect: 'none', display: 'none' }}
                                 />
                                 {/* 启用完整的参数配置 */}
-                                {/* <FormControlLabel
+                                <FormControlLabel
                                     control={
                                         <Switch
+                                            checked={appSettings?.enableAdvancedParams || false}
+                                            onChange={(e) => handleAdvancedParamsToggle(e.target.checked)}
                                         />
                                     }
-                                    label="启用完整的参数配置"
+                                    // label="启用完整的参数配置"
+                                    label={t('settings.advanced_params.enable')}
                                     sx={{ userSelect: 'none' }}
-                                /> */}
+                                />
                             </Stack>
                         </Box>
 

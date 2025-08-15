@@ -2,6 +2,8 @@ import { PushResponse, EncryptionAlgorithm } from '../popup/types';
 
 /**
  * 消息体（最终发送给服务器的数据）
+ * 注意: 后续出现新的参数，需要在这里添加
+ * i18n 参考 https://github.com/Finb/Bark/blob/master/Bark/Localizable.xcstrings
  */
 export interface MessagePayload {
     body: string; // 推送内容（必需）
@@ -40,35 +42,18 @@ export interface MessagePayload {
 
 /**
  * 推送参数接口（前端传入的数据）
+ * 继承 MessagePayload 只添加特殊字段, 避免重复定义
  */
-export interface PushParams {
-    apiURL: string;
+export interface PushParams extends Omit<MessagePayload, 'body' | 'id'> {
+    apiURL: string; // API URL地址
     message: string; // *必填* 对应 MessagePayload 中的 body
-    sound?: string;
-    url?: string;
-    title?: string;
     uuid?: string; // 作为请求参数里的 id 作为唯一标识, 这个 id 后续修改撤回功能会用到 对应 MessagePayload 中的 id
-    icon?: string;
     authorization?: {
         type: 'basic';
         user: string;
         pwd: string;
         value: string; // Basic <凭证>
     };
-    // 添加其他 MessagePayload 参数
-    subtitle?: string;
-    device_key?: string;
-    device_keys?: string[];
-    level?: 'critical' | 'active' | 'timeSensitive' | 'passive';
-    volume?: number;
-    badge?: number;
-    call?: '1';
-    autoCopy?: '1';
-    copy?: string;
-    group?: string;
-    isArchive?: '1';
-    action?: 'none';
-    delete?: '1';
 }
 
 /**
@@ -282,29 +267,16 @@ export async function sendEncryptedPush(msgPayload: MessagePayload, apiURL: stri
  * 统一的推送服务 - 根据配置自动选择明文或加密方式
  */
 export async function sendPush(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
-    // 构建消息体
+    // 构建消息体 - 将PushParams转换为MessagePayload
     const msgPayload: MessagePayload = {
-        // 基础参数
-        id: params.uuid || generateUUID(),
+        // 特殊字段映射
         body: params.message,
-        title: params.title,
-        sound: params.sound,
-        url: params.url,
-        copy: params.copy || params.message,
-        autoCopy: params.autoCopy || "1", // 默认开启自动复制推送内容
-        icon: params.icon,
-        // 其他参数
-        subtitle: params.subtitle,
-        device_key: params.device_key,
-        device_keys: params.device_keys,
-        level: params.level,
-        volume: params.volume,
-        badge: params.badge,
-        call: params.call,
-        group: params.group,
-        isArchive: params.isArchive,
-        action: params.action,
-        delete: params.delete
+        id: params.uuid || generateUUID(),
+
+        // 复制其他所有字段 (除了 apiURL 和 authorization )
+        ...Object.entries(params)
+            .filter(([key]) => !['apiURL', 'message', 'uuid', 'authorization'].includes(key))
+            .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
     };
 
     if (encryptionConfig?.key) {
@@ -348,20 +320,14 @@ export function getRequestParameters(params: PushParams, isEncrypted: boolean): 
         .filter(([_, value]) => value !== undefined)
         .map(([key, value]) => ({ key, value: value as string }));
 
-    // 如果是加密模式，添加加密相关参数
+    // 如果是加密模式，添加加密相关参数，但保留所有原始参数
     if (isEncrypted) {
-        // 保留id和sound参数
-        const baseParams = filteredParams.filter(param =>
-            param.key === 'id' || param.key === 'sound'
-        );
-
-        // 添加加密特有参数
         return [
             { key: 'iv', value: '***' },
             { key: 'ciphertext', value: '***' },
-            ...baseParams
+            ...filteredParams // 保留所有参数，不再过滤
         ];
     }
 
     return filteredParams;
-} 
+}

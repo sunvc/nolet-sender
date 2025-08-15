@@ -64,6 +64,8 @@ export interface AppSettings {
     enableCustomAvatar?: boolean; // 是否启用自定义头像
     barkAvatarUrl?: string; // 自定义头像URL
     enableApiV2?: boolean; // 是否启用API v2
+    enableAdvancedParams?: boolean; // 是否启用完整参数配置
+    advancedParamsJson?: string; // 完整参数配置的 JSON
 }
 
 // 平台类型

@@ -158,6 +158,11 @@
             "title": "启用 API v2",
             "update_success": "API v2 已启用，现在可以批量推送了。",
             "update_failed": "更新设备失败: {{message}}"
+        },
+        "advanced_params": {
+            "enable": "启用自定义参数",
+            "success_message": "已启用完整参数配置，可在发送页面设置更多参数",
+            "reset_message": "已关闭完整参数配置，参数设置已重置"
         }
     },
     "about": {
@@ -235,6 +240,33 @@
             "send_selected_text": "发送选中文本",
             "send_link": "发送链接",
             "info": "由于该页面无法被解析，请在点击上方的选项确认需要发送的内容"
+        },
+        "advanced_params": {
+            "title": "自定义参数",
+            "p_title": "推送标题",
+            "p_subtitle": "推送副标题",
+            "p_level": "推送中断级别",
+            "p_volume": "推送音量",
+            "p_badge": "推送角标",
+            "p_call": "推送铃声",
+            "p_autoCopy": "自动复制",
+            "p_copy": "复制内容",
+            "p_group": "推送分组",
+            "p_isArchive": "是否保存推送",
+            "p_url": "点击推送时, 跳转的URL",
+            "p_action": "点击推送时, 弹窗的类型",
+            "tips": "Tips:",
+            "tips_1": "铃声和加密参数请点击底部导航栏的 \"修改配置\"。",
+            "tips_2": "底部的标签为已修改的参数, 点击可以跳转, 右键可以进行重置。",
+            "tips_3": "点击跳转到参数 | 右键重置为默认值",
+            "tips_4": "部分参数需要组合使用, 例如: 音量需要配合重要警告, 活跃, 时效性的级别才可生效。",
+            "not_set": "未设置",
+            "critical": "重要警告",
+            "active": "活跃",
+            "timeSensitive": "时效性",
+            "passive": "被动",
+            "1": "1",
+            "0": "0"
         }
     },
     "encryption": {

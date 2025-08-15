@@ -158,6 +158,10 @@
             "title": "Enable API v2",
             "update_success": "API v2 enabled, now you can batch push messages.",
             "update_failed": "Failed to update devices: {{message}}"
+        },
+        "advanced_params": {
+            "enable": "Enable Modify Parameters",
+            "success_message": "You have enabled the full parameter configuration, you can set more parameters on the send page."
         }
     },
     "about": {
@@ -235,6 +239,33 @@
             "send_selected_text": "Send selected text",
             "send_link": "Send link",
             "info": "Since this page cannot be parsed, please click the option above to confirm the content to send"
+        },
+        "advanced_params": {
+            "title": "Modify Parameters",
+            "p_title": "alert.title",
+            "p_subtitle": "alert.subtitle",
+            "p_badge": "badge",
+            "p_call": "sound",
+            "p_volume": "apns.customSound.volume",
+            "p_level": "interruption-level",
+            "p_isArchive": "isArchive (custom key)",
+            "p_group": "category (or custom key)",
+            "p_autoCopy": "autoCopy (custom key)",
+            "p_copy": "copy (custom key)",
+            "p_url": "url (custom key)",
+            "p_action": "action (custom key)",
+            "tips": "Tips:",
+            "tips_1": "For sound and encrypted parameters, tap \"Settings\" in the bottom navigation.",
+            "tips_2": "Modified parameters are shown as tabs at the bottom. Tap to navigate, or right-click to reset.",
+            "tips_3": "Tap to jump to a parameter | Right-click to restore default",
+            "tips_4": "Some parameters need to be combined, for example: volume needs to be combined with critical, active, and time-sensitive levels to take effect.",
+            "not_set": "Not set",
+            "critical": "Critical",
+            "active": "Active",
+            "timeSensitive": "Time-sensitive",
+            "passive": "Passive",
+            "1": "1",
+            "0": "0"
         }
     },
     "encryption": {

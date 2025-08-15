@@ -5,8 +5,24 @@ import { AppSettings } from '../types';
 // 设置存储键名
 const SETTINGS_KEY = 'bark_app_settings';
 
+// 默认自定义参数配置
+export const DEFAULT_ADVANCED_PARAMS = {
+    title: "",
+    subtitle: "",
+    level: "",
+    volume: "5",
+    badge: "",
+    call: "",
+    autoCopy: "1",
+    copy: "",
+    group: "",
+    isArchive: "",
+    url: "",
+    action: ""
+};
+
 // 默认设置
-const DEFAULT_SETTINGS: AppSettings = {
+export const DEFAULT_SETTINGS: AppSettings = {
     enableContextMenu: true,
     enableInspectSend: true,
     themeMode: 'system',
@@ -19,7 +35,9 @@ const DEFAULT_SETTINGS: AppSettings = {
     },
     sound: undefined, // 推送铃声，默认不设置
     enableBasicAuth: false, // Basic Auth，默认关闭
-    enableApiV2: false // API v2，默认关闭
+    enableApiV2: false, // API v2，默认关闭
+    enableAdvancedParams: false, // 完整参数配置，默认关闭
+    advancedParamsJson: JSON.stringify(DEFAULT_ADVANCED_PARAMS, null, 2) // 默认自定义参数JSON
 };
 
 // 获取浏览器存储API

@@ -33,6 +33,7 @@ import DeviceSelect from '../components/DeviceSelect';
 import DeviceDialog from '../components/DeviceDialog';
 import ShortcutTips from '../components/ShortcutTips';
 import UrlDialog from '../components/UrlDialog';
+import AdvancedParamsEditor from '../components/AdvancedParamsEditor';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -63,12 +64,16 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     const [lastPushUuid, setLastPushUuid] = useState<string | null>(null); // 记录最后一次推送的UUID
     const [recallLoading, setRecallLoading] = useState(false); // 撤回操作加载状态
     const sendButtonRef = useRef<HTMLButtonElement>(null);
+    const paperRef = useRef<HTMLDivElement>(null); // 添加Paper的ref
     const [urlDialogOpen, setUrlDialogOpen] = useState(false);
     const [urlParams, setUrlParams] = useState<{
         url?: string;
         title?: string;
         selectionText?: string;
     }>({});
+
+    // 自定义参数
+    const [advancedParams, setAdvancedParams] = useState<Record<string, any> | undefined>(undefined);
 
     // 从本地存储恢复消息内容
     useEffect(() => {
@@ -183,7 +188,20 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice, shortcutClipboardText.trim(), undefined, pushUuid);
+            // 如果 JSON 格式有误, 显示提示但继续发送
+            if (advancedParams === undefined) {
+                console.warn('自定义参数无效，忽略自定义参数');
+            }
+
+            const response = await sendPushMessage(
+                selectedDevice,
+                shortcutClipboardText.trim(),
+                undefined,
+                pushUuid,
+                undefined,
+                undefined,
+                advancedParams
+            );
 
             if (response.code === 200) {
                 setShortcutDialogOpen(false);
@@ -309,7 +327,15 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice, message.trim(), undefined, pushUuid);
+            const response = await sendPushMessage(
+                selectedDevice,
+                message.trim(),
+                undefined,
+                pushUuid,
+                undefined,
+                undefined,
+                advancedParams
+            );
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -357,7 +383,15 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const pushUuid = generateUUID();
             setLastPushUuid(pushUuid);
 
-            const response = await sendPushMessage(selectedDevice, clipboardText.trim(), undefined, pushUuid);
+            const response = await sendPushMessage(
+                selectedDevice,
+                clipboardText.trim(),
+                undefined,
+                pushUuid,
+                undefined,
+                undefined,
+                advancedParams
+            );
 
             if (response.code === 200) {
                 /* 推送发送成功！ */
@@ -405,6 +439,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 message: t('push.errors.add_device', { message: error instanceof Error ? error.message : '未知错误' })
             });
         }
+    };
+
+    // 处理自定义参数变化
+    const handleAdvancedParamsChange = (params: Record<string, any> | undefined) => {
+        setAdvancedParams(params);
     };
 
     // 检测是否需要自动打开添加设备对话框
@@ -478,7 +517,18 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     return (
         <>
             <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
-                <Paper elevation={2} sx={{ p: 3, flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                <Paper
+                    ref={paperRef}
+                    elevation={2}
+                    sx={{
+                        p: 3,
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 3,
+                        transformOrigin: 'center center'
+                    }}
+                >
                     <Typography variant="h6" gutterBottom>
                         {/* 发送推送消息 */}
                         {t('push.title')}
@@ -504,7 +554,6 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         variant="outlined"
                         size="small"
                         fullWidth
-                        autoFocus
                     />
 
                     {result && (
@@ -557,6 +606,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             onClick={handleSend}
                             disabled={loading || clipboardLoading || !selectedDevice || !message.trim()}
                             fullWidth
+                            id="send-button"
                         >
                             {/* 发送中... / 发送推送 */}
                             {loading ? t('push.sending') : t('push.send')}
@@ -582,6 +632,13 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         />
                     </Stack>
                 </Paper>
+
+                {/* 自定义参数, 传递 paperRef */}
+                <AdvancedParamsEditor
+                    onChange={handleAdvancedParamsChange}
+                    paperRef={paperRef}
+                />
+
             </Box>
 
             {/* 快捷键触发的Dialog */}
