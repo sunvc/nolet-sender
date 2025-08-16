@@ -1,5 +1,6 @@
 import { initBackgroundI18n, watchLanguageChanges, getMessage } from './background/i18n-helper';
 import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from './shared/push-service';
+import { Device } from './popup/types';
 
 export default defineBackground(() => {
   // 初始化 i18n
@@ -9,7 +10,7 @@ export default defineBackground(() => {
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -20,7 +21,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendEncryptedPush') {
-      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization)
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -85,9 +86,12 @@ export default defineBackground(() => {
           apiURL: defaultDevice.apiURL,
           message: content,
           sound: settings.sound,
+          image: message.contentType === 'image' ? message.content : undefined,
           url,
           title,
           uuid: pushUuid,
+          useAPIv2: settings.enableApiV2,
+          devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };
@@ -97,8 +101,8 @@ export default defineBackground(() => {
         let isEncrypted = false;
 
         const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
-          ? (method = 'POST', isEncrypted = true, sendPush(pushParams, settings.encryptionConfig))
-          : (method = 'GET', sendPush(pushParams));
+          ? (method = 'POST', isEncrypted = true, sendPush(pushParams, settings.encryptionConfig, settings.enableApiV2 ? 'v2' : 'v1'))
+          : (method = 'GET', sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1'));
 
         sendPushPromise
           .then(response => {
@@ -348,11 +352,23 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[]) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('bark_app_settings');
       const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      // 如果没有传入 devices，则创建一个单设备对象
+      const singleDevice = authorization ? {
+        id: uuid || generateUUID(),
+        apiURL,
+        deviceKey: apiURL.split('/').filter(Boolean).pop() || '',
+        server: new URL(apiURL).origin,
+        alias: 'Default Device',
+        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
+        authorization
+      } : undefined;
 
       const pushParams: PushParams = {
         apiURL,
@@ -361,10 +377,13 @@ export default defineBackground(() => {
         url,
         title,
         uuid,
+        useAPIv2,
+        devices: devices || (singleDevice ? [singleDevice] : undefined),
         ...(authorization && { authorization }),
         ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
       };
-      const response = await sendPush(pushParams);
+      const apiVersion = useAPIv2 ? 'v2' : 'v1';
+      const response = await sendPush(pushParams, undefined, apiVersion);
       return response; // 返回PushResponse
     } catch (error) {
       // console.error('Background发送推送失败:', error);
@@ -374,11 +393,23 @@ export default defineBackground(() => {
   }
 
   // 处理加密推送请求
-  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) {
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[]) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('bark_app_settings');
       const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      // 如果没有传入 devices，则创建一个单设备对象
+      const singleDevice = authorization ? {
+        id: uuid || generateUUID(),
+        apiURL,
+        deviceKey: apiURL.split('/').filter(Boolean).pop() || '',
+        server: new URL(apiURL).origin,
+        alias: 'Default Device',
+        timestamp: Date.now(),
+        createdAt: new Date().toISOString(),
+        authorization
+      } : undefined;
 
       const pushParams: PushParams = {
         apiURL,
@@ -387,10 +418,13 @@ export default defineBackground(() => {
         url,
         title,
         uuid,
+        useAPIv2,
+        devices: devices || (singleDevice ? [singleDevice] : undefined),
         ...(authorization && { authorization }),
         ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
       };
-      const response = await sendPush(pushParams, encryptionConfig);
+      const apiVersion = useAPIv2 ? 'v2' : 'v1';
+      const response = await sendPush(pushParams, encryptionConfig, apiVersion);
       return response; // 返回 PushResponse
     } catch (error) {
       // console.error('Background 发送加密推送失败:', error);
@@ -452,6 +486,11 @@ export default defineBackground(() => {
 
       // 根据 enableInspectSend 设置决定 如果开启则使用新版的 inspect-send 否则使用旧版的 send-selection, send-page, send-link
       if (enableInspectSend) {
+        browser.contextMenus.create({
+          id: 'send-page',
+          title: getMessage('send_page_to_device', [defaultDevice.alias]),
+          contexts: ['action']
+        });
         // 创建新版右键菜单项 - inspect-send
         browser.contextMenus.create({
           id: 'inspect-send',
@@ -469,7 +508,7 @@ export default defineBackground(() => {
         browser.contextMenus.create({
           id: 'send-page',
           title: getMessage('send_page_to_device', [defaultDevice.alias]),
-          contexts: ['page']
+          contexts: ['page', 'action']
         });
 
         // browser.contextMenus.create({
@@ -607,6 +646,8 @@ export default defineBackground(() => {
           url,
           title,
           uuid: pushUuid,
+          useAPIv2: settings.enableApiV2,
+          devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };
@@ -615,10 +656,10 @@ export default defineBackground(() => {
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
           method = 'POST';
           isEncrypted = true;
-          response = await sendPush(pushParams, settings.encryptionConfig);
+          response = await sendPush(pushParams, settings.encryptionConfig, settings.enableApiV2 ? 'v2' : 'v1');
         } else {
-          method = 'GET';
-          response = await sendPush(pushParams);
+          method = settings.enableApiV2 ? 'POST' : 'GET';
+          response = await sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1');
         }
 
         // 获取请求参数

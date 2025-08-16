@@ -18,7 +18,8 @@ import {
     Popover,
     LinearProgress,
     Divider,
-    Snackbar
+    Snackbar,
+    Chip
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -125,6 +126,10 @@ export default function Settings({
     // 处理 Basic Auth 开关切换
     const handleBasicAuthToggle = async (enabled: boolean) => {
         try {
+            setToast({
+                open: enabled,
+                message: t('settings.basic_auth.success_message')
+            });
             await updateAppSetting('enableBasicAuth', enabled);
         } catch (error) {
             setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
@@ -599,6 +604,23 @@ export default function Settings({
                             </Typography>
 
                             <Stack direction="column" alignItems="flex-start" gap={1}>
+
+                                {/* 自定义头像 */}
+                                <AvatarSetting />
+
+                                {/* 启用完整的参数配置 */}
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={appSettings?.enableAdvancedParams || false}
+                                            onChange={(e) => handleAdvancedParamsToggle(e.target.checked)}
+                                        />
+                                    }
+                                    // label="启用完整的参数配置"
+                                    label={t('settings.advanced_params.enable')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                                <Divider sx={{ pt: 1 }} />
                                 <FormControlLabel
                                     control={
                                         <Switch
@@ -610,8 +632,6 @@ export default function Settings({
                                     label={t('device.basic_auth.title')}
                                     sx={{ userSelect: 'none' }}
                                 />
-                                {/* 自定义头像 */}
-                                <AvatarSetting />
                                 {/* API v2 开关 */}
                                 <FormControlLabel
                                     control={
@@ -620,19 +640,10 @@ export default function Settings({
                                             onChange={(e) => handleApiV2Toggle(e.target.checked)}
                                         />
                                     }
-                                    label={t('settings.api_v2.title')}
-                                    sx={{ userSelect: 'none', display: 'none' }}
-                                />
-                                {/* 启用完整的参数配置 */}
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={appSettings?.enableAdvancedParams || false}
-                                            onChange={(e) => handleAdvancedParamsToggle(e.target.checked)}
-                                        />
-                                    }
-                                    // label="启用完整的参数配置"
-                                    label={t('settings.advanced_params.enable')}
+                                    label={<Stack direction="row" alignItems="center" gap={1}>
+                                        <Typography variant="body1">{t('settings.api_v2.title')}</Typography>
+                                        <Chip label="Beta" size="small" color="default" variant="outlined" />
+                                    </Stack>}
                                     sx={{ userSelect: 'none' }}
                                 />
                             </Stack>

@@ -20,7 +20,8 @@ export async function sendPushMessage(
     uuid?: string,
     title?: string,
     url?: string,
-    advancedParams?: Record<string, any>
+    advancedParams?: Record<string, any>,
+    devices?: Device[]
 ): Promise<PushResponse> {
     let response: PushResponse;
     let method: 'GET' | 'POST' = 'GET';
@@ -48,6 +49,7 @@ export async function sendPushMessage(
         const pushParams: PushParams = {
             apiURL: device.apiURL,
             message,
+            devices: devices ? devices : [device], // 设备信息, 可能有多个设备
             sound: sound || settings.sound,
             uuid: pushUuid,
             // 优先使用自定义参数中的 title, url
@@ -63,13 +65,17 @@ export async function sendPushMessage(
             ))
         };
 
-        // 根据是否启用加密选择发送方式
+        // 根据是否启用加密和API v2选择发送方式
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
             method = 'POST';
             isEncrypted = true;
+            // 添加API v2标志
+            pushParams.useAPIv2 = settings.enableApiV2;
             response = await sendPushDirectly(pushParams, settings.encryptionConfig);
         } else {
-            method = 'GET';
+            method = settings.enableApiV2 ? 'POST' : 'GET';
+            // 添加API v2标志
+            pushParams.useAPIv2 = settings.enableApiV2;
             response = await sendPushDirectly(pushParams);
         }
 
@@ -140,7 +146,8 @@ export async function sendPushMessage(
 async function sendPushDirectly(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
     try {
         // 尝试直接发送
-        return await sendPush(params, encryptionConfig);
+        const apiVersion = params.useAPIv2 ? 'v2' : 'v1';
+        return await sendPush(params, encryptionConfig, apiVersion);
     } catch (error) {
         console.error('直接请求失败，尝试通过background script:', error);
 
@@ -154,7 +161,9 @@ async function sendPushDirectly(params: PushParams, encryptionConfig?: Encryptio
                 sound: params.sound,
                 url: params.url,
                 title: params.title,
-                uuid: params.uuid // 传递UUID给background script
+                uuid: params.uuid, // 传递UUID给background script
+                useAPIv2: params.useAPIv2, // 传递API版本标志
+                devices: params.devices // 传递设备列表
             };
 
             if (encryptionConfig) {

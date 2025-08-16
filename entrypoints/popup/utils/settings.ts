@@ -9,6 +9,7 @@ const SETTINGS_KEY = 'bark_app_settings';
 export const DEFAULT_ADVANCED_PARAMS = {
     title: "",
     subtitle: "",
+    image: "",
     level: "",
     volume: "5",
     badge: "",

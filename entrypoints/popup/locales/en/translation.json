@@ -139,6 +139,9 @@
             "save_failed": "Failed to save avatar settings",
             "dialog_title": "Set Custom Avatar"
         },
+        "basic_auth": {
+            "success_message": "Basic Auth enabled, now you can configure username and password in the \"Edit Device\" dialog"
+        },
         "encryption": {
             "title": "Encryption Settings",
             "enable": "Enable Encryption",
@@ -156,7 +159,7 @@
         },
         "api_v2": {
             "title": "Enable API v2",
-            "update_success": "API v2 enabled, now you can batch push messages.",
+            "update_success": "API v2 enabled, now you can use all parameters.",
             "update_failed": "Failed to update devices: {{message}}"
         },
         "advanced_params": {
@@ -242,18 +245,19 @@
         },
         "advanced_params": {
             "title": "Modify Parameters",
-            "p_title": "alert.title",
-            "p_subtitle": "alert.subtitle",
+            "p_title": "title",
+            "p_subtitle": "subtitle",
+            "p_image": "image URL",
             "p_badge": "badge",
             "p_call": "sound",
             "p_volume": "apns.customSound.volume",
             "p_level": "interruption-level",
-            "p_isArchive": "isArchive (custom key)",
-            "p_group": "category (or custom key)",
-            "p_autoCopy": "autoCopy (custom key)",
-            "p_copy": "copy (custom key)",
-            "p_url": "url (custom key)",
-            "p_action": "action (custom key)",
+            "p_isArchive": "isArchive",
+            "p_group": "category",
+            "p_autoCopy": "autoCopy",
+            "p_copy": "copy",
+            "p_url": "url",
+            "p_action": "action",
             "tips": "Tips:",
             "tips_1": "For sound and encrypted parameters, tap \"Settings\" in the bottom navigation.",
             "tips_2": "Modified parameters are shown as tabs at the bottom. Tap to navigate, or right-click to reset.",

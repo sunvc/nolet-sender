@@ -139,6 +139,9 @@
             "save_failed": "保存头像设置失败",
             "dialog_title": "设置自定义头像"
         },
+        "basic_auth": {
+            "success_message": "Basic Auth 现已启用，现在可以在 \"编辑设备\" 中配置用户名和密码了"
+        },
         "encryption": {
             "title": "加密设置",
             "enable": "启用加密",
@@ -156,7 +159,7 @@
         },
         "api_v2": {
             "title": "启用 API v2",
-            "update_success": "API v2 已启用，现在可以批量推送了。",
+            "update_success": "API v2 已启用，已完整支持所有参数。",
             "update_failed": "更新设备失败: {{message}}"
         },
         "advanced_params": {
@@ -245,6 +248,7 @@
             "title": "自定义参数",
             "p_title": "推送标题",
             "p_subtitle": "推送副标题",
+            "p_image": "推送图片地址",
             "p_level": "推送中断级别",
             "p_volume": "推送音量",
             "p_badge": "推送角标",

@@ -1,4 +1,4 @@
-import { PushResponse, EncryptionAlgorithm } from '../popup/types';
+import { PushResponse, EncryptionAlgorithm, Device } from '../popup/types';
 
 /**
  * 消息体（最终发送给服务器的数据）
@@ -9,6 +9,7 @@ export interface MessagePayload {
     body: string; // 推送内容（必需）
     title?: string; // 推送标题
     subtitle?: string; // 推送副标题
+    image?: string; // 推送图片地址，支持 URL 或 base64 编码的图片
     device_key?: string;
     /* 设备 key，API v2 使用
         实际服务器根据请求头 Content-Type 来判断是 API v1 还是 API v2
@@ -41,10 +42,19 @@ export interface MessagePayload {
 }
 
 /**
+ * API v2 消息体（body字段可选）
+ */
+export interface MessagePayloadv2 extends Omit<MessagePayload, 'body'> {
+    body?: string; // 推送内容（加密时可选）
+}
+
+/**
  * 推送参数接口（前端传入的数据）
  * 继承 MessagePayload 只添加特殊字段, 避免重复定义
  */
 export interface PushParams extends Omit<MessagePayload, 'body' | 'id'> {
+    useAPIv2?: boolean; // 是否使用 API v2
+    devices?: Device[]; // 完整的设备信息
     apiURL: string; // API URL地址
     message: string; // *必填* 对应 MessagePayload 中的 body
     uuid?: string; // 作为请求参数里的 id 作为唯一标识, 这个 id 后续修改撤回功能会用到 对应 MessagePayload 中的 id
@@ -264,22 +274,184 @@ export async function sendEncryptedPush(msgPayload: MessagePayload, apiURL: stri
 }
 
 /**
+ * 发送 API v2 推送消息
+ */
+export async function sendAPIv2Push(msgPayload: MessagePayloadv2, apiURL: string, authorization?: PushParams['authorization'], encryptionConfig?: EncryptionConfig, devices?: Device[]): Promise<PushResponse> {
+    // 获取服务器地址的 origin 部分
+    const url = new URL(apiURL);
+    const defaultEndpoint = `${url.origin}/push`;
+
+    // 如果没有设备信息，直接使用默认端点发送
+    if (!devices || devices.length === 0) {
+        return sendGroupAPIv2Push(msgPayload, defaultEndpoint, authorization, encryptionConfig);
+    }
+
+    // 按服务器分组设备
+    const deviceGroups = groupDevicesByServer(devices);
+    console.debug('设备分组:', deviceGroups);
+
+    // 存储所有请求的结果
+    const results: PushResponse[] = [];
+
+    // 对每个服务器分组进行批量请求
+    const requests = Object.entries(deviceGroups).map(async ([server, groupDevices]) => {
+        // 获取该组中的设备密钥（过滤掉可能的undefined值）
+        const deviceKeys = groupDevices
+            .map(device => device.deviceKey)
+            .filter((key): key is string => key !== undefined);
+
+        // 获取该组的授权信息（使用第一个设备的授权信息）
+        const groupAuth = groupDevices[0].authorization || authorization;
+
+        // 创建该组的请求负载（移除devices字段）
+        const { devices: _, ...payloadWithoutDevices } = msgPayload as any;
+        const groupPayload = {
+            ...payloadWithoutDevices,
+            device_keys: deviceKeys
+        };
+
+        try {
+            // 发送批量请求
+            const endpoint = `${server}/push`;
+            const result = await sendGroupAPIv2Push(groupPayload, endpoint, groupAuth, encryptionConfig);
+            results.push(result);
+            return result;
+        } catch (error) {
+            console.error(`服务器 ${server} 批量推送失败:`, error);
+            throw error;
+        }
+    });
+
+    // 等待所有请求完成
+    await Promise.all(requests);
+
+    // 合并结果
+    const mergedResult: PushResponse = {
+        code: results.every(r => r.code === 200) ? 200 : 400,
+        message: results.map(r => r.message).join('; '),
+        timestamp: Date.now()
+    };
+
+    return mergedResult;
+}
+
+/**
+ * 按服务器分组设备
+ */
+function groupDevicesByServer(devices: Device[]): Record<string, Device[]> {
+    return devices.reduce((groups, device) => {
+        if (!device.server) {
+            return groups;
+        }
+
+        const server = device.server;
+        if (!groups[server]) {
+            groups[server] = [];
+        }
+
+        groups[server].push(device);
+        return groups;
+    }, {} as Record<string, Device[]>);
+}
+
+/**
+ * 发送分组 API v2 推送消息
+ */
+async function sendGroupAPIv2Push(msgPayload: MessagePayloadv2, endpoint: string, authorization?: PushParams['authorization'], encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
+    // 准备请求头
+    const headers: Record<string, string> = {
+        'Content-Type': 'application/json; charset=utf-8'
+    };
+
+    if (authorization && authorization.value) {
+        headers['Authorization'] = authorization.value;
+    }
+
+    let payload = { ...msgPayload };
+
+    // 如果是加密模式，处理加密
+    if (encryptionConfig?.key) {
+        const iv = generateIV();
+        const plaintext = JSON.stringify({
+            body: payload.body,
+            title: payload.title,
+            ...Object.entries(payload)
+                .filter(([key]) => !['body', 'title'].includes(key))
+                .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
+        });
+
+        const ciphertext = await encryptAESCBC(plaintext, encryptionConfig.key, iv);
+
+        // 加密模式下，移除 body，title subtitle useAPIv2 字段，使用 ciphertext 和 iv
+        const { body, title, subtitle, ...payloadWithoutBody } = payload;
+        payload = {
+            ...payloadWithoutBody,
+            ciphertext,
+            iv
+        };
+
+        console.debug('API v2 加密请求:', {
+            endpoint,
+            iv,
+            plaintext,
+            ciphertext
+        });
+    } else {
+        console.debug('API v2 明文请求:', {
+            endpoint,
+            payload
+        });
+    }
+
+    // 发送请求
+    const response = await fetch(endpoint, {
+        method: 'POST',
+        mode: 'cors',
+        cache: 'no-cache',
+        headers,
+        body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result: PushResponse = await response.json();
+    console.debug('API v2 请求成功:', result);
+
+    return result;
+}
+
+/**
  * 统一的推送服务 - 根据配置自动选择明文或加密方式
  */
-export async function sendPush(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
+export async function sendPush(params: PushParams, encryptionConfig?: EncryptionConfig, apiVersion: 'v1' | 'v2' = 'v1'): Promise<PushResponse> {
     // 构建消息体 - 将PushParams转换为MessagePayload
     const msgPayload: MessagePayload = {
         // 特殊字段映射
         body: params.message,
         id: params.uuid || generateUUID(),
 
-        // 复制其他所有字段 (除了 apiURL 和 authorization )
+        // 复制其他所有字段 (除去前端内部使用的 apiURL, authorization, devices 等)
         ...Object.entries(params)
-            .filter(([key]) => !['apiURL', 'message', 'uuid', 'authorization'].includes(key))
+            .filter(([key, value]) => {
+                // 排除内部使用的字段
+                if (['apiURL', 'message', 'uuid', 'authorization', 'useAPIv2', 'devices'].includes(key)) {
+                    return false;
+                }
+                // 排除默认音量 (5)
+                if (key === 'volume' && (value === 5 || value === '5')) {
+                    return false;
+                }
+                return true;
+            })
             .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {})
     };
-
-    if (encryptionConfig?.key) {
+    // 判断是否是 API v2 模式
+    if (apiVersion === 'v2') {
+        // 使用 API v2 方式
+        return sendAPIv2Push(msgPayload as unknown as MessagePayloadv2, params.apiURL, params.authorization, encryptionConfig, params.devices);
+    } else if (encryptionConfig?.key) {
         // 使用加密方式
         return sendEncryptedPush(msgPayload, params.apiURL, params.authorization, encryptionConfig);
     } else {
