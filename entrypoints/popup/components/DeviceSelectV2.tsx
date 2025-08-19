@@ -174,29 +174,10 @@ export default function DeviceSelectV2({
                     userSelect: 'none',
                     minHeight: '1.25em',
                     display: 'block',
-                    transformStyle: 'preserve-3d',
-                    backfaceVisibility: 'hidden',
-                    animation: 'flipUpFade 0.6s ease-in-out 3s forwards', // 3s 延迟后执行动画
-                    '@keyframes flipUpFade': {
-                        '0%': {
-                            transform: 'rotateX(0deg) translateY(0px)',
-                            opacity: 0.6,
-                            visibility: 'visible',
-                        },
-                        '60%': {
-                            transform: 'rotateX(0deg) translateY(-8px)', // 翻转 + 上移一点
-                            opacity: 0,
-                            visibility: 'visible',
-                        },
-                        '100%': {
-                            transform: 'rotateX(180deg) translateY(-20px)', // 完全上移
-                            opacity: 0,
-                            visibility: 'hidden',
-                        }
-                    },
+                    opacity: 0.6,
                 }}
             >
-                {t('push.select_device_helper')}
+                {selectedDevices.length > 1 ? `${t('push.select_device_length', { count: selectedDevices.length })}` : t('push.select_device_helper')}
             </FormHelperText>
 
         </FormControl>

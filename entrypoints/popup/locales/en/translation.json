@@ -25,7 +25,9 @@
         "set_default_device_failed": "Failed to set default device: {{message}}",
         "delay": "Delay",
         "error_network": "Network Error",
-        "ping_server": "Check server connectivity"
+        "close": "Close",
+        "open": "Open",
+        "timeout": "Timeout"
     },
     "nav": {
         "send": "Push",
@@ -225,6 +227,7 @@
         "success": "Sent successfully!",
         "clipboard_empty": "Clipboard is empty or contains no valid content",
         "select_device_helper": "Support selecting multiple devices",
+        "select_device_length": "{{count}} devices selected",
         "recall": {
             "button": "Try Recall",
             "loading": "Recalling...",

@@ -1,6 +1,6 @@
 {
     "ext_desc": {
-        "message": "Bark Sender 係一款桌面瀏覽器擴充套件，可快速將網頁選取文字或剪貼簿內容推送到已安裝 Bark App 嘅 iOS 裝置，仲支援加密傳輸同自訂推送參數。"
+        "message": "Bark Sender 係一款桌面瀏覽器擴充，可快速將網頁選取文字或剪貼簿內容推送到已安裝 Bark App 嘅 iOS 裝置，仲支援加密傳輸同自訂參數。"
     },
     "extension_installed": {
         "message": "Bark Sender 已安裝"

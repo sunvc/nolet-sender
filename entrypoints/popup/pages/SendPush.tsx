@@ -37,7 +37,6 @@ import UrlDialog from '../components/UrlDialog';
 import UrlDialogV2 from '../components/UrlDialogV2';
 import AdvancedParamsEditor from '../components/AdvancedParamsEditor';
 import { getAppSettings } from '../utils/settings';
-import { Notification } from "../components/NotificationProvider";
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {

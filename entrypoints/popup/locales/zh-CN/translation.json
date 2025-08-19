@@ -25,7 +25,9 @@
         "set_default_device_failed": "设置默认设备失败: {{message}}",
         "delay": "延迟",
         "error_network": "网络错误",
-        "ping_server": "检测服务器连通性"
+        "close": "关闭",
+        "open": "打开",
+        "timeout": "超时"
     },
     "nav": {
         "send": "发起推送",
@@ -226,6 +228,7 @@
         "success": "发送成功！",
         "clipboard_empty": "剪切板为空或无有效内容",
         "select_device_helper": "支持选择多个设备",
+        "select_device_length": "已选 {{count}} 个设备",
         "recall": {
             "button": "尝试撤回",
             "loading": "撤回中...",

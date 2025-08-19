@@ -17,7 +17,6 @@ import { SnackbarProvider } from "notistack";
 
 import './i18n';
 import './App.css';
-import { NotificationProvider } from './components/NotificationProvider';
 
 // 主应用组件内容
 function AppContent() {
@@ -152,10 +151,8 @@ function AppContent() {
 function App() {
   return (
     <AppProvider>
-      <SnackbarProvider maxSnack={3}>
-        <NotificationProvider>
-          <AppContent />
-        </NotificationProvider>
+      <SnackbarProvider>
+        <AppContent />
       </SnackbarProvider>
     </AppProvider>
   );

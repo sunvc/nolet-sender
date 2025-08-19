@@ -22,6 +22,7 @@ const PingButton: React.FC<PingButtonProps> = ({ apiURL }) => {
     ) => {
         enqueueSnackbar("", {
             autoHideDuration: 3000,
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
             content: (key: SnackbarKey) => (
                 <Alert
                     severity={severity}
@@ -91,7 +92,7 @@ const PingButton: React.FC<PingButtonProps> = ({ apiURL }) => {
     };
 
     return (
-        <Tooltip title={t("common.ping_server")} placement="top">
+        <Tooltip title="PING" placement="right">
             <span>
                 <IconButton
                     color="primary"

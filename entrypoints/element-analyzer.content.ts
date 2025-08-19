@@ -33,6 +33,7 @@ export default defineContentScript({
             rightClickX = event.clientX;
             rightClickY = event.clientY;
             rightClickElements = getElementsFromPoint(rightClickX, rightClickY);
+            // console.debug('rightClickElements', rightClickX, rightClickY, rightClickElements);
         });
 
         // 监听来自 background 的消息
@@ -140,7 +141,13 @@ export default defineContentScript({
                 };
 
                 // 查找图片元素
-                const imgElement = rightClickElements.find(element => element.tagName.toLowerCase() === 'img') as HTMLImageElement | undefined;
+                // 1. 从右键点击的元素中查找
+                let imgElement = rightClickElements.find(element => element.tagName.toLowerCase() === 'img') as HTMLImageElement | undefined;
+
+                // 2. 如果没有找到，使用 querySelectorAll 查找坐标下的所有图片
+                if (!imgElement) {
+                    imgElement = findImagesAtPoint(rightClickX, rightClickY)[0];
+                }
 
                 // 如果没有找到img元素，尝试查找带有背景图片的元素
                 let backgroundImageUrl: string | undefined;
@@ -235,7 +242,66 @@ export default defineContentScript({
                 // 准备图片选项内容
                 let imageContent = '';
                 if (imgElement || backgroundImageUrl) {
-                    const imgSrc = imgElement ? (imgElement.currentSrc || imgElement.src) : backgroundImageUrl!;
+                    const srcset = imgElement?.getAttribute('srcset');
+                    // console.log('srcset', srcset);
+
+                    // 获取最高画质的图片 URL
+                    let bestQualityUrl: string | undefined;
+
+                    if (srcset && srcset.trim()) {
+                        try {
+                            // 解析 srcset 为对象数组
+                            const sources = srcset.split(',')
+                                .filter(item => item && item.trim()) // 先过滤掉空项
+                                .map(item => {
+                                    const parts = item.trim().split(/\s+/);
+                                    const url = parts[0] || '';
+                                    const descriptor = parts[1] || '';
+
+                                    let weight = 0;
+
+                                    if (descriptor) {
+                                        if (descriptor.endsWith('w')) {
+                                            // 宽度描述符，如 "1200w"，权重为 1200
+                                            const parsedWidth = parseInt(descriptor);
+                                            weight = isNaN(parsedWidth) ? 0 : parsedWidth;
+                                        } else if (descriptor.endsWith('x')) {
+                                            // Retina 屏幕，2x 权重为 2000
+                                            const parsedDensity = parseFloat(descriptor);
+                                            weight = isNaN(parsedDensity) ? 0 : parsedDensity * 1000; // 乘以1000使像素密度有较高优先级
+                                        }
+                                    }
+
+                                    return { url, weight };
+                                })
+                                .filter(source => source.url); // 过滤掉解析后可能出现的空URL
+
+                            // 找出权重最大的图片
+                            if (sources.length > 0) {
+                                // 如果所有图片都没有权重，直接使用第一个
+                                const allZeroWeights = sources.every(source => source.weight === 0);
+                                if (allZeroWeights) {
+                                    bestQualityUrl = sources[0].url;
+                                } else {
+                                    // 否则找出权重最大的
+                                    const maxSource = sources.reduce((a, b) => (b.weight > a.weight ? b : a), sources[0]);
+                                    bestQualityUrl = maxSource?.url || sources[0]?.url;
+                                }
+                            }
+                        } catch (error) {
+                            console.warn('解析srcset时出错:', error);
+                            // 出错时回退到使用第一个 URL
+                            try {
+                                const firstUrl = srcset.split(',')[0]?.trim().split(/\s+/)[0];
+                                if (firstUrl) {
+                                    bestQualityUrl = firstUrl;
+                                }
+                            } catch (e) {
+                            }
+                        }
+                    }
+
+                    const imgSrc = imgElement ? (bestQualityUrl || imgElement.currentSrc || imgElement.src) : backgroundImageUrl!;
                     const imgAlt = imgElement ? (imgElement.alt || '') : '';
                     const imgSource = imgElement ? `&lt;img&gt; ${i18n.tag || '标签'}` : `${i18n.backgroundImage || '背景图片'}`;
 
@@ -1178,6 +1244,27 @@ export default defineContentScript({
                 alert(error instanceof Error ? error.message : (i18n.unknownError || '未知错误'));
                 isDialogOpen = false; // 重置状态
             }
+        }
+
+        function findImagesAtPoint(x: number, y: number): HTMLImageElement[] {
+            const images = document.querySelectorAll('img');
+
+            const imagesAtPoint: HTMLImageElement[] = [];
+
+            images.forEach(img => {
+                const rect = img.getBoundingClientRect(); // 获取图片在页面上的位置和大小
+                if (
+                    x >= rect.left &&
+                    x <= rect.right &&
+                    y >= rect.top &&
+                    y <= rect.bottom
+                ) {
+                    imagesAtPoint.push(img as HTMLImageElement);
+                }
+            });
+
+            // console.debug('坐标点下的图', x, y, imagesAtPoint);
+            return imagesAtPoint;
         }
 
         // 获取指定坐标下方的所有元素

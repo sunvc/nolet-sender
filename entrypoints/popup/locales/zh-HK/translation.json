@@ -25,7 +25,9 @@
         "set_default_device_failed": "設定預設裝置失敗：{{message}}",
         "delay": "延遲",
         "error_network": "網絡錯誤",
-        "ping_server": "檢測伺服器連通性"
+        "close": "關閉",
+        "open": "打開",
+        "timeout": "超時"
     },
     "nav": {
         "send": "發送訊息",
@@ -226,6 +228,7 @@
         "success": "發送成功！",
         "clipboard_empty": "剪貼板為空或沒有有效內容",
         "select_device_helper": "支持選擇多個裝置",
+        "select_device_length": "已選 {{count}} 個裝置",
         "recall": {
             "button": "嘗試撤回",
             "loading": "撤回中...",

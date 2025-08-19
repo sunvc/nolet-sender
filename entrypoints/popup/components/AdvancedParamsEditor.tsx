@@ -517,6 +517,7 @@ const AdvancedParamsEditor: React.FC<AdvancedParamsEditorProps> = ({ onChange, p
                 {/* 触发把手区域 */}
                 <Box
                     component="div"
+                    title={t('common.open') + ' - ' + t('push.advanced_params.title')}
                     onClick={handleOpen}
                     sx={{
                         position: 'fixed',
@@ -594,42 +595,65 @@ const AdvancedParamsEditor: React.FC<AdvancedParamsEditorProps> = ({ onChange, p
                         e.stopPropagation();
                     }}
                 >
-                    {/* 关闭把手 */}
+                    {/* 关闭把手区域 */}
                     <Box
                         component="div"
                         onClick={handleClose}
+                        title={t('common.close')}
                         sx={{
                             position: 'absolute',
-                            left: '-4px',
+                            left: '-8px',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            bgcolor: 'primary.main',
-                            color: theme.palette.primary.contrastText,
-                            width: '8px',
-                            height: '80px',
-                            borderRadius: '4px',
+                            height: '132px',
+                            width: '27px',
+                            zIndex: 9,
+                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
+                            justifyContent: 'flex-start',
+                            // backgroundColor: 'divider',
                             '&:hover': {
-                                bgcolor: 'primary.dark',
-                                width: '12px',
-                                left: '-6px'
-                            },
-                            boxShadow: 2,
-                            transition: 'width 0s, left .15s ease-in-out'
+                                '& > div': {
+                                    width: '14px',
+                                    backgroundColor: 'primary.dark',
+                                    // left: '1px'
+                                }
+                            }
                         }}
                     >
+                        {/* 实际可见的关闭把手 */}
                         <Box
                             component="div"
                             sx={{
-                                width: '2px',
-                                height: '30px',
-                                backgroundColor: theme.palette.primary.contrastText,
-                                opacity: 0.8
+                                position: 'absolute',
+                                left: '4px',
+                                bgcolor: 'primary.main',
+                                color: theme.palette.primary.contrastText,
+                                width: '8px',
+                                height: '80px',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                cursor: 'pointer',
+                                '&:hover': {
+                                    bgcolor: 'primary.dark',
+                                },
+                                boxShadow: 2,
+                                transition: 'width 0.2s, left 0.2s'
                             }}
-                        />
+                        >
+                            <Box
+                                component="div"
+                                sx={{
+                                    width: '2px',
+                                    height: '30px',
+                                    backgroundColor: theme.palette.primary.contrastText,
+                                    opacity: 0.8
+                                }}
+                            />
+                        </Box>
                     </Box>
                     {/* 抽屉头部 */}
                     <Box sx={{
