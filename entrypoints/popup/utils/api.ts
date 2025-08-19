@@ -49,7 +49,9 @@ export async function sendPushMessage(
         const pushParams: PushParams = {
             apiURL: device.apiURL,
             message,
-            devices: devices ? devices : [device], // 设备信息, 可能有多个设备
+            devices: devices ? devices : [device], // 设备信息, 可能有多个设备 (用于API v2)
+            device_key: device.deviceKey, // 添加device_key (用于 indexedDB 记录)
+            device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys (用于 indexedDB 记录)
             sound: sound || settings.sound,
             uuid: pushUuid,
             // 优先使用自定义参数中的 title, url

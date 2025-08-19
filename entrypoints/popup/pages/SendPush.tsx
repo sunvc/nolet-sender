@@ -30,10 +30,14 @@ import { readClipboard } from '../utils/clipboard';
 import { getHistoryRecordByUuid, updateHistoryRecordStatus } from '../utils/database';
 import { useAppContext } from '../contexts/AppContext';
 import DeviceSelect from '../components/DeviceSelect';
+import DeviceSelectV2 from '../components/DeviceSelectV2';
 import DeviceDialog from '../components/DeviceDialog';
 import ShortcutTips from '../components/ShortcutTips';
 import UrlDialog from '../components/UrlDialog';
+import UrlDialogV2 from '../components/UrlDialogV2';
 import AdvancedParamsEditor from '../components/AdvancedParamsEditor';
+import { getAppSettings } from '../utils/settings';
+import { Notification } from "../components/NotificationProvider";
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -54,6 +58,8 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     const { t } = useTranslation();
     const { shortcutKeys, isAppleDevice } = useAppContext();
     const [selectedDevice, setSelectedDevice] = useState<Device | null>(null);
+    const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
+    const [isApiV2, setIsApiV2] = useState(false);
     const [message, setMessage] = useState('');
     const [loading, setLoading] = useState(false);
     const [clipboardLoading, setClipboardLoading] = useState(false);
@@ -101,12 +107,23 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         localStorage.removeItem('bark-sender-draft-message');
     };
 
-    // 设置默认选中设备
+    // 检查API版本并设置默认选中设备
     useEffect(() => {
-        if (defaultDevice && !selectedDevice) {
-            setSelectedDevice(defaultDevice);
-        }
-    }, [defaultDevice, selectedDevice]);
+        const checkApiVersion = async () => {
+            const settings = await getAppSettings();
+            setIsApiV2(settings.enableApiV2 || false);
+
+            if (defaultDevice) {
+                if (settings.enableApiV2) {
+                    setSelectedDevices([defaultDevice]);
+                } else {
+                    setSelectedDevice(defaultDevice);
+                }
+            }
+        };
+
+        checkApiVersion();
+    }, [defaultDevice]);
 
     // 检测是否是窗口模式
     const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
@@ -151,7 +168,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
     // 处理快捷键触发
     const handleShortcutTriggered = async () => {
-        if (!selectedDevice) {
+        if (isApiV2 && selectedDevices.length === 0 && !defaultDevice) {
+            /* 请先配置默认设备 */
+            setResult({ type: 'error', message: t('push.errors.no_device') });
+            return;
+        } else if (!isApiV2 && !selectedDevice && !defaultDevice) {
             /* 请先配置默认设备 */
             setResult({ type: 'error', message: t('push.errors.no_device') });
             return;
@@ -160,6 +181,14 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         try {
             const clipboardText = await readClipboard();
             setShortcutClipboardText(clipboardText || '');
+
+            // 如果是API v2且没有选择设备，但有默认设备，则自动选择默认设备
+            if (isApiV2 && selectedDevices.length === 0 && defaultDevice) {
+                setSelectedDevices([defaultDevice]);
+            } else if (!isApiV2 && !selectedDevice && defaultDevice) {
+                setSelectedDevice(defaultDevice);
+            }
+
             setShortcutDialogOpen(true);
 
             setTimeout(() => {
@@ -178,7 +207,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
     // 处理快捷键Dialog中的发送
     const handleShortcutSend = async () => {
-        if (!selectedDevice || !shortcutClipboardText.trim()) {
+        if ((isApiV2 && selectedDevices.length === 0) || (!isApiV2 && !selectedDevice) || !shortcutClipboardText.trim()) {
             return;
         }
 
@@ -194,13 +223,14 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             }
 
             const response = await sendPushMessage(
-                selectedDevice,
+                isApiV2 ? selectedDevices[0] : selectedDevice!,
                 shortcutClipboardText.trim(),
                 undefined,
                 pushUuid,
                 undefined,
                 undefined,
-                advancedParams
+                advancedParams,
+                isApiV2 ? selectedDevices : undefined
             );
 
             if (response.code === 200) {
@@ -307,7 +337,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     };
 
     const handleSend = async () => {
-        if (!selectedDevice) {
+        if (isApiV2 && selectedDevices.length === 0) {
+            /* 请选择至少一个设备 */
+            setResult({ type: 'error', message: t('push.errors.no_device') });
+            return;
+        } else if (!isApiV2 && !selectedDevice) {
             /* 请选择一个设备 */
             setResult({ type: 'error', message: t('push.errors.no_device') });
             return;
@@ -328,13 +362,14 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             setLastPushUuid(pushUuid);
 
             const response = await sendPushMessage(
-                selectedDevice,
+                isApiV2 ? selectedDevices[0] : selectedDevice!,
                 message.trim(),
                 undefined,
                 pushUuid,
                 undefined,
                 undefined,
-                advancedParams
+                advancedParams,
+                isApiV2 ? selectedDevices : undefined
             );
 
             if (response.code === 200) {
@@ -362,7 +397,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
     };
 
     const handleSendClipboard = async () => {
-        if (!selectedDevice) {
+        if (isApiV2 && selectedDevices.length === 0) {
+            /* 请选择至少一个设备 */
+            setResult({ type: 'error', message: t('push.errors.no_device') });
+            return;
+        } else if (!isApiV2 && !selectedDevice) {
             /* 请选择一个设备 */
             setResult({ type: 'error', message: t('push.errors.no_device') });
             return;
@@ -384,13 +423,14 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             setLastPushUuid(pushUuid);
 
             const response = await sendPushMessage(
-                selectedDevice,
+                isApiV2 ? selectedDevices[0] : selectedDevice!,
                 clipboardText.trim(),
                 undefined,
                 pushUuid,
                 undefined,
                 undefined,
-                advancedParams
+                advancedParams,
+                isApiV2 ? selectedDevices : undefined
             );
 
             if (response.code === 200) {
@@ -534,12 +574,21 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         {t('push.title')}
                     </Typography>
 
-                    <DeviceSelect
-                        devices={devices}
-                        selectedDevice={selectedDevice}
-                        onDeviceChange={setSelectedDevice}
-                        onAddClick={() => setDeviceDialogOpen(true)}
-                    />
+                    {isApiV2 ? (
+                        <DeviceSelectV2
+                            devices={devices}
+                            selectedDevices={selectedDevices}
+                            onDevicesChange={setSelectedDevices}
+                            onAddClick={() => setDeviceDialogOpen(true)}
+                        />
+                    ) : (
+                        <DeviceSelect
+                            devices={devices}
+                            selectedDevice={selectedDevice}
+                            onDeviceChange={setSelectedDevice}
+                            onAddClick={() => setDeviceDialogOpen(true)}
+                        />
+                    )}
 
                     <TextField
                         /* 推送内容 */
@@ -605,7 +654,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             size="large"
                             startIcon={loading ? <CircularProgress size={20} /> : <SendIcon />}
                             onClick={handleSend}
-                            disabled={loading || clipboardLoading || !selectedDevice || !message.trim()}
+                            disabled={loading || clipboardLoading || (isApiV2 && selectedDevices.length === 0) || (!isApiV2 && !selectedDevice) || !message.trim()}
                             fullWidth
                             id="send-button"
                         >
@@ -665,16 +714,29 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                                 {/* 目标设备 */}
                                 {t('push.target_device')}:
                             </Typography>
-                            <DeviceSelect
-                                showLabel={false}
-                                devices={devices}
-                                selectedDevice={selectedDevice}
-                                onDeviceChange={setSelectedDevice}
-                                onAddClick={() => {
-                                    setShortcutDialogOpen(false);
-                                    setDeviceDialogOpen(true);
-                                }}
-                            />
+                            {isApiV2 ? (
+                                <DeviceSelectV2
+                                    showLabel={false}
+                                    devices={devices}
+                                    selectedDevices={selectedDevices}
+                                    onDevicesChange={setSelectedDevices}
+                                    onAddClick={() => {
+                                        setShortcutDialogOpen(false);
+                                        setDeviceDialogOpen(true);
+                                    }}
+                                />
+                            ) : (
+                                <DeviceSelect
+                                    showLabel={false}
+                                    devices={devices}
+                                    selectedDevice={selectedDevice}
+                                    onDeviceChange={setSelectedDevice}
+                                    onAddClick={() => {
+                                        setShortcutDialogOpen(false);
+                                        setDeviceDialogOpen(true);
+                                    }}
+                                />
+                            )}
                         </Box>
 
                         <Box>
@@ -714,7 +776,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     <Button
                         variant="contained"
                         onClick={handleShortcutSend}
-                        disabled={loading || !shortcutClipboardText.trim()}
+                        disabled={loading || !shortcutClipboardText.trim() || (isApiV2 && selectedDevices.length === 0) || (!isApiV2 && !selectedDevice)}
                         ref={sendButtonRef}
                     >
                         {/* 发送中... / 发送 */}
@@ -724,20 +786,37 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             </Dialog>
 
             {/* URL选择Dialog */}
-            <UrlDialog
-                open={urlDialogOpen}
-                onClose={() => setUrlDialogOpen(false)}
-                urlParams={urlParams}
-                selectedDevice={selectedDevice}
-                devices={devices}
-                onDeviceChange={setSelectedDevice}
-                onDeviceAdd={() => {
-                    setUrlDialogOpen(false);
-                    setDeviceDialogOpen(true);
-                }}
-                onSuccess={handleUrlDialogSuccess}
-                onError={handleUrlDialogError}
-            />
+            {isApiV2 ? (
+                <UrlDialogV2
+                    open={urlDialogOpen}
+                    onClose={() => setUrlDialogOpen(false)}
+                    urlParams={urlParams}
+                    selectedDevices={selectedDevices}
+                    devices={devices}
+                    onDevicesChange={setSelectedDevices}
+                    onDeviceAdd={() => {
+                        setUrlDialogOpen(false);
+                        setDeviceDialogOpen(true);
+                    }}
+                    onSuccess={handleUrlDialogSuccess}
+                    onError={handleUrlDialogError}
+                />
+            ) : (
+                <UrlDialog
+                    open={urlDialogOpen}
+                    onClose={() => setUrlDialogOpen(false)}
+                    urlParams={urlParams}
+                    selectedDevice={selectedDevice}
+                    devices={devices}
+                    onDeviceChange={setSelectedDevice}
+                    onDeviceAdd={() => {
+                        setUrlDialogOpen(false);
+                        setDeviceDialogOpen(true);
+                    }}
+                    onSuccess={handleUrlDialogSuccess}
+                    onError={handleUrlDialogError}
+                />
+            )}
 
             {/* 添加设备Dialog */}
             <DeviceDialog

@@ -13,8 +13,11 @@ import SendPush from './pages/SendPush';
 import History from './pages/History';
 import Settings from './pages/Settings';
 
+import { SnackbarProvider } from "notistack";
+
 import './i18n';
 import './App.css';
+import { NotificationProvider } from './components/NotificationProvider';
 
 // 主应用组件内容
 function AppContent() {
@@ -149,7 +152,11 @@ function AppContent() {
 function App() {
   return (
     <AppProvider>
-      <AppContent />
+      <SnackbarProvider maxSnack={3}>
+        <NotificationProvider>
+          <AppContent />
+        </NotificationProvider>
+      </SnackbarProvider>
     </AppProvider>
   );
 }

@@ -1,0 +1,204 @@
+import React, { useState } from 'react';
+import {
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    Box,
+    Typography,
+    SelectChangeEvent,
+    Stack,
+    Divider,
+    OutlinedInput,
+    Checkbox,
+    ListItemText,
+    FormHelperText
+} from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { useTranslation } from 'react-i18next';
+import { Device } from '../types';
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+const MenuProps = {
+    PaperProps: {
+        style: {
+            maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP + 16,
+            width: 'calc(100% - 120px)',
+        },
+        sx: {
+            display: 'flex',
+            flexDirection: 'column',
+            '& .MuiList-root': {
+                flex: '1 1 auto',
+                overflow: 'auto'
+            }
+        }
+    }
+};
+
+interface DeviceSelectV2Props {
+    devices: Device[];
+    selectedDevices: Device[];
+    onDevicesChange: (devices: Device[]) => void;
+    onAddClick: () => void;
+    label?: string;
+    placeholder?: string;
+    showLabel?: boolean;
+}
+
+export default function DeviceSelectV2({
+    devices,
+    selectedDevices,
+    onDevicesChange,
+    onAddClick,
+    label = '选择设备',
+    placeholder = '请选择设备',
+    showLabel = true
+}: DeviceSelectV2Props) {
+    const { t } = useTranslation();
+    const [open, setOpen] = useState(false);
+
+    const handleChange = (event: SelectChangeEvent<string[]>) => {
+        const selectedIds = typeof event.target.value === 'string'
+            ? event.target.value.split(',')
+            : event.target.value;
+
+        const selectedDevicesList = devices.filter(device => selectedIds.includes(device.id));
+        onDevicesChange(selectedDevicesList);
+    };
+
+    const handleAddClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setOpen(false);
+        onAddClick();
+    };
+
+    // 获取选中设备的ID列表
+    const selectedDeviceIds = selectedDevices.map(device => device.id);
+
+    // 渲染选中设备的显示文本
+    const renderValue = (selected: string[]) => {
+        if (selected.length === 0) {
+            return <em>{t('push.select_device')}</em>;
+        }
+        const selectedNames = devices
+            .filter(device => selected.includes(device.id))
+            .map(device => device.alias);
+        return selectedNames.join(', ');
+    };
+
+    return (
+        <FormControl fullWidth variant="outlined" size="small">
+            {showLabel && <InputLabel
+                shrink
+                sx={{
+                    backgroundColor: 'background.paper',
+                    px: 0.5,
+                    '&.MuiInputLabel-shrink': {
+                        transform: 'translate(14px, -9px) scale(0.75)'
+                    }
+                }}
+            >
+                {/* 目标设备 */}
+                {t('push.target_device')}
+            </InputLabel>}
+            <Select
+                multiple
+                open={open}
+                onOpen={() => setOpen(true)}
+                onClose={() => setOpen(false)}
+                value={selectedDeviceIds}
+                onChange={handleChange}
+                input={<OutlinedInput label={showLabel ? t('push.target_device') : undefined} notched />}
+                renderValue={renderValue}
+                displayEmpty
+                MenuProps={MenuProps}
+                sx={{ py: 0.5, }}
+            >
+                {devices.length === 0 ?
+                    <MenuItem disabled value="">
+                        <em>{t('push.select_device')}</em>
+                    </MenuItem> :
+                    <Typography color="text.secondary" variant="overline" sx={{
+                        px: 1, pt: 1, userSelect: 'none'
+                    }}>
+                        {/* 选择要发送推送的设备 */}
+                        {t('push.select_device')}
+                    </Typography>}
+                {devices.map((device) => (
+                    <MenuItem key={device.id} value={device.id}>
+                        <Checkbox checked={selectedDeviceIds.includes(device.id)} />
+                        <Stack sx={{ width: '100%' }}>
+                            <Typography variant="body1">{device.alias}</Typography>
+                            <Typography
+                                variant="caption"
+                                color="text.secondary"
+                                sx={{
+                                    fontSize: '0.75rem',
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 1,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                    textOverflow: 'ellipsis',
+                                    wordBreak: 'break-all',
+                                    whiteSpace: 'nowrap',
+                                }}
+                            >
+                                {device.deviceKey}
+                            </Typography>
+                        </Stack>
+                    </MenuItem>
+                ))}
+                <Box sx={{ position: 'sticky', bottom: 0, bgcolor: 'background.paper', zIndex: 1 }}>
+                    <Divider />
+                    <MenuItem
+                        onClick={handleAddClick}
+                        sx={{
+                            justifyContent: 'center',
+                            p: 0,
+                        }}
+                    >
+                        <Stack direction="row" alignItems="center" justifyContent="center"
+                            sx={{ p: 0, color: 'primary.main' }}>
+                            <AddIcon sx={{ mr: 1 }} />
+                            {/* 添加新设备 */}
+                            {t('device.add')}
+                        </Stack>
+                    </MenuItem>
+                </Box>
+            </Select>
+            <FormHelperText
+                sx={{
+                    color: 'text.secondary',
+                    userSelect: 'none',
+                    minHeight: '1.25em',
+                    display: 'block',
+                    transformStyle: 'preserve-3d',
+                    backfaceVisibility: 'hidden',
+                    animation: 'flipUpFade 0.6s ease-in-out 3s forwards', // 3s 延迟后执行动画
+                    '@keyframes flipUpFade': {
+                        '0%': {
+                            transform: 'rotateX(0deg) translateY(0px)',
+                            opacity: 0.6,
+                            visibility: 'visible',
+                        },
+                        '60%': {
+                            transform: 'rotateX(0deg) translateY(-8px)', // 翻转 + 上移一点
+                            opacity: 0,
+                            visibility: 'visible',
+                        },
+                        '100%': {
+                            transform: 'rotateX(180deg) translateY(-20px)', // 完全上移
+                            opacity: 0,
+                            visibility: 'hidden',
+                        }
+                    },
+                }}
+            >
+                {t('push.select_device_helper')}
+            </FormHelperText>
+
+        </FormControl>
+    );
+}

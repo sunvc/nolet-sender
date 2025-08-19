@@ -22,7 +22,10 @@
         "add_device_failed": "新增裝置失敗：{{message}}",
         "edit_device_failed": "編輯裝置失敗：{{message}}",
         "delete_device_failed": "刪除裝置失敗：{{message}}",
-        "set_default_device_failed": "設定預設裝置失敗：{{message}}"
+        "set_default_device_failed": "設定預設裝置失敗：{{message}}",
+        "delay": "延遲",
+        "error_network": "網路錯誤",
+        "ping_server": "檢測伺服器連線"
     },
     "nav": {
         "send": "傳送通知",
@@ -187,7 +190,7 @@
         },
         "telegram": {
             "title": "Telegram 頻道",
-            "description": "加入頻道獲得最新消息"
+            "description": "查看最新動態"
         },
         "contact": {
             "title": "聯絡方式",
@@ -222,6 +225,7 @@
         "shortcut_esc_suffix": "取消",
         "success": "發送成功！",
         "clipboard_empty": "剪貼簿為空或沒有可用內容",
+        "select_device_helper": "支援選擇多個裝置",
         "recall": {
             "button": "嘗試撤回",
             "loading": "撤回中...",
@@ -264,11 +268,13 @@
             "tips_2": "底部標籤顯示已修改的參數，點選即可前往，右鍵點擊可重設。",
             "tips_3": "點選跳轉至參數 ｜ 右鍵恢復預設值",
             "tips_4": "部分參數需要組合使用, 例如: 音量需要配合重要警告, 活躍, 時效性的等級才可生效。",
+            "tips_5": "所有自訂設定會在「傳送通知」頁面自動記憶，下次依然有效！",
             "not_set": "未設定",
             "critical": "重要警告",
             "active": "活躍",
             "timeSensitive": "時效性",
             "passive": "被動",
+            "none": "none",
             "1": "1",
             "0": "0"
         }

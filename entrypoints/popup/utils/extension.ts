@@ -35,7 +35,7 @@ export function openFeedback() {
 }
 
 export function openTelegramChannel() {
-    const url = 'https://t.me/bark_sender';
+    const url = 'https://t.me/s/bark_sender';
     window.open(url, '_blank');
 }
 

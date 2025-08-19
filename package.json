@@ -2,7 +2,7 @@
   "name": "Bark Sender",
   "description": "__MSG_ext_desc__",
   "private": true,
-  "version": "0.1.9",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -26,6 +26,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "idb": "^8.0.3",
     "lottie-web": "^5.13.0",
+    "notistack": "^3.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-i18next": "^15.6.0",

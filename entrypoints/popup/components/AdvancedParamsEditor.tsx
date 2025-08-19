@@ -115,7 +115,12 @@ const AdvancedParamsEditor: React.FC<AdvancedParamsEditorProps> = ({ onChange, p
                 { "value": "0", "label": "0" }
             ]
         },
-        { "key": "action", "value": "", "description": "传 \"none\" 时，点击推送不会弹窗", "type": "text" }
+        {
+            "key": "action", "value": "", "description": "传 \"none\" 时，点击推送不会弹窗", "type": "select", "options": [
+                { "value": "", "label": "not_set" },
+                { "value": "none", "label": "none" }
+            ]
+        }
     ];
 
     useEffect(() => {
@@ -671,6 +676,9 @@ const AdvancedParamsEditor: React.FC<AdvancedParamsEditorProps> = ({ onChange, p
                                 - {t(`push.advanced_params.tips_2`)}
                             </Typography>
                             {/* 部分参数需要组合使用, 例如: 音量需要配合重要警告, 活跃, 时效性的级别才可生效。 */}
+                            <Typography variant="caption" color="text.secondary" fontSize={'0.625rem'}>
+                                - {t(`push.advanced_params.tips_5`)}
+                            </Typography>
                         </Stack>
                     </Box>
 

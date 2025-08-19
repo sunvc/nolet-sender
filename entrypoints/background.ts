@@ -111,6 +111,9 @@ export default defineBackground(() => {
             // 记录历史
             const requestTimestamp = Date.now();
             const parameters = getRequestParameters(pushParams, isEncrypted);
+            parameters.push({ key: 'device_key', value: defaultDevice.deviceKey || '' });
+            parameters.push({ key: 'device_keys', value: [defaultDevice.deviceKey].filter(Boolean).join(',') || '' });
+
             const historyRecord = {
               id: Date.now(),
               uuid: pushUuid,
@@ -137,6 +140,7 @@ export default defineBackground(() => {
                 second: '2-digit',
                 hour12: false,
               }),
+              inspectType: message.contentType, // 记录分析的内容类型
               authorization: defaultDevice.authorization
             };
 
@@ -379,6 +383,8 @@ export default defineBackground(() => {
         uuid,
         useAPIv2,
         devices: devices || (singleDevice ? [singleDevice] : undefined),
+        device_key: singleDevice?.deviceKey, // 添加device_key
+        device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
         ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
       };
@@ -420,6 +426,8 @@ export default defineBackground(() => {
         uuid,
         useAPIv2,
         devices: devices || (singleDevice ? [singleDevice] : undefined),
+        device_key: singleDevice?.deviceKey, // 添加device_key
+        device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
         ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
       };
@@ -648,6 +656,8 @@ export default defineBackground(() => {
           uuid: pushUuid,
           useAPIv2: settings.enableApiV2,
           devices: [defaultDevice],
+          device_key: defaultDevice.deviceKey, // 添加device_key
+          device_keys: [defaultDevice.deviceKey].filter(Boolean) as string[], // 添加device_keys
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };

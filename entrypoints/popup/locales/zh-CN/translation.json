@@ -22,7 +22,10 @@
         "add_device_failed": "添加设备失败: {{message}}",
         "edit_device_failed": "编辑设备失败: {{message}}",
         "delete_device_failed": "删除设备失败: {{message}}",
-        "set_default_device_failed": "设置默认设备失败: {{message}}"
+        "set_default_device_failed": "设置默认设备失败: {{message}}",
+        "delay": "延迟",
+        "error_network": "网络错误",
+        "ping_server": "检测服务器连通性"
     },
     "nav": {
         "send": "发起推送",
@@ -187,7 +190,7 @@
         },
         "telegram": {
             "title": "Telegram 频道",
-            "description": "加入频道获取更新信息"
+            "description": "查看最新动态"
         },
         "contact": {
             "title": "联系方式",
@@ -222,6 +225,7 @@
         "shortcut_esc_suffix": "取消",
         "success": "发送成功！",
         "clipboard_empty": "剪切板为空或无有效内容",
+        "select_device_helper": "支持选择多个设备",
         "recall": {
             "button": "尝试撤回",
             "loading": "撤回中...",
@@ -258,17 +262,19 @@
             "p_group": "推送分组",
             "p_isArchive": "是否保存推送",
             "p_url": "点击推送时, 跳转的URL",
-            "p_action": "点击推送时, 弹窗的类型",
+            "p_action": "点击推送时, 是否弹窗",
             "tips": "Tips:",
             "tips_1": "铃声和加密参数请点击底部导航栏的 \"修改配置\"。",
             "tips_2": "底部的标签为已修改的参数, 点击可以跳转, 右键可以进行重置。",
             "tips_3": "点击跳转到参数 | 右键重置为默认值",
             "tips_4": "部分参数需要组合使用, 例如: 音量需要配合重要警告, 活跃, 时效性的级别才可生效。",
+            "tips_5": "所有自定义配置会在 \"发起推送\" 页中会自动记忆, 下次仍然有效!",
             "not_set": "未设置",
             "critical": "重要警告",
             "active": "活跃",
             "timeSensitive": "时效性",
             "passive": "被动",
+            "none": "none",
             "1": "1",
             "0": "0"
         }

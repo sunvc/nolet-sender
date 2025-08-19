@@ -20,6 +20,8 @@ import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import { validateApiURL } from '../utils/api';
 import { useAppContext } from '../contexts/AppContext';
+import PingButton from "./PingButton";
+
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -249,6 +251,9 @@ export default function DeviceDialog({
             </DialogContent>
             <DialogActions>
                 {/* 取消 */}
+                <Box sx={{ mr: "auto", px: 1 }}>
+                    <PingButton apiURL={deviceApiURL} />
+                </Box>
                 <Button onClick={onClose}>{t('common.cancel')}</Button>
                 <Button
                     variant="contained"

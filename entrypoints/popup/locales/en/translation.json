@@ -22,7 +22,10 @@
         "add_device_failed": "Failed to add device: {{message}}",
         "edit_device_failed": "Failed to edit device: {{message}}",
         "delete_device_failed": "Failed to delete device: {{message}}",
-        "set_default_device_failed": "Failed to set default device: {{message}}"
+        "set_default_device_failed": "Failed to set default device: {{message}}",
+        "delay": "Delay",
+        "error_network": "Network Error",
+        "ping_server": "Check server connectivity"
     },
     "nav": {
         "send": "Push",
@@ -186,7 +189,7 @@
         },
         "telegram": {
             "title": "Telegram Channel",
-            "description": "Join the channel for updates"
+            "description": "View the latest updates"
         },
         "contact": {
             "title": "Contact",
@@ -221,6 +224,7 @@
         "shortcut_esc_suffix": "to cancel",
         "success": "Sent successfully!",
         "clipboard_empty": "Clipboard is empty or contains no valid content",
+        "select_device_helper": "Support selecting multiple devices",
         "recall": {
             "button": "Try Recall",
             "loading": "Recalling...",
@@ -253,7 +257,7 @@
             "p_volume": "apns.customSound.volume",
             "p_level": "interruption-level",
             "p_isArchive": "isArchive",
-            "p_group": "category",
+            "p_group": "group",
             "p_autoCopy": "autoCopy",
             "p_copy": "copy",
             "p_url": "url",
@@ -263,11 +267,13 @@
             "tips_2": "Modified parameters are shown as tabs at the bottom. Tap to navigate, or right-click to reset.",
             "tips_3": "Tap to jump to a parameter | Right-click to restore default",
             "tips_4": "Some parameters need to be combined, for example: volume needs to be combined with critical, active, and time-sensitive levels to take effect.",
+            "tips_5": "All custom settings will be remembered automatically on the \"Push\" page and remain effective next time!",
             "not_set": "Not set",
             "critical": "Critical",
             "active": "Active",
             "timeSensitive": "Time-sensitive",
             "passive": "Passive",
+            "none": "none",
             "1": "1",
             "0": "0"
         }
