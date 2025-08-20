@@ -230,6 +230,7 @@
         "select_device_length": "{{count}} devices selected",
         "recall": {
             "button": "Try Recall",
+            "button2": "Due to the limited support for batch message recall by Bark, this function cannot guarantee successful recall. Please pay attention to future updates.",
             "loading": "Recalling...",
             "success": "Requested to recall",
             "no_record": "No message to recall",

@@ -18,7 +18,7 @@ export default defineContentScript({
             }
         }
 
-        // console.debug('调试用 content script 已加载');
+        // console.debug('调试用 content script 已加载'); // 开发模式 macOS 的 Chrome 低版本注入不了, 实测 123 版本注入不了, 125版本注入成功
 
         // 存储右键点击的坐标和元素
         let rightClickX = 0;
@@ -131,6 +131,7 @@ export default defineContentScript({
                             closeDialog();
                         } else {
                             console.error('发送失败:', response);
+                            alert(JSON.stringify(response));
                         }
                     } catch (error) {
                         if (dialogContainer) {
@@ -1103,13 +1104,44 @@ export default defineContentScript({
                 if (sendImgSrcBtn && imgSrcTextarea) {
                     sendImgSrcBtn.addEventListener('click', () => {
                         const imageUrl = imgSrcTextarea.value.trim();
-                        // 检查URL是否有效
-                        if (checkImageUrl(imageUrl)) {
+                        // 处理各种路径情况
+                        let processedUrl = imageUrl;
+
+                        if (imageUrl.startsWith('//')) {
+                            processedUrl = `${window.location.protocol}${imageUrl}`;
+                        }
+                        else if (imageUrl.startsWith('/')) {
+                            processedUrl = `${window.location.origin}${imageUrl}`;
+                        }
+                        else if (imageUrl.startsWith('./')) {
+                            const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                            processedUrl = `${window.location.origin}${currentPath}${imageUrl.slice(2)}`;
+                        }
+                        else if (imageUrl.startsWith('../')) {
+                            let currentPath = window.location.pathname;
+                            const segments = imageUrl.split('/');
+                            let upCount = 0;
+
+                            while (segments[upCount] === '..') {
+                                upCount++;
+                            }
+
+                            const pathSegments = currentPath.split('/').filter(segment => segment.length > 0);
+                            const targetPath = pathSegments.slice(0, -upCount).join('/');
+                            const remainingPath = segments.slice(upCount).join('/');
+
+                            processedUrl = `${window.location.origin}/${targetPath}/${remainingPath}`;
+                        }
+
+                        // 检查处理后的 URL 是否有效 // 可能存在 blob: 或者 base64 等
+                        if (checkImageUrl(processedUrl)) {
+                            // 更新文本框中的 URL 为处理后的 URL
+                            imgSrcTextarea.value = processedUrl;
                             if (imgMessage) {
                                 imgMessage.style.visibility = 'hidden';
                             }
                             const title = imgAltTextarea && imgAltTextarea.value ? imgAltTextarea.value.trim() || (i18n.image || '图片') : (i18n.image || '图片');
-                            handleSendContent('image', imageUrl, title);
+                            handleSendContent('image', processedUrl, title);
                         } else {
                             if (imgMessage) {
                                 imgMessage.style.visibility = 'visible';

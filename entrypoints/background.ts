@@ -72,12 +72,30 @@ export default defineBackground(() => {
 
         // 准备发送参数
         let title = message.title || '';
-        let content = message.content || '';
+        let content = message.content?.trim() || '';
         let url = '';
+        let copyContent = message.content?.trim() || undefined;
 
-        // 根据内容类型设置 URL
-        if (message.contentType === 'image' || message.contentType === 'url') {
-          url = message.content;
+        // 根据内容类型设置 URL 和标题
+        switch (message.contentType) {
+          case 'text':
+            if (content.length > 128) {
+              content = content.slice(0, 30) + '...';
+            }
+            if (copyContent.length > 1500) {
+              title = `⚠️ Content truncated - ${title}`;
+              content = 'Scroll down or press and hold to copy the beginning.'; // “内容被截断。向下滚动或按住可复制开头部分。”
+            }
+            copyContent = copyContent.slice(0, 1500);
+            break;
+          case 'image':
+            url = message.content;
+            break;
+          case 'url':
+            url = message.content;
+            break;
+          default:
+            break;
         }
 
         // 发送推送
@@ -87,22 +105,22 @@ export default defineBackground(() => {
           message: content,
           sound: settings.sound,
           image: message.contentType === 'image' ? message.content : undefined,
-          url,
-          title,
+          url: url || undefined,
+          title: title || undefined,
           uuid: pushUuid,
+          copy: copyContent || undefined,
           useAPIv2: settings.enableApiV2,
           devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
         };
 
-        // 根据设置选择发送方式
-        let method: 'GET' | 'POST' = 'GET';
+        // 根据设置选择是否加密, 避免 414 Request-URI Too Large 错误, 使用 POST 请求（API v2 使用POST, 默认 4Kb)
         let isEncrypted = false;
 
         const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
-          ? (method = 'POST', isEncrypted = true, sendPush(pushParams, settings.encryptionConfig, settings.enableApiV2 ? 'v2' : 'v1'))
-          : (method = 'GET', sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1'));
+          ? (isEncrypted = true, sendPush(pushParams, settings.encryptionConfig, 'v2'))
+          : sendPush(pushParams, undefined, 'v2');
 
         sendPushPromise
           .then(response => {
@@ -126,7 +144,7 @@ export default defineBackground(() => {
               requestTimestamp: requestTimestamp,
               responseTimestamp: Date.now(),
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              method: method,
+              method: 'POST',
               title: title || undefined,
               sound: settings.sound || undefined,
               url: url || undefined,
@@ -180,7 +198,7 @@ export default defineBackground(() => {
               requestTimestamp: requestTimestamp,
               responseTimestamp: Date.now(),
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-              method: method,
+              method: 'POST',
               title: title || undefined,
               sound: settings.sound || undefined,
               url: url || undefined,

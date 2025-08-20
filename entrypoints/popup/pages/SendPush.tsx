@@ -611,17 +611,32 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             action={
                                 result.type === 'success' && lastPushUuid ? (
                                     <Stack direction="row" gap={1}>
-                                        <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button')}>
-                                            <IconButton
-                                                size="small"
-                                                aria-label="recall"
-                                                color="warning"
-                                                onClick={handleRecall}
-                                                disabled={recallLoading}
-                                            >
-                                                {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em' }} />}
-                                            </IconButton>
-                                        </Tooltip>
+                                        {/* 选择了两个设备时, 不要显示撤回按钮 */}
+                                        {selectedDevices.length > 1 ?
+                                            <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button2')}>
+                                                <IconButton
+                                                    size="small"
+                                                    aria-label="recall"
+                                                    color="inherit"
+                                                    onClick={handleRecall}
+                                                    disabled={recallLoading}
+                                                >
+                                                    {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em', color: 'text.secondary' }} />}
+                                                </IconButton>
+                                            </Tooltip> :
+                                            (
+                                                <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button')}>
+                                                    <IconButton
+                                                        size="small"
+                                                        aria-label="recall"
+                                                        color="warning"
+                                                        onClick={handleRecall}
+                                                        disabled={recallLoading}
+                                                    >
+                                                        {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em' }} />}
+                                                    </IconButton>
+                                                </Tooltip>
+                                            )}
                                         <IconButton
                                             size="small"
                                             aria-label="close"

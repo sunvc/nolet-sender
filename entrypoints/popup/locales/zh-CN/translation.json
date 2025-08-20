@@ -231,6 +231,7 @@
         "select_device_length": "已选 {{count}} 个设备",
         "recall": {
             "button": "尝试撤回",
+            "button2": "由于 Bark 暂时对批量消息撤回的支持有限, 故此处不保证撤回成功, 请留意后续更新。",
             "loading": "撤回中...",
             "success": "已请求撤回",
             "no_record": "没有可撤回的推送记录",
