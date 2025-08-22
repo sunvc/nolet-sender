@@ -1107,32 +1107,47 @@ export default defineContentScript({
                         // 处理各种路径情况
                         let processedUrl = imageUrl;
 
-                        if (imageUrl.startsWith('//')) {
-                            processedUrl = `${window.location.protocol}${imageUrl}`;
-                        }
-                        else if (imageUrl.startsWith('/')) {
-                            processedUrl = `${window.location.origin}${imageUrl}`;
-                        }
-                        else if (imageUrl.startsWith('./')) {
-                            const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
-                            processedUrl = `${window.location.origin}${currentPath}${imageUrl.slice(2)}`;
-                        }
-                        else if (imageUrl.startsWith('../')) {
-                            let currentPath = window.location.pathname;
-                            const segments = imageUrl.split('/');
-                            let upCount = 0;
+                        const urlPattern = /^(?:(\/\/)|(\/)|(?:\.\/)|(?:\.\.\/+))(.*)/;
+                        const match = imageUrl.match(urlPattern);
 
-                            while (segments[upCount] === '..') {
-                                upCount++;
+                        if (match) {
+                            const [, protocolRelative, rootRelative, , ...rest] = match;
+                            const pathPart = match[3];
+
+                            switch (true) {
+                                // 处理 // 相对路径
+                                case !!protocolRelative:
+                                    processedUrl = `${window.location.protocol}${imageUrl}`;
+                                    break;
+
+                                // 处理 / 相对路径
+                                case !!rootRelative:
+                                    processedUrl = `${window.location.origin}${imageUrl}`;
+                                    break;
+
+                                // 处理 ./ 当前路径
+                                case imageUrl.startsWith('./'):
+                                    const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                                    processedUrl = `${window.location.origin}${currentPath}${pathPart}`;
+                                    break;
+
+                                // 处理 ../ 上级路径
+                                case imageUrl.startsWith('../'): {
+                                    const currentPath = window.location.pathname;
+                                    // 计算需要向上多少层级
+                                    const upCount = (imageUrl.match(/\.\.\//g) || []).length;
+                                    // 分割并过滤当前路径
+                                    const pathSegments = currentPath.split('/').filter(Boolean);
+                                    // 获取目标路径
+                                    const targetPath = pathSegments.slice(0, -upCount).join('/');
+                                    // 获取剩余路径（去掉 '../' 部分）
+                                    const remainingPath = pathPart.replace(/^(?:\.\.\/)*/, '');
+
+                                    processedUrl = `${window.location.origin}/${targetPath}/${remainingPath}`;
+                                    break;
+                                }
                             }
-
-                            const pathSegments = currentPath.split('/').filter(segment => segment.length > 0);
-                            const targetPath = pathSegments.slice(0, -upCount).join('/');
-                            const remainingPath = segments.slice(upCount).join('/');
-
-                            processedUrl = `${window.location.origin}/${targetPath}/${remainingPath}`;
                         }
-
                         // 检查处理后的 URL 是否有效 // 可能存在 blob: 或者 base64 等
                         if (checkImageUrl(processedUrl)) {
                             // 更新文本框中的 URL 为处理后的 URL
