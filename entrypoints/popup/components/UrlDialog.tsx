@@ -140,8 +140,13 @@ export default function UrlDialog({
 
     // 当对话框打开时，聚焦到第一个可用的选项
     React.useEffect(() => {
-        if (open && firstOptionRef.current) {
-            firstOptionRef.current.focus();
+        if (open) {
+            const timer = setTimeout(() => {
+                if (firstOptionRef.current) {
+                    firstOptionRef.current.focus();
+                }
+            }, 450); // 等待 Slide 动画完成
+            return () => clearTimeout(timer);
         }
     }, [open]);
 
