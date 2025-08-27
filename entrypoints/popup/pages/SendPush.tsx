@@ -501,9 +501,20 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
     useLayoutEffect(() => {
         if (shouldAutoAddDevice) {
-            // 读取剪切板内容到输入框
-            const loadClipboardContent = async () => {
+            // 优先读取 omnibox 缓存的文字，其次读取剪切板内容
+            const loadContentToInput = async () => {
                 try {
+                    // 先检查是否有 omnibox 缓存的文字
+                    const omniboxResult = await browser.storage.local.get('bark_omnibox_message');
+                    if (omniboxResult.bark_omnibox_message && omniboxResult.bark_omnibox_message.trim()) {
+                        setMessage(omniboxResult.bark_omnibox_message.trim());
+                        localStorage.setItem('bark-sender-draft-message', omniboxResult.bark_omnibox_message.trim());
+                        // 用完后清除缓存
+                        await browser.storage.local.remove('bark_omnibox_message');
+                        return;
+                    }
+
+                    // 如果没有 omnibox 缓存的文字，则读取剪切板内容
                     const clipboardText = await readClipboard();
                     if (clipboardText && clipboardText.trim()) {
                         setMessage(clipboardText.trim());
@@ -511,11 +522,11 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         localStorage.setItem('bark-sender-draft-message', clipboardText.trim());
                     }
                 } catch (error) {
-                    console.debug('读取剪切板失败:', error);
+                    console.debug('读取内容失败:', error);
                 }
             };
 
-            loadClipboardContent();
+            loadContentToInput();
             setDeviceDialogOpen(true);
             setShouldAutoAddDevice(false); // 重置状态
         }

@@ -169,5 +169,8 @@
     },
     "parse_html_error": {
         "message": "解析 HTML 时出错"
+    },
+    "omnibox_send_push": {
+        "message": "推送内容给默认设备"
     }
 }

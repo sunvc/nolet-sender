@@ -458,6 +458,137 @@ export default defineBackground(() => {
       throw error;
     }
   }
+  // 监听 omnibox 输入完成（回车）
+  browser.omnibox.onInputEntered.addListener(async (text) => {
+    if (text.trim()) {
+      await handleOmniboxPush(text.trim());
+    }
+  });
+
+  // 监听 omnibox 输入变化，提供建议
+  browser.omnibox.onInputChanged.addListener((text, suggest) => {
+    if (text.trim()) {
+      browser.omnibox.setDefaultSuggestion({ description: getMessage('omnibox_send_push') });
+    }
+  });
+
+  // 处理地址栏推送发送
+  async function handleOmniboxPush(message: string) {
+    try {
+      // 获取默认设备和设置
+      const [devicesResult, defaultDeviceResult, settingsResult] = await Promise.all([
+        browser.storage.local.get('bark_devices'),
+        browser.storage.local.get('bark_default_device'),
+        browser.storage.local.get('bark_app_settings')
+      ]);
+
+      const devices = devicesResult.bark_devices || [];
+      const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+      const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
+      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      if (!defaultDevice) { // 没有默认设备，则打开 添加设备 窗口
+        // 将用户输入的文字保存到 storage，供 popup 使用
+        await browser.storage.local.set({ bark_omnibox_message: message });
+
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: '/icon/128.png',
+          title: getMessage('bark_sender_title'),
+          message: getMessage('device_not_found')
+        });
+        // 打开设置窗口让用户添加设备
+        await browser.windows.create({
+          url: browser.runtime.getURL('/popup.html?mode=window&autoAddDevice=true'),
+          type: 'popup',
+          width: 380,
+          height: 660,
+          left: 0,
+          top: 0,
+          focused: true
+        });
+        return;
+      }
+
+      // 发送推送
+      const pushUuid = generateUUID();
+      const pushParams: PushParams = {
+        apiURL: defaultDevice.apiURL,
+        message: message,
+        sound: settings.sound,
+        title: undefined,
+        uuid: pushUuid,
+        useAPIv2: settings.enableApiV2,
+        devices: [defaultDevice],
+        ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
+        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+      };
+
+      let isEncrypted = false;
+      let method: 'GET' | 'POST' = 'GET';
+
+      const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
+        ? (isEncrypted = true, method = 'POST', sendPush(pushParams, settings.encryptionConfig, 'v2'))
+        : (method = settings.enableApiV2 ? 'POST' : 'GET', sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1'));
+
+      const response = await sendPushPromise;
+
+      // 记录历史
+      const requestTimestamp = Date.now();
+      const parameters = getRequestParameters(pushParams, isEncrypted);
+      parameters.push({ key: 'device_key', value: defaultDevice.deviceKey || '' });
+      parameters.push({ key: 'device_keys', value: [defaultDevice.deviceKey].filter(Boolean).join(',') || '' });
+
+      const historyRecord = {
+        id: Date.now(),
+        uuid: pushUuid,
+        timestamp: requestTimestamp,
+        body: message,
+        apiUrl: defaultDevice.apiURL,
+        deviceName: defaultDevice.alias,
+        parameters: parameters,
+        responseJson: response,
+        requestTimestamp: requestTimestamp,
+        responseTimestamp: Date.now(),
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        method: method,
+        title: undefined,
+        sound: settings.sound || undefined,
+        url: undefined,
+        isEncrypted: isEncrypted,
+        createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: false,
+        }),
+        inspectType: 'omnibox', // 标记为 omnibox 输入
+        authorization: defaultDevice.authorization
+      };
+
+      await saveHistoryRecord(historyRecord);
+
+      // 显示成功通知
+      browser.notifications.create({
+        type: 'basic',
+        iconUrl: '/icon/128.png',
+        title: getMessage('bark_sender_title'),
+        message: getMessage('sent_to_device', [defaultDevice.alias])
+      });
+
+    } catch (error) {
+      console.error('地址栏推送发送失败:', error);
+      browser.notifications.create({
+        type: 'basic',
+        iconUrl: '/icon/128.png',
+        title: getMessage('bark_sender_title'),
+        message: getMessage('send_failed_check_network')
+      });
+    }
+  }
 
   // 监听扩展安装和启动
   browser.runtime.onInstalled.addListener(() => {
