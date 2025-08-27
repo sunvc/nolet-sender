@@ -335,7 +335,10 @@ export default function UrlDialogV2({
                 </Stack>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose}>
+                <Button onClick={() => {
+                    onClose();
+                    window.close();
+                }}>
                     {t('common.cancel')}
                 </Button>
             </DialogActions>
