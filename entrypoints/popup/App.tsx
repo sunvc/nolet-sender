@@ -12,6 +12,7 @@ import Layout from './components/Layout';
 import SendPush from './pages/SendPush';
 import History from './pages/History';
 import Settings from './pages/Settings';
+import SpeedMode from './pages/SpeedMode';
 
 import { SnackbarProvider } from "notistack";
 
@@ -36,63 +37,51 @@ function AppContent() {
   const {
     themeMode,
     effectiveTheme,
-    loading: themeLoading,
     updateThemeMode
   } = useTheme();
 
   const {
     appSettings,
-    loading: settingsLoading,
     toggleEncryption,
     shouldShowEncryptionToggle,
-    reloadSettings
+    reloadSettings,
+    updateAppSetting
   } = useAppContext();
 
   // 初始化历史服务
   useEffect(() => {
     initHistoryService();
   }, []);
-
+  const [windowMode,] = useState(new URLSearchParams(window.location.search).get('mode') === 'window');
   // 检查是否是窗口模式并添加类名
   useEffect(() => {
-    const isWindowMode = new URLSearchParams(window.location.search).get('mode') === 'window';
-    if (isWindowMode) {
+    if (windowMode) {
       document.documentElement.classList.add('u-full');
     }
     return () => {
-      if (isWindowMode) {
+      if (windowMode) {
         document.documentElement.classList.remove('u-full');
       }
     };
-  }, []);
+  }, [windowMode]);
 
   // 设置data-theme属性以控制CSS样式
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', effectiveTheme);
   }, [effectiveTheme]);
 
-  // 等待 i18n 和其他资源加载完成
-  if (!i18n.isInitialized || devicesLoading || themeLoading || settingsLoading) {
-    return (
-      <ThemeProvider theme={createAppTheme(effectiveTheme, i18n.language?.startsWith('zh') ? 'zh' : 'en')}>
-        <CssBaseline />
-        {/* 加载中，此时需要等待i18n和其他资源 */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          height: '100vh',
-          fontSize: '14px',
-          color: '#666'
-        }}>
-          Loading...
-        </div>
-      </ThemeProvider>
-    );
+  if (devicesLoading) {
+    return <div style={{ height: '52px', width: '100%', backgroundColor: 'transparent' }} >
+    </div>;
   }
-
   // 创建动态主题
   const theme = createAppTheme(effectiveTheme, i18n.language?.startsWith('zh') ? 'zh' : 'en');
+
+  // 退出极速模式
+  const handleExitSpeedMode = async () => {
+    await updateAppSetting('enableSpeedMode', false);
+    // window.close();
+  };
 
   // 渲染当前页面内容
   const renderCurrentPage = () => {
@@ -135,15 +124,22 @@ function AppContent() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Layout
-        currentTab={currentTab}
-        onTabChange={setCurrentTab}
-        showEncryptionToggle={shouldShowEncryptionToggle}
-        encryptionEnabled={appSettings?.enableEncryption || false}
-        onEncryptionToggle={toggleEncryption}
-      >
-        {renderCurrentPage()}
-      </Layout>
+      {(!windowMode && appSettings?.enableSpeedMode) ?
+        <SpeedMode
+          defaultDevice={getDefaultDevice()}
+          onExitSpeedMode={handleExitSpeedMode}
+        />
+        :
+        <Layout
+          currentTab={currentTab}
+          onTabChange={setCurrentTab}
+          showEncryptionToggle={shouldShowEncryptionToggle}
+          encryptionEnabled={appSettings?.enableEncryption || false}
+          onEncryptionToggle={toggleEncryption}
+        >
+          {renderCurrentPage()}
+        </Layout>
+      }
     </ThemeProvider>
   );
 }

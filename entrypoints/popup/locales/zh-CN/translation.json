@@ -171,7 +171,37 @@
             "enable": "启用自定义参数",
             "success_message": "已启用完整参数配置，可在发送页面设置更多参数",
             "reset_message": "已关闭完整参数配置，参数设置已重置"
+        },
+        "speed_mode": {
+            "enable": "启用极速模式",
+            "dialog_title": "启用极速模式",
+            "warning_description": "启用后，点击扩展图标时将直接进入极速模式界面，而不是常规的推送界面。",
+            "how_it_works_title": "极速模式功能流程：",
+            "feature_1": "自动读取剪贴板内容",
+            "feature_2": "倒计时 {{countdown}}s 后发送给默认设备",
+            "feature_3": "点击输入框可以暂停发送并手动编辑内容",
+            "requirements": "右键扩展栏的图标可以关闭",
+            "confirm_enable": "确认启用",
+            "save_failed": "保存极速模式设置失败"
         }
+    },
+    "speed_mode_page": {
+        "title": "极速模式",
+        "sending_to_device": "正在发送剪贴板内容给默认设备：{{device}}",
+        "device_not_set": "未设置",
+        "clipboard_reading": "正在读取剪贴板...",
+        "clipboard_failed": "剪贴板内容获取失败，点击重新读取",
+        "manual_input_placeholder": "或者手动输入要发送的内容",
+        "clipboard_empty_placeholder": "剪贴板内容为空",
+        "send_success": "发送成功",
+        "send_failed": "发送失败：{{message}}",
+        "exit_speed_mode": "退出极速模式",
+        "send": "发送",
+        "cancel": "取消",
+        "sending": "正在发送...",
+        "cancelled": "已取消",
+        "can_edit_and_send": "可修改内容后手动发送",
+        "auto_send_countdown": "{{seconds}}秒后自动发送"
     },
     "about": {
         "title": "关于",
@@ -346,6 +376,7 @@
         "api": {
             "network_failed": "网络请求失败，请检查网络连接和API地址",
             "runtime_unavailable": "扩展运行时不可用"
-        }
+        },
+        "open_window": "双击弹出到新窗口"
     }
 }

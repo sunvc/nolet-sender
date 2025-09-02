@@ -66,8 +66,9 @@ export interface AppSettings {
     enableApiV2?: boolean; // 是否启用API v2
     enableAdvancedParams?: boolean; // 是否启用完整参数配置
     advancedParamsJson?: string; // 完整参数配置的 JSON
+    enableSpeedMode?: boolean; // 是否启用极速模式
+    speedModeCountdown?: number; // 极速模式倒计时时间(ms)
 }
-
 // 平台类型
 export type PlatformType = 'mac' | 'windows' | 'linux' | 'unknown';
 

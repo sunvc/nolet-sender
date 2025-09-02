@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     Box,
     AppBar,
@@ -16,9 +16,11 @@ import HistoryIcon from '@mui/icons-material/History';
 import SettingsIcon from '@mui/icons-material/Settings';
 import LockIcon from '@mui/icons-material/Lock';
 import LockOpenIcon from '@mui/icons-material/LockOpen';
+// import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import { useTranslation } from 'react-i18next';
 import { TabValue } from '../types';
 import LanguageSelect from './LanguageSelect';
+import { detectPlatform } from '../utils/platform';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -39,6 +41,38 @@ export default function Layout({
     onEncryptionToggle
 }: LayoutProps) {
     const { t } = useTranslation();
+    const [isWindowMode] = useState(new URLSearchParams(window.location.search).get('mode') === 'window');
+
+    // 打开小窗口
+    const handleOpenWindow = (event: React.MouseEvent) => {
+        browser.windows.getCurrent((win) => { // macOS 窗口全屏模式会显示扩展栏，打开的小窗会自动进入全屏状态会很难看，所以不打开小窗
+            const windowState = win.state || 'normal';
+
+            if (windowState === 'fullscreen' || // 如果当前浏览器窗口是全屏状态
+                isWindowMode) { // 如果当前本身就是小窗
+                return;
+            }
+            // 获取鼠标点击位置
+            const { screenX, } = event;
+
+            // 计算窗口位置，使窗口中心对准鼠标点击位置
+            const windowWidth = 380;
+            const windowHeight = 660;
+            const left = Math.max(0, screenX - windowWidth / 2);
+
+            const platform = detectPlatform();
+            browser.windows.create({
+                url: browser.runtime.getURL('/popup.html?mode=window'),
+                type: 'popup',
+                width: windowWidth,
+                height: windowHeight,
+                left: Math.round(left),
+                top: platform === 'unknown' ? 90 : (platform === 'mac' ? 120 : 90), // 如果是 Windows 则为 90，如果是 Mac 则为 120
+                focused: true,
+            });
+            window.close();
+        });
+    };
     const getTabIndex = (tab: TabValue): number => {
         const tabs: TabValue[] = ['send', 'history', 'settings'];
         return tabs.indexOf(tab);
@@ -72,7 +106,10 @@ export default function Layout({
                 {/* 顶部AppBar */}
                 <AppBar position="static" elevation={2}>
                     <Toolbar variant="dense" sx={{ minHeight: 48 }}>
-                        <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontSize: '1.1rem' }}>
+                        <Typography variant="h6" component="div"
+                            sx={{ flexGrow: 1, fontSize: '1.1rem', userSelect: 'none' }}
+                            onDoubleClick={handleOpenWindow}
+                        >
                             Bark Sender
                         </Typography>
                         {/* Appbar 的加密切换按钮 */}

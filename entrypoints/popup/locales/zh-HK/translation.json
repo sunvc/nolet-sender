@@ -171,7 +171,37 @@
             "enable": "啟用自訂參數",
             "success_message": "已啟用自訂參數，可在發送頁面設定更多參數",
             "reset_message": "已關閉自訂參數，參數設定已重置"
+        },
+        "speed_mode": {
+            "enable": "啟用極速模式",
+            "dialog_title": "啟用極速模式",
+            "warning_description": "啟用後，點擊擴充功能圖標時會直接進入極速模式介面，而不是常規的推送介面。",
+            "how_it_works_title": "極速模式功能流程：",
+            "feature_1": "自動讀取剪貼簿內容",
+            "feature_2": "倒數 {{countdown}}s 後自動傳送到預設裝置",
+            "feature_3": "點擊輸入框可以暫停傳送並手動編輯內容",
+            "requirements": "右鍵擴充功能圖標即可關閉",
+            "confirm_enable": "確認啟用",
+            "save_failed": "儲存極速模式設定失敗"
         }
+    },
+    "speed_mode_page": {
+        "title": "極速模式",
+        "sending_to_device": "正在傳送剪貼簿內容到預設裝置：{{device}}",
+        "device_not_set": "未設定",
+        "clipboard_reading": "正在讀取剪貼簿...",
+        "clipboard_failed": "剪貼簿內容獲取失敗，點擊重新讀取",
+        "manual_input_placeholder": "或者手動輸入要傳送的內容",
+        "clipboard_empty_placeholder": "剪貼簿內容為空",
+        "send_success": "傳送成功",
+        "send_failed": "傳送失敗：{{message}}",
+        "exit_speed_mode": "離開極速模式",
+        "send": "傳送",
+        "cancel": "取消",
+        "sending": "正在傳送...",
+        "cancelled": "已取消",
+        "can_edit_and_send": "可修改內容後手動傳送",
+        "auto_send_countdown": "{{seconds}}秒後自動傳送"
     },
     "about": {
         "title": "關於",
@@ -346,6 +376,7 @@
         "api": {
             "network_failed": "網路請求失敗，請檢查網路連接和API地址",
             "runtime_unavailable": "擴充套件執行時不可用"
-        }
+        },
+        "open_window": "雙擊彈出到新窗口"
     }
 }

@@ -77,6 +77,12 @@
     "error_unknown": {
         "message": "Unknown error"
     },
+    "enable_speed_mode": {
+        "message": "Enable Speed Mode"
+    },
+    "disable_speed_mode": {
+        "message": "Disable Speed Mode"
+    },
     "shortcut_send_clipboard_description": {
         "message": "Send clipboard content to default device"
     },

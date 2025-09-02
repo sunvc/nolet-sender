@@ -77,6 +77,12 @@
     "error_unknown": {
         "message": "未知錯誤"
     },
+    "enable_speed_mode": {
+        "message": "啟用極速模式"
+    },
+    "disable_speed_mode": {
+        "message": "關閉極速模式"
+    },
     "shortcut_send_clipboard_description": {
         "message": "將剪貼簿內容傳送至預設裝置"
     },

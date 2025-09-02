@@ -170,7 +170,37 @@
         "advanced_params": {
             "enable": "Enable Modify Parameters",
             "success_message": "You have enabled the full parameter configuration, you can set more parameters on the send page."
+        },
+        "speed_mode": {
+            "enable": "Enable Speed Mode",
+            "dialog_title": "Enable Speed Mode",
+            "warning_description": "After enabling Speed Mode, clicking the extension icon will directly enter the Speed Mode interface instead of the regular push interface.",
+            "how_it_works_title": "How Speed Mode Works:",
+            "feature_1": "Automatically read clipboard content",
+            "feature_2": "Send to default device after countdown {{countdown}}s",
+            "feature_3": "Click the input box to pause sending and manually edit content",
+            "requirements": "You can right-click the extension icon to disable",
+            "confirm_enable": "Confirm Enable",
+            "save_failed": "Failed to save Speed Mode settings"
         }
+    },
+    "speed_mode_page": {
+        "title": "Speed Mode",
+        "sending_to_device": "Sending clipboard content to default device: {{device}}",
+        "device_not_set": "Not Set",
+        "clipboard_reading": "Reading clipboard...",
+        "clipboard_failed": "Failed to get clipboard content, click to retry",
+        "manual_input_placeholder": "Or manually enter content to send",
+        "clipboard_empty_placeholder": "Clipboard is empty",
+        "send_success": "Sent successfully",
+        "send_failed": "Send failed: {{message}}",
+        "exit_speed_mode": "Exit Speed Mode",
+        "send": "Send",
+        "cancel": "Cancel",
+        "sending": "Sending...",
+        "cancelled": "Cancelled",
+        "can_edit_and_send": "Can edit content and send manually",
+        "auto_send_countdown": "Auto-send in {{seconds}} seconds"
     },
     "about": {
         "title": "About",
@@ -345,6 +375,7 @@
         "api": {
             "network_failed": "Network request failed, please check network connection and API address",
             "runtime_unavailable": "Extension runtime unavailable"
-        }
+        },
+        "open_window": "Double-click to open a new window"
     }
 }

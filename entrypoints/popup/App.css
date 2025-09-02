@@ -13,15 +13,23 @@ body {
 
 html {
   overflow: hidden;
-  min-height: 600px;
-  height: 100%;
+  /* min-height: 0px; */
+  /* height: 100%; */
 }
 
 body {
   position: relative;
   width: 380px;
   min-width: 380px;
-  min-height: 600px;
+  /* min-height: 200px; */
+}
+
+/* 极速模式样式 */
+body.speed-mode {
+  width: 380px;
+  min-width: 200px;
+  min-height: 200px;
+  height: 200px;
 }
 
 html.u-full {

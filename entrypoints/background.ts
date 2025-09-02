@@ -675,6 +675,14 @@ export default defineBackground(() => {
         // });
       }
 
+      // 切换极速模式的右键菜单项
+      const speedModeEnabled = settings.enableSpeedMode || false;
+      browser.contextMenus.create({
+        id: 'toggle-speed-mode',
+        title: getMessage(speedModeEnabled ? 'disable_speed_mode' : 'enable_speed_mode'),
+        contexts: ['action']
+      });
+
     } catch (error) {
       console.error(getMessage('update_context_menus_failed'), error);
     }
@@ -698,6 +706,28 @@ export default defineBackground(() => {
       const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
       defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
       settings = settingsResult.bark_app_settings || { enableEncryption: false };
+
+      // 对于切换极速模式，不需要检查默认设备
+      if (info.menuItemId === 'toggle-speed-mode') {
+        const currentSpeedMode = settings.enableSpeedMode || false;
+        const newSpeedMode = !currentSpeedMode;
+
+        // 更新设置
+        const updatedSettings = { ...settings, enableSpeedMode: newSpeedMode };
+        await browser.storage.local.set({ bark_app_settings: updatedSettings });
+
+        // 显示通知
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: '/icon/128.png',
+          title: getMessage('bark_sender_title'),
+          message: getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode')
+        });
+
+        // 更新右键菜单
+        updateContextMenus();
+        return;
+      }
 
       if (!defaultDevice) {
         // console.error('未找到默认设备');

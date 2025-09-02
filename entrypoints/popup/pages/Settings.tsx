@@ -29,9 +29,9 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-import BugReportIcon from '@mui/icons-material/BugReport';
+// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+// import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
+// import BugReportIcon from '@mui/icons-material/BugReport';
 import EmailIcon from '@mui/icons-material/Email';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import TelegramIcon from '@mui/icons-material/Telegram';
@@ -51,6 +51,7 @@ import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
 import AvatarSetting from '../components/AvatarSetting';
+import SpeedModeSetting from '../components/SpeedModeSetting';
 import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
 import { saveDevices } from '../utils/storage';
 import { DEFAULT_ADVANCED_PARAMS } from '../utils/settings';
@@ -537,33 +538,14 @@ export default function Settings({
                         </Stack>
                     </Stack>
                 </Paper>
-
-                {/* 其他设置卡片 */}
+                {/* 功能设置卡片 */}
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Stack spacing={3}>
                         <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <SettingsIcon />
-                            {/* 其他设置 */}
-                            {t('settings.title')}
+                            <TuneIcon fontSize="small" />
+                            {/* 功能设置 */}
+                            {t('settings.features.title')}
                         </Typography>
-
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 主题设置 */}
-                                {t('settings.theme.title')}
-                            </Typography>
-                            <ThemeSelector themeMode={themeMode} onThemeChange={onThemeChange} />
-                        </Box>
-
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 语言设置 */}
-                                {t('settings.language.title')}
-                            </Typography>
-                            <LanguageSelector />
-                        </Box>
-
-                        <Divider />
                         <Box>
                             <Typography variant="subtitle1" gutterBottom>
                                 {/* 右键菜单 */}
@@ -596,17 +578,15 @@ export default function Settings({
                                 />
                             )}
                         </Box>
-
+                        <Divider />
                         <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 功能开关 */}
-                                {t('settings.features.title')}
-                            </Typography>
-
                             <Stack direction="column" alignItems="flex-start" gap={1}>
 
                                 {/* 自定义头像 */}
                                 <AvatarSetting />
+
+                                {/* 启用极速模式 */}
+                                <SpeedModeSetting disabled={devices.length === 0} />
 
                                 {/* 启用完整的参数配置 */}
                                 <FormControlLabel
@@ -648,8 +628,33 @@ export default function Settings({
                                 />
                             </Stack>
                         </Box>
+                    </Stack>
+                </Paper>
+                {/* 其他设置卡片 */}
+                <Paper elevation={2} sx={{ p: 3 }}>
+                    <Stack spacing={3}>
+                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <SettingsIcon />
+                            {/* 其他设置 */}
+                            {t('settings.title')}
+                        </Typography>
 
-                        <Divider />
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 主题设置 */}
+                                {t('settings.theme.title')}
+                            </Typography>
+                            <ThemeSelector themeMode={themeMode} onThemeChange={onThemeChange} />
+                        </Box>
+
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 语言设置 */}
+                                {t('settings.language.title')}
+                            </Typography>
+                            <LanguageSelector />
+                        </Box>
+
 
                         <Box>
                             <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -816,35 +821,13 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={t('about.github.description')}
+                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.github.description')}</Box>}
                                         onClick={openGitHub}
                                         sx={{ cursor: 'pointer' }}
                                     />
                                     <Tooltip title={t('about.github.description2')}>
                                         <IconButton edge="end" onClick={openGitHub}>
-                                            <FavoriteBorderIcon />
-                                        </IconButton>
-                                    </Tooltip>
-                                </ListItem>
-
-                                <ListItem sx={{ px: 0 }}>
-                                    <ListItemText
-                                        primary={
-                                            <Stack direction="row" alignItems="center" spacing={1}>
-                                                <BugReportIcon fontSize="small" />
-                                                <Typography variant="body1">
-                                                    {/* 问题反馈 */}
-                                                    {t('about.feedback.title')}
-                                                </Typography>
-                                            </Stack>
-                                        }
-                                        secondary={t('about.feedback.description')}
-                                        onClick={openGitHub}
-                                        sx={{ cursor: 'pointer' }}
-                                    />
-                                    <Tooltip title={t('about.feedback.description2')}>
-                                        <IconButton edge="end" onClick={openFeedback}>
-                                            <ChatBubbleOutlineIcon />
+                                            <OpenInNewIcon />
                                         </IconButton>
                                     </Tooltip>
                                 </ListItem>
@@ -862,7 +845,7 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={t('about.store_rating.description')}
+                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.store_rating.description')}</Box>}
                                         onClick={openStoreRating}
                                         sx={{ cursor: 'pointer' }}
                                     />
@@ -882,7 +865,7 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={t('about.telegram.description')}
+                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.telegram.description')}</Box>}
                                         onClick={openTelegramChannel}
                                         sx={{ cursor: 'pointer' }}
                                     />
@@ -891,28 +874,6 @@ export default function Settings({
                                     </IconButton>
                                 </ListItem>
 
-                                <ListItem sx={{ px: 0 }}>
-                                    <ListItemText
-                                        primary={
-                                            <Stack direction="row" alignItems="center" spacing={1}>
-                                                <EmailIcon fontSize="small" />
-                                                <Typography variant="body1">
-                                                    {/* 联系方式 */}
-                                                    {t('about.contact.title')}
-                                                </Typography>
-                                            </Stack>
-                                        }
-                                        secondary={
-                                            <Link
-                                                href={`mailto:${t('about.contact.email')}`}
-                                                underline="hover"
-                                                color="inherit"
-                                            >
-                                                {t('about.contact.email')}
-                                            </Link>
-                                        }
-                                    />
-                                </ListItem>
                             </List>
                         </Stack>
                     </Paper>
@@ -925,10 +886,30 @@ export default function Settings({
                             bottom: '8px',
                             zIndex: 1,
                             opacity: 0.5
-                        }}>
-                            <Typography variant="caption" color="text.secondary">
-                                {`${t('about.version')}: v${version}`}
-                            </Typography>
+                        }} gap={.3}>
+
+                            <Stack direction="row" alignItems="center" justifyContent="center" gap={.6}>
+                                <Typography variant="caption" color="text.secondary">
+                                    <Link
+                                        onClick={() => window.open('https://bark-sender.uuphy.com/', '_blank')}
+                                        color="inherit"
+                                        sx={{ fontSize: '0.8rem', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
+                                    >
+                                        {t('about.version')}: v{version}
+                                    </Link>
+                                </Typography>
+                            </Stack>
+                            <Stack direction="row" alignItems="center" justifyContent="center" gap={.6} sx={{ flex: 1, color: 'text.secondary' }}>
+                                <EmailIcon style={{ fontSize: '0.8rem' }} titleAccess='contact' />
+                                <Link
+                                    href={`mailto:${t('about.contact.email')}`}
+                                    underline="hover"
+                                    color="inherit"
+                                    sx={{ cursor: 'pointer', fontSize: '0.8rem', '&:hover': { color: 'primary.main' } }}
+                                >
+                                    {t('about.contact.email')}
+                                </Link>
+                            </Stack>
                         </Stack>
                     )}
                 </Box>
