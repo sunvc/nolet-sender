@@ -169,6 +169,7 @@
         "api_v2": {
             "title": "启用 API v2",
             "update_success": "API v2 已启用，已完整支持所有参数。",
+            "success_message": "已自动开启 API v2 模式",
             "update_failed": "更新设备失败: {{message}}"
         },
         "advanced_params": {

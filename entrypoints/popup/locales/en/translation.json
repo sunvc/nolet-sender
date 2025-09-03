@@ -169,6 +169,7 @@
         "api_v2": {
             "title": "Enable API v2",
             "update_success": "API v2 enabled, now you can use all parameters.",
+            "success_message": "API v2 mode enabled automatically",
             "update_failed": "Failed to update devices: {{message}}"
         },
         "advanced_params": {

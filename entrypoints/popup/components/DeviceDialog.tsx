@@ -29,6 +29,9 @@ import GiteIcon from '@mui/icons-material/Gite';
 import PhonelinkIcon from '@mui/icons-material/Phonelink';
 import FilterDramaIcon from '@mui/icons-material/FilterDrama';
 import { blue } from '@mui/material/colors';
+import { useSnackbar, SnackbarKey } from "notistack";
+import { Alert } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -85,6 +88,7 @@ export default function DeviceDialog({
     editDevice,
     title
 }: DeviceDialogProps) {
+    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { t } = useTranslation();
     const [deviceAlias, setDeviceAlias] = useState('');
     const [deviceApiURL, setDeviceApiURL] = useState('');
@@ -101,7 +105,7 @@ export default function DeviceDialog({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [isBasicAuthCollapsed, setIsBasicAuthCollapsed] = useState(true);
-    const { appSettings } = useAppContext();
+    const { appSettings, updateAppSetting } = useAppContext();
 
     // 获取 enableBasicAuth 功能开关设置
     const enableBasicAuth = appSettings?.enableBasicAuth || false;
@@ -161,6 +165,11 @@ export default function DeviceDialog({
             }
             // truncatedURL 是截取后的URL, 格式为 `https://api.day.app/<device_key>/`
             await onSubmit(deviceAlias.trim(), truncatedURL, authorization);
+            // 如果是自建服务器，开启 API v2 的开关, 如果自建服务器使用额外的代理路径, API v1 模式下容易将内容截断
+            if (selfHosted && !appSettings?.enableApiV2) {
+                await updateAppSetting('enableApiV2', true);
+                showAlert('warning', t('settings.api_v2.success_message'));
+            }
             onClose();
         } catch (error) {
             // setError(`操作失败: ${error instanceof Error ? error.message : '未知错误'}`);
@@ -175,6 +184,32 @@ export default function DeviceDialog({
         setDeviceApiURL(concatenateServerAndDeviceKey(server.trim(), deviceKey.trim()));
     }, [server, deviceKey]);
 
+    const showAlert = (
+        severity: "info" | "error" | "success" | "warning",
+        message: string
+    ) => {
+        enqueueSnackbar("", {
+            autoHideDuration: 3000,
+            anchorOrigin: { vertical: 'top', horizontal: 'right' },
+            content: (key: SnackbarKey) => (
+                <Alert
+                    severity={severity}
+                    sx={{ width: "100%" }}
+                    action={
+                        <IconButton
+                            size="small"
+                            color="inherit"
+                            onClick={() => closeSnackbar(key)}
+                        >
+                            <CloseIcon fontSize="small" />
+                        </IconButton>
+                    }
+                >
+                    {message}
+                </Alert>
+            ),
+        });
+    };
     return (
         <Dialog
             open={open}
@@ -270,7 +305,7 @@ export default function DeviceDialog({
                         />)}
                     {/* 实时预览 */}
                     {selfHosted && server.trim() && deviceKey.trim() && (
-                        <Stack direction="column" gap={0} sx={{ px: 1, py: 0.2, backgroundColor: 'grey.50', borderRadius: 0.5 }}>
+                        <Stack direction="column" gap={0} sx={{ px: 1, py: 0.2, backgroundColor: "ButtonFace", borderRadius: 0.5 }}>
                             {/* 最终地址 */}
                             <Typography variant="caption" color="text.secondary">
                                 {t('device.final_url')}:
@@ -373,7 +408,7 @@ export default function DeviceDialog({
                             <GiteIcon />
                         </IconButton>
                     </Badge>
-                    <PingButton apiURL={deviceApiURL} />
+                    <PingButton apiURL={deviceApiURL} showAlert={showAlert} />
                 </Stack>
                 <Button onClick={onClose}>{t('common.cancel')}</Button>
                 <Button

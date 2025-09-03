@@ -1,47 +1,48 @@
 import React, { useState } from "react";
 import IconButton from "@mui/material/IconButton";
 import dayjs from "dayjs";
-import { useSnackbar, SnackbarKey } from "notistack";
+// import { useSnackbar, SnackbarKey } from "notistack";
 import NetworkPingIcon from '@mui/icons-material/NetworkPing';
-import CloseIcon from '@mui/icons-material/Close';
+// import CloseIcon from '@mui/icons-material/Close';
 import { Tooltip, Alert } from "@mui/material";
 import { useTranslation } from "react-i18next";
 
 interface PingButtonProps {
     apiURL: string;
+    showAlert: (severity: "success" | "error", message: string) => void;
 }
 
-const PingButton: React.FC<PingButtonProps> = ({ apiURL }) => {
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+const PingButton: React.FC<PingButtonProps> = ({ apiURL, showAlert }) => {
+    // const { enqueueSnackbar, closeSnackbar } = useSnackbar();
     const { t } = useTranslation();
     const [loading, setLoading] = useState(false);
 
-    const showAlert = (
-        severity: "success" | "error",
-        message: string
-    ) => {
-        enqueueSnackbar("", {
-            autoHideDuration: 3000,
-            anchorOrigin: { vertical: 'top', horizontal: 'right' },
-            content: (key: SnackbarKey) => (
-                <Alert
-                    severity={severity}
-                    sx={{ width: "100%" }}
-                    action={
-                        <IconButton
-                            size="small"
-                            color="inherit"
-                            onClick={() => closeSnackbar(key)}
-                        >
-                            <CloseIcon fontSize="small" />
-                        </IconButton>
-                    }
-                >
-                    {message}
-                </Alert>
-            ),
-        });
-    };
+    // const showAlert = (
+    //     severity: "success" | "error",
+    //     message: string
+    // ) => {
+    //     enqueueSnackbar("", {
+    //         autoHideDuration: 3000,
+    //         anchorOrigin: { vertical: 'top', horizontal: 'right' },
+    //         content: (key: SnackbarKey) => (
+    //             <Alert
+    //                 severity={severity}
+    //                 sx={{ width: "100%" }}
+    //                 action={
+    //                     <IconButton
+    //                         size="small"
+    //                         color="inherit"
+    //                         onClick={() => closeSnackbar(key)}
+    //                     >
+    //                         <CloseIcon fontSize="small" />
+    //                     </IconButton>
+    //                 }
+    //             >
+    //                 {message}
+    //             </Alert>
+    //         ),
+    //     });
+    // };
 
     const handlePing = async () => {
         const pingURL = new URL(apiURL).origin + "/ping";
