@@ -124,19 +124,6 @@ export default function Settings({
         }
     };
 
-    // 处理 Basic Auth 开关切换
-    const handleBasicAuthToggle = async (enabled: boolean) => {
-        try {
-            setToast({
-                open: enabled,
-                message: t('settings.basic_auth.success_message')
-            });
-            await updateAppSetting('enableBasicAuth', enabled);
-        } catch (error) {
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
-
     // 处理加密开关切换
     const handleEncryptionToggle = async (enabled: boolean) => {
         try {
@@ -601,17 +588,6 @@ export default function Settings({
                                     sx={{ userSelect: 'none' }}
                                 />
                                 <Divider sx={{ pt: 1 }} />
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={appSettings?.enableBasicAuth || false}
-                                            onChange={(e) => handleBasicAuthToggle(e.target.checked)}
-                                        />
-                                    }
-                                    // Basic Auth
-                                    label={t('device.basic_auth.title')}
-                                    sx={{ userSelect: 'none' }}
-                                />
                                 {/* API v2 开关 */}
                                 <FormControlLabel
                                     control={
@@ -821,7 +797,7 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.github.description')}</Box>}
+                                        secondary={<span style={{ paddingLeft: '2.4em', fontSize: '0.75rem' }}>{t('about.github.description')}</span>}
                                         onClick={openGitHub}
                                         sx={{ cursor: 'pointer' }}
                                     />
@@ -845,7 +821,7 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.store_rating.description')}</Box>}
+                                        secondary={<span style={{ paddingLeft: '2.4em', fontSize: '0.75rem' }}>{t('about.store_rating.description')}</span>}
                                         onClick={openStoreRating}
                                         sx={{ cursor: 'pointer' }}
                                     />
@@ -865,7 +841,7 @@ export default function Settings({
                                                 </Typography>
                                             </Stack>
                                         }
-                                        secondary={<Box sx={{ pl: '2.4em', fontSize: '0.75rem' }}>{t('about.telegram.description')}</Box>}
+                                        secondary={<span style={{ paddingLeft: '2.4em', fontSize: '0.75rem' }}>{t('about.telegram.description')}</span>}
                                         onClick={openTelegramChannel}
                                         sx={{ cursor: 'pointer' }}
                                     />

@@ -92,12 +92,13 @@ const PingButton: React.FC<PingButtonProps> = ({ apiURL }) => {
     };
 
     return (
-        <Tooltip title="PING" placement="right">
+        <Tooltip title="PING" placement="top">
             <span>
                 <IconButton
-                    color="primary"
+                    color="info"
                     onClick={handlePing}
                     disabled={loading}
+                    size="small"
                 >
                     <NetworkPingIcon />
                 </IconButton>

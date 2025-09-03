@@ -13,7 +13,11 @@ import {
     Slide,
     Collapse,
     Card,
-    Divider
+    Divider,
+    IconButton,
+    Badge,
+    Tooltip,
+    InputAdornment
 } from '@mui/material';
 import { TransitionProps } from '@mui/material/transitions';
 import { useTranslation } from 'react-i18next';
@@ -21,7 +25,10 @@ import { Device } from '../types';
 import { validateApiURL } from '../utils/api';
 import { useAppContext } from '../contexts/AppContext';
 import PingButton from "./PingButton";
-
+import GiteIcon from '@mui/icons-material/Gite';
+import PhonelinkIcon from '@mui/icons-material/Phonelink';
+import FilterDramaIcon from '@mui/icons-material/FilterDrama';
+import { blue } from '@mui/material/colors';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -50,6 +57,19 @@ const truncateAfterFourthSlash = (url: string): string => {
     }
 };
 
+// 拼接服务器地址和设备 Key，去除前后斜杠并使用/连接
+const concatenateServerAndDeviceKey = (server: string, deviceKey: string): string => {
+    if (!server || !deviceKey) return '';
+
+    // 去除 server 末尾的斜杠
+    const cleanServer = server.replace(/\/+$/, '');
+    // 去除 deviceKey 前后的斜杠
+    const cleanDeviceKey = deviceKey.replace(/^\/+|\/+$/g, '');
+
+    // 使用单个杠连接
+    return `${cleanServer}/${cleanDeviceKey}/`;
+};
+
 interface DeviceDialogProps {
     open: boolean;
     onClose: () => void;
@@ -68,6 +88,14 @@ export default function DeviceDialog({
     const { t } = useTranslation();
     const [deviceAlias, setDeviceAlias] = useState('');
     const [deviceApiURL, setDeviceApiURL] = useState('');
+
+    // 是否自建服务器
+    const [selfHosted, setSelfHosted] = useState(false);
+
+    // 第二种模式 自建服务器 采用 server + deviceKey 作为 API URL
+    const [server, setServer] = useState('https://api.day.app'); // 自建服务器地址 (使用 bark 官方服务器回落)
+    const [deviceKey, setDeviceKey] = useState('');              // 设备密钥
+
     const [basicAuthUsername, setBasicAuthUsername] = useState('');
     const [basicAuthPassword, setBasicAuthPassword] = useState('');
     const [loading, setLoading] = useState(false);
@@ -83,8 +111,15 @@ export default function DeviceDialog({
         if (editDevice) {
             setDeviceAlias(editDevice.alias);
             setDeviceApiURL(editDevice.apiURL);
+            setServer(editDevice.server || 'https://api.day.app');
+            setDeviceKey(editDevice.deviceKey || '');
             setBasicAuthUsername(editDevice.authorization?.user || '');
             setBasicAuthPassword(editDevice.authorization?.pwd || '');
+
+            // 如果 server 不等于 bark 官方服务器地址，则切换到自建模式
+            const isCustomServer = editDevice.server && editDevice.server !== 'https://api.day.app';
+            setSelfHosted(isCustomServer || false);
+
             // 如果有认证信息，自动展开基本认证区域
             setIsBasicAuthCollapsed(!editDevice.authorization);
         } else {
@@ -93,12 +128,16 @@ export default function DeviceDialog({
             setBasicAuthUsername('');
             setBasicAuthPassword('');
             setIsBasicAuthCollapsed(true);
+            setSelfHosted(false);
+            setServer('https://api.day.app');
+            setDeviceKey('');
         }
         setError('');
     }, [editDevice, open]);
 
     const handleSubmit = async () => {
-        const truncatedURL = truncateAfterFourthSlash(deviceApiURL.trim());
+        // 判断是否关闭地址处理, 如果是自建服务器, 则不要截取
+        const truncatedURL = selfHosted ? deviceApiURL.trim() : truncateAfterFourthSlash(deviceApiURL.trim());
 
         if (!validateApiURL(truncatedURL)) {
             setError(t('device.api_url_invalid'));
@@ -131,6 +170,11 @@ export default function DeviceDialog({
         }
     };
 
+    // 当 server 或 deviceKey 变化时，更新 deviceApiURL
+    useEffect(() => {
+        setDeviceApiURL(concatenateServerAndDeviceKey(server.trim(), deviceKey.trim()));
+    }, [server, deviceKey]);
+
     return (
         <Dialog
             open={open}
@@ -142,55 +186,127 @@ export default function DeviceDialog({
             }}
             keepMounted
         >
-            <DialogTitle>{title || t(editDevice ? 'device.edit' : 'device.add')}</DialogTitle>
+            <DialogTitle>{title || t(editDevice ? 'device.edit' : 'device.add')} <span style={{ fontSize: '0.875rem', color: blue[500] }}>{selfHosted ? `(${t('device.self_hosted')})` : ''}</span></DialogTitle>
             <DialogContent>
                 <Stack spacing={2} sx={{ mt: 1 }}>
-                    <TextField
-                        label={t('device.api_url')}
-                        placeholder={t('device.api_url_placeholder')}
-                        value={deviceApiURL}
-                        onChange={(e) => {
-                            setDeviceApiURL(e.target.value);
-                            setError('');
-                        }}
-                        variant="outlined"
-                        fullWidth
-                        multiline
-                        rows={2}
-                        error={!!error && error === t('device.api_url_invalid')}
-                        helperText={
-                            error === t('device.api_url_invalid')
-                                ? error
-                                : t('device.api_url_helper')
-                        }
-                    />
+                    {selfHosted ? (
+                        <Stack gap={2} direction="column" sx={{ px: 1, pb: 1 }}>
+                            {/* 自建服务器地址 */}
+                            <TextField
+                                label={t('device.server')}
+                                placeholder={t('device.server_placeholder')}
+                                value={server}
+                                onChange={(e) => {
+                                    setServer(e.target.value);
+                                    setError('');
+                                }}
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <Tooltip title={t('device.device_key_helper')}>
+                                                <InputAdornment position="end" sx={{ cursor: 'cell' }}>
+                                                    <FilterDramaIcon fontSize="small" />
+                                                </InputAdornment>
+                                            </Tooltip>
+                                        ),
+                                    },
+                                }}
+                                variant="standard"
+                                fullWidth
+                                size="small"
+                                error={!!error && error === t('device.server_invalid')}
+                            // helperText={
+                            //     error === t('device.server_invalid')
+                            //         ? error
+                            //         : t('device.server_helper')
+                            // }
+                            />
+                            <TextField
+                                label={t('device.device_key')}
+                                placeholder={t('device.device_key_placeholder')}
+                                value={deviceKey}
+                                onChange={(e) => {
+                                    setDeviceKey(e.target.value);
+                                    setError('');
+                                }}
+                                size="small"
+                                variant="standard"
+                                fullWidth
+                                error={!!error && error === t('device.device_key_invalid')}
+                                slotProps={{
+                                    input: {
+                                        endAdornment: (
+                                            <Tooltip title={t('device.device_key_helper')}>
+                                                <InputAdornment position="end" sx={{ cursor: 'cell' }}>
+                                                    <PhonelinkIcon fontSize="small" />
+                                                </InputAdornment>
+                                            </Tooltip>
+                                        ),
+                                    },
+                                }}
+                            />
 
-                    <Box>
+
+                        </Stack>
+                    ) : ( // 非自建
                         <TextField
-                            label={t('device.name')}
-                            placeholder={t('device.name_placeholder')}
-                            value={deviceAlias}
-                            onChange={(e) => setDeviceAlias(e.target.value)}
+                            label={t('device.api_url')}
+                            placeholder={t('device.api_url_placeholder')}
+                            value={deviceApiURL}
+                            onChange={(e) => {
+                                setDeviceApiURL(e.target.value);
+                                setError('');
+                            }}
                             variant="outlined"
                             fullWidth
-                            helperText={t('device.name_helper')}
-                        />
-                        {!editDevice && (
-                            <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-                                {COMMON_DEVICE_NAMES.map((name) => (
-                                    <Chip
-                                        key={name}
-                                        label={t(`device.common_names.${name}`)}
-                                        onClick={() => setDeviceAlias(t(`device.common_names.${name}`))}
-                                        variant="outlined"
-                                        color="primary"
-                                        size="small"
-                                    />
-                                ))}
-                            </Stack>
-                        )}
-                    </Box>
-
+                            multiline
+                            rows={2}
+                            error={!!error && error === t('device.api_url_invalid')}
+                            helperText={
+                                error === t('device.api_url_invalid')
+                                    ? error
+                                    : t('device.api_url_helper')
+                            }
+                        />)}
+                    {/* 实时预览 */}
+                    {selfHosted && server.trim() && deviceKey.trim() && (
+                        <Stack direction="column" gap={0} sx={{ px: 1, py: 0.2, backgroundColor: 'grey.50', borderRadius: 0.5 }}>
+                            {/* 最终地址 */}
+                            <Typography variant="caption" color="text.secondary">
+                                {t('device.final_url')}:
+                            </Typography>
+                            <Typography variant="caption" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                                {concatenateServerAndDeviceKey(server.trim(), deviceKey.trim())}
+                            </Typography>
+                        </Stack>
+                    )}
+                    <Stack sx={{ px: selfHosted ? 1 : 0 }}>
+                        <Box>
+                            <TextField
+                                label={t('device.name')}
+                                placeholder={t('device.name_placeholder')}
+                                value={deviceAlias}
+                                onChange={(e) => setDeviceAlias(e.target.value)}
+                                variant={selfHosted ? "standard" : "outlined"}
+                                fullWidth
+                                helperText={t('device.name_helper')}
+                            />
+                            {!editDevice && !selfHosted && (
+                                <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+                                    {COMMON_DEVICE_NAMES.map((name) => (
+                                        <Chip
+                                            key={name}
+                                            label={t(`device.common_names.${name}`)}
+                                            onClick={() => setDeviceAlias(t(`device.common_names.${name}`))}
+                                            variant="outlined"
+                                            color="primary"
+                                            size="small"
+                                        />
+                                    ))}
+                                </Stack>
+                            )}
+                        </Box>
+                    </Stack>
                     {error && error !== t('device.api_url_invalid') && (
                         <Typography color="error" variant="body2">
                             {error}
@@ -199,7 +315,7 @@ export default function DeviceDialog({
 
                     {/* Basic Auth */}
                     {/* Basic Auth 认证区域 */}
-                    <Box sx={{ display: enableBasicAuth ? 'block' : 'none' }}>
+                    <Box sx={{ display: (selfHosted || enableBasicAuth) ? 'block' : 'none' }}>
                         <Divider sx={{ mb: .5, px: 1.5, userSelect: 'none' }} >
                             <Box sx={{
                                 fontSize: '0.625rem', cursor: 'pointer',
@@ -251,13 +367,19 @@ export default function DeviceDialog({
             </DialogContent>
             <DialogActions>
                 {/* 取消 */}
-                <Box sx={{ mr: "auto", px: 1 }}>
+                <Stack direction="row" gap={1} sx={{ mr: "auto", px: 1.5 }}>
+                    <Badge color="info" variant="dot" invisible={!selfHosted} overlap="circular" anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+                        <IconButton onClick={() => setSelfHosted(!selfHosted)} color={selfHosted ? 'info' : 'default'} size="small">
+                            <GiteIcon />
+                        </IconButton>
+                    </Badge>
                     <PingButton apiURL={deviceApiURL} />
-                </Box>
+                </Stack>
                 <Button onClick={onClose}>{t('common.cancel')}</Button>
                 <Button
                     variant="contained"
                     onClick={handleSubmit}
+                    color={selfHosted ? 'info' : 'primary'}
                     disabled={loading || !deviceAlias.trim() || !deviceApiURL.trim()}
                 >
                     {loading ? t('common.processing') : editDevice ? t('common.save') : t('common.add')}

@@ -93,11 +93,13 @@ export async function addDevice(alias: string, apiURL: string, authorization?: {
 
     try {
         const url = new URL(formattedApiURL);
-        server = `${url.protocol}//${url.host}`;
+        // const oldServer = `${url.protocol}//${url.host}`; // 旧的获取 server 的方式，新的应该是整段地址除去最后一段 /<device_key>/
 
         const pathParts = url.pathname.split('/').filter(part => part);
         if (pathParts.length > 0) {
             deviceKey = pathParts[pathParts.length - 1];
+            server = formattedApiURL.slice(0, -deviceKey.length - 1).replace(/\/$/, ''); // 去除最后的 /
+            // console.debug('server', server, 'deviceKey', deviceKey, formattedApiURL, 'oldServer', oldServer);
         }
     } catch (error) {
         console.error('解析API URL失败:', error);

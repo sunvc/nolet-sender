@@ -59,7 +59,14 @@
             "username_placeholder": "输入用户名",
             "password": "密码",
             "password_placeholder": "输入密码"
-        }
+        },
+        "self_hosted": "自建服务器",
+        "server": "服务器地址",
+        "server_placeholder": "例如: https://your.server.com/",
+        "device_key": "设备 Key",
+        "device_key_placeholder": "your_key",
+        "device_key_helper": "<服务器地址>/<设备 Key>/ 会作为最终 API URL",
+        "final_url": "最终地址"
     },
     "settings": {
         "title": "其他设置",
@@ -144,9 +151,6 @@
             "save_failed": "保存头像设置失败",
             "dialog_title": "设置自定义头像"
         },
-        "basic_auth": {
-            "success_message": "Basic Auth 现已启用，现在可以在 \"编辑设备\" 中配置用户名和密码了"
-        },
         "encryption": {
             "title": "加密设置",
             "enable": "启用加密",
@@ -210,11 +214,6 @@
             "title": "GitHub",
             "description": "查看源码或提交问题",
             "description2": "❤️ 如果你喜欢这个项目，欢迎 Star 或 Fork～"
-        },
-        "feedback": {
-            "title": "反馈",
-            "description": "遇到问题？快来 GitHub 给我反馈吧！",
-            "description2": "跳转 GitHub 提交问题, 或邮箱联系我～"
         },
         "store_rating": {
             "title": "商店评分",

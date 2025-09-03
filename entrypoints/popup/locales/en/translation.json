@@ -59,7 +59,14 @@
             "username_placeholder": "Enter username",
             "password": "Password",
             "password_placeholder": "Enter password"
-        }
+        },
+        "self_hosted": "Self-hosted",
+        "server": "Server Address",
+        "server_placeholder": "e.g., https://your.server.com/",
+        "device_key": "Device Key",
+        "device_key_placeholder": "your_key",
+        "device_key_helper": "<Server Address>/<Device Key>/ will be used as the final API URL",
+        "final_url": "Final URL"
     },
     "settings": {
         "title": "Other Settings",
@@ -144,9 +151,6 @@
             "save_failed": "Failed to save avatar settings",
             "dialog_title": "Set Custom Avatar"
         },
-        "basic_auth": {
-            "success_message": "Basic Auth enabled, now you can configure username and password in the \"Edit Device\" dialog"
-        },
         "encryption": {
             "title": "Encryption Settings",
             "enable": "Enable Encryption",
@@ -169,7 +173,8 @@
         },
         "advanced_params": {
             "enable": "Enable Modify Parameters",
-            "success_message": "You have enabled the full parameter configuration, you can set more parameters on the send page."
+            "success_message": "You have enabled the full parameter configuration, you can set more parameters on the send page.",
+            "reset_message": "You have disabled the full parameter configuration, the parameter settings have been reset"
         },
         "speed_mode": {
             "enable": "Enable Speed Mode",
@@ -209,11 +214,6 @@
             "title": "GitHub",
             "description": "View source code or submit an issue",
             "description2": "❤️ If you like this project, consider starring or forking it~"
-        },
-        "feedback": {
-            "title": "Feedback",
-            "description": "Encountering problems? Click here to report them to me!",
-            "description2": "Jump to GitHub to submit an issue, or contact me via email."
         },
         "store_rating": {
             "title": "Store Rating",
