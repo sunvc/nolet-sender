@@ -71,7 +71,7 @@ function AppContent() {
   }, [effectiveTheme]);
 
   if (devicesLoading) {
-    return <div style={{ height: '52px', width: '100%', backgroundColor: 'transparent' }} >
+    return <div style={{ height: '600px', width: '100%', backgroundColor: 'transparent' }} >
     </div>;
   }
   // 创建动态主题

@@ -15,6 +15,7 @@ import { Device, PushResponse } from '../types';
 import { readClipboard } from '../utils/clipboard';
 import { useAppContext } from '../contexts/AppContext';
 import { sendPush } from '../../shared/push-service';
+import gsap from 'gsap';
 
 interface SpeedModeProps {
     defaultDevice: Device | null;
@@ -38,6 +39,7 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
     const [clipboardLoading, setClipboardLoading] = useState(false);
 
     const cancelButtonRef = useRef<HTMLButtonElement>(null); // 用于自动聚焦到取消
+    const speedModeRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => { // 读取剪贴板内容
         let isMounted = true;
@@ -181,10 +183,27 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
         }
     }, [loading, error, sending, cancelled]);
 
+    useEffect(() => {
+        if (speedModeRef.current) {
+            gsap.set(speedModeRef.current, { minHeight: "600px" });
+
+            requestAnimationFrame(() => {
+                gsap.to(speedModeRef.current, {
+                    minHeight: "370px",
+                    duration: 0.6,
+                    ease: "power4.inOut",
+                    overwrite: "auto",
+                });
+            });
+        }
+    }, []);
+
     return (
         <Box
+            ref={speedModeRef}
             sx={{
                 height: '100%',
+                minHeight: '600px',
                 display: 'flex',
                 flexDirection: 'column',
                 p: 2,
