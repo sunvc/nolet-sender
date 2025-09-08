@@ -289,6 +289,7 @@ export default defineContentScript({
                 // 2. 如果没有找到，使用 querySelectorAll 查找坐标下的所有图片
                 if (!imgElement) {
                     imgElement = findImagesAtPoint(rightClickX, rightClickY)[0];
+                    // console.debug('imgElement', findImagesAtPoint(rightClickX, rightClickY));
                 }
 
                 // 如果没有找到img元素，尝试查找带有背景图片的元素
@@ -1441,11 +1442,30 @@ export default defineContentScript({
         }
 
         function findImagesAtPoint(x: number, y: number): HTMLImageElement[] {
-            const images = document.querySelectorAll('img');
-
             const imagesAtPoint: HTMLImageElement[] = [];
 
-            images.forEach(img => {
+            // 递归查找所有图片，包括 Shadow DOM 内的图片
+            function collectAllImages(root: Document | ShadowRoot): HTMLImageElement[] {
+                const images: HTMLImageElement[] = [];
+
+                // 查找当前层级的所有图片
+                const currentImages = root.querySelectorAll('img');
+                currentImages.forEach(img => images.push(img as HTMLImageElement));
+
+                // 递归查找所有 Shadow Host 内的图片
+                const allElements = root.querySelectorAll('*');
+                allElements.forEach(element => {
+                    if (element.shadowRoot) {
+                        images.push(...collectAllImages(element.shadowRoot));
+                    }
+                });
+
+                return images;
+            }
+
+            const allImages = collectAllImages(document);
+
+            allImages.forEach(img => { // 检查每个图片是否在指定坐标点
                 const rect = img.getBoundingClientRect(); // 获取图片在页面上的位置和大小
                 if (
                     x >= rect.left &&
@@ -1453,7 +1473,7 @@ export default defineContentScript({
                     y >= rect.top &&
                     y <= rect.bottom
                 ) {
-                    imagesAtPoint.push(img as HTMLImageElement);
+                    imagesAtPoint.push(img);
                 }
             });
 
@@ -1461,32 +1481,50 @@ export default defineContentScript({
             return imagesAtPoint;
         }
 
-        // 获取指定坐标下方的所有元素
+        // 获取指定坐标下方的所有元素（包括 Shadow DOM 内）
         function getElementsFromPoint(x: number, y: number): HTMLElement[] {
-            /* 使用 document.elementsFromPoint 获取所有元素
-            // 这个 API 返回指定坐标处所有元素的数组，从最上层到最下层排序 */
-            if (document.elementsFromPoint) {
-                return Array.from(document.elementsFromPoint(x, y)) as HTMLElement[];
-            }
-
-            // 兼容性处理: 如果不支持 elementsFromPoint 则使用 elementFromPoint
             const result: HTMLElement[] = [];
-            let element = document.elementFromPoint(x, y) as HTMLElement | null;
 
-            while (element && element !== document.documentElement) {
-                result.push(element);
+            function findElementsAtPointRecursive(root: Document | ShadowRoot, x: number, y: number): HTMLElement[] {
+                const elements: HTMLElement[] = [];
 
-                // 临时隐藏元素以获取下一层元素
-                element.style.pointerEvents = 'none';
+                // 尝试 elementsFromPoint
+                if (root.elementsFromPoint) {
+                    const foundElements = Array.from(root.elementsFromPoint(x, y)) as HTMLElement[];
+                    elements.push(...foundElements);
 
-                // 获取下一层元素
-                element = document.elementFromPoint(x, y) as HTMLElement | null;
+                    // 对于每个找到的元素，检查是否有 Shadow DOM 并递归查找
+                    foundElements.forEach(element => {
+                        if (element.shadowRoot) {
+                            const shadowElements = findElementsAtPointRecursive(element.shadowRoot, x, y);
+                            elements.push(...shadowElements);
+                        }
+                    });
+                } else {
+                    let element = root.elementFromPoint(x, y) as HTMLElement | null;
+
+                    if (element) {
+                        elements.push(element);
+
+                        // 检查该元素是否有 Shadow DOM
+                        if (element.shadowRoot) {
+                            const shadowElements = findElementsAtPointRecursive(element.shadowRoot, x, y);
+                            elements.push(...shadowElements);
+                        }
+                    }
+                }
+
+                return elements;
             }
 
-            // 恢复所有元素的 pointerEvents 
-            result.forEach(el => el.style.pointerEvents = '');
+            // 从 document 开始递归查找
+            const foundElements = findElementsAtPointRecursive(document, x, y);
+            result.push(...foundElements);
 
-            return result;
+            // 去重
+            const uniqueElements = Array.from(new Set(result));
+
+            return uniqueElements;
         }
     },
 }); 
