@@ -173,6 +173,7 @@
             "options": "Encryption Options",
             "key_invalid": "Invalid, please check options",
             "key_valid": "Valid key",
+            "tips_on": "Please note that the encryption settings (Algorithm, KEY) are same as Bark App",
             "tooltips": {
                 "encryption_on": "Turn off encryption",
                 "encryption_off": "Turn on encryption"

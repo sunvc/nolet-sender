@@ -173,6 +173,7 @@
             "options": "加密选项",
             "key_invalid": "密钥无效, 请修改加密选项",
             "key_valid": "密钥有效",
+            "tips_on": "请注意和 Bark App 的加密设置（算法，KEY）一致",
             "tooltips": {
                 "encryption_on": "关闭加密",
                 "encryption_off": "开启加密"

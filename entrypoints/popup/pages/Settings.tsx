@@ -129,6 +129,13 @@ export default function Settings({
     const handleEncryptionToggle = async (enabled: boolean) => {
         try {
             await updateAppSetting('enableEncryption', enabled);
+            if (enabled) { // 如果开启加密，则打开加密配置
+                setEncryptionDialogOpen(true);
+                setToast({
+                    open: true,
+                    message: t('settings.encryption.tips_on')
+                });
+            }
         } catch (error) {
             // 更新加密设置失败: {{message}}
             setError(t('settings.encryption.errors.update_failed', { message: error instanceof Error ? error.message : '未知错误' }));
@@ -603,7 +610,7 @@ export default function Settings({
                                     }
                                     label={<Stack direction="row" alignItems="center" gap={1}>
                                         <Typography variant="body1">{t('settings.api_v2.title')}</Typography>
-                                        <Chip label="Beta" size="small" color="default" variant="outlined" />
+                                        {/* <Chip label="Beta" size="small" color="default" variant="outlined" /> */}
                                     </Stack>}
                                     sx={{ userSelect: 'none' }}
                                 />
