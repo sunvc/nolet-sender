@@ -178,5 +178,14 @@
     },
     "omnibox_send_push": {
         "message": "傳送内容给默认设备"
+    },
+    "large_content_not_last_chunk": {
+        "message": "長按本消息或向下複製, 這不是最後一段"
+    },
+    "large_content_last_chunk": {
+        "message": "長按或向下複製, 打開通知中心查看其他內容"
+    },
+    "text_length_tip": {
+        "message": "如果文字過長，可能會分段傳送"
     }
 }

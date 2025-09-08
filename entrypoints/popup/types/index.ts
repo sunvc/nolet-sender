@@ -68,6 +68,8 @@ export interface AppSettings {
     advancedParamsJson?: string; // 完整参数配置的 JSON
     enableSpeedMode?: boolean; // 是否启用极速模式
     speedModeCountdown?: number; // 极速模式倒计时时间(ms)
+    enableFaviconIcon?: boolean; // 是否启用 favicon 作为 icon
+    faviconApiUrl?: string; // favicon 接口 URL 模板
 }
 // 平台类型
 export type PlatformType = 'mac' | 'windows' | 'linux' | 'unknown';

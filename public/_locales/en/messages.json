@@ -178,5 +178,14 @@
     },
     "omnibox_send_push": {
         "message": "Send content to default device"
+    },
+    "large_content_not_last_chunk": {
+        "message": "Scroll down or press and hold to copy, this is not the last chunk."
+    },
+    "large_content_last_chunk": {
+        "message": "Scroll down or press and hold to copy, open notification center to see the other content"
+    },
+    "text_length_tip": {
+        "message": "If the text is too long, it may be sent in chunks"
     }
 }

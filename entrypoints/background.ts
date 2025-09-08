@@ -7,8 +7,70 @@ export default defineBackground(() => {
   initBackgroundI18n();
   watchLanguageChanges();
 
+  // 预请求 favicon
+  async function prefetchFavicon(url: string): Promise<string | null> {
+    try {
+      // 获取应用设置
+      const settingsResult = await browser.storage.local.get('bark_app_settings');
+      const settings = settingsResult.bark_app_settings || {};
+
+      // 检查是否启用 favicon
+      if (!settings.enableFaviconIcon) {
+        throw new Error('Favicon 功能已关闭');
+      }
+
+      const domain = new URL(url).hostname;
+
+      // 构建 favicon URL，使用 API 模板
+      const faviconApiTemplate = settings.faviconApiUrl;
+      const faviconUrl = faviconApiTemplate.replace('$domain$', domain);
+
+      // 发送 HEAD 判断 Favicon 是否存在
+      const response = await fetch(faviconUrl, {
+        method: 'HEAD',
+        cache: 'force-cache'
+      });
+
+      if (response.ok) {
+        // 如果 HEAD 请求成功，再发送 GET 请求预加载 Favicon
+        const getResponse = await fetch(faviconUrl, {
+          cache: 'force-cache'
+        });
+
+        if (getResponse.ok) {
+          const contentType = getResponse.headers.get('content-type');
+          // 检查是否为有效的图片类型
+          if (contentType && (
+            contentType.startsWith('image/') ||
+            contentType === 'application/octet-stream'
+          )) {
+            console.debug(`Favicon 预加载 for ${domain}: ${faviconUrl}`);
+            return faviconUrl;
+          }
+        }
+      }
+
+      console.debug(`Favicon 不可用 for ${domain}`);
+      return null;
+    } catch (error) {
+      console.debug(`预加载 Favicon 失败 ${url}:`, error);
+      return null;
+    }
+  }
+
   // 监听来自popup的消息
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    if (message.action === 'prefetchFavicon') {
+      prefetchFavicon(message.url)
+        .then(faviconUrl => {
+          sendResponse({ success: true, faviconUrl });
+        })
+        .catch(error => {
+          sendResponse({ success: false, error: error.message });
+        });
+      return true;
+    }
+
     if (message.action === 'sendPush') {
       handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices)
         .then(result => {
@@ -45,7 +107,6 @@ export default defineBackground(() => {
 
     // 处理来自 content script 的发送内容请求
     if (message.action === 'send_content') {
-      console.log('收到发送内容请求:', message.contentType, message.content);
 
       // 获取默认设备和设置
       Promise.all([
@@ -75,18 +136,20 @@ export default defineBackground(() => {
         let content = message.content?.trim() || '';
         let url = '';
         let copyContent = message.content?.trim() || undefined;
-
+        let level = undefined;
         // 根据内容类型设置 URL 和标题
         switch (message.contentType) {
           case 'text':
             if (content.length > 128) {
               content = content.slice(0, 30) + '...';
             }
-            if (copyContent.length > 1500) {
-              title = `⚠️ Content truncated - ${title}`;
-              content = 'Scroll down or press and hold to copy the beginning.'; // “内容被截断。向下滚动或按住可复制开头部分。”
-            }
-            copyContent = copyContent.slice(0, 1500);
+            break;
+          case 'text-large':
+            // 对于 text-large 类型，保持完整的 copyContent，但显示提示信息
+            content = message.isLastChunk ?
+              getMessage('push.large_content.last_chunk') : // 最后一段显示完整内容
+              getMessage('push.large_content.not_last_chunk'); // 其他段显示提示信息
+            level = message.isLastChunk ? undefined : 'passive'; // 最后一段显示提醒出来
             break;
           case 'image':
             url = message.content;
@@ -100,6 +163,18 @@ export default defineBackground(() => {
 
         // 发送推送
         const pushUuid = generateUUID();
+        // 确定最终使用的图标
+        let finalIcon: string | undefined;
+
+        // 1. 如果启用了 favicon 且传来了 icon，使用 favicon
+        if (settings.enableFaviconIcon && message.icon) {
+          finalIcon = message.icon;
+        }
+        // 2. 如果没有 favicon 但启用了自定义头像，使用自定义头像
+        else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
+          finalIcon = settings.barkAvatarUrl;
+        }
+
         const pushParams: PushParams = {
           apiURL: defaultDevice.apiURL,
           message: content,
@@ -112,7 +187,8 @@ export default defineBackground(() => {
           useAPIv2: settings.enableApiV2,
           devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
-          ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+          ...(level && { level }),
+          ...(finalIcon && { icon: finalIcon })
         };
 
         // 根据设置选择是否加密, 避免 414 Request-URI Too Large 错误, 使用 POST 请求（API v2 使用POST, 默认 4Kb)
@@ -164,13 +240,15 @@ export default defineBackground(() => {
 
             saveHistoryRecord(historyRecord);
 
-            // 显示通知
-            browser.notifications.create({
-              type: 'basic',
-              iconUrl: '/icon/128.png',
-              title: getMessage('bark_sender_title'),
-              message: getMessage('sent_to_device', [defaultDevice.alias])
-            });
+            // 只在非 text-large 类型或是最后一段时显示通知
+            if (message.contentType !== 'text-large' || message.isLastChunk) {
+              browser.notifications.create({
+                type: 'basic',
+                iconUrl: '/icon/128.png',
+                title: getMessage('bark_sender_title') + (message.contentType === 'text-large' ? ' (Large Content)' : ''),
+                message: getMessage('sent_to_device', [defaultDevice.alias])
+              });
+            }
 
             // 返回成功响应给content script
             sendResponse({ success: true, data: response });

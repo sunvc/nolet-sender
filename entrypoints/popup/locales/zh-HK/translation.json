@@ -151,6 +151,22 @@
             "save_failed": "儲存頭像設定失敗",
             "dialog_title": "設定自訂頭像"
         },
+        "favicon": {
+            "title": "API 設定",
+            "icon_param": "icon 參數預覽",
+            "enable": "啟用網站圖示作為頭像",
+            "custom_api": "自訂 Favicon API",
+            "enable_help": "啟用後，通知會顯示網站圖示，讓推送更直觀。",
+            "api_url_help": "此功能預設為關閉，您可隨時啟用或停用。",
+            "api_url_help_2": "運作原理：擴充功能只會擷取網址的網域部分，並透過伺服器代理查詢公開圖示。若您對私隱仍有顧慮，可在此更換其他 favicon 服務（第三方服務）。",
+            "api_url_help_3": "更多說明請參閱官網 Q&A 及私隱政策。",
+            "api_url_prefix": "API 前綴",
+            "api_url_suffix": "API 後綴",
+            "api_url_domain": "網域",
+            "save_failed": "儲存網站圖示設定失敗",
+            "dialog_title": "配置 Favicon API",
+            "enable_btn": "確認並啟用"
+        },
         "encryption": {
             "title": "加密設定",
             "enable": "啟用加密",
@@ -239,12 +255,12 @@
         }
     },
     "push": {
-        "title": "訊息發送",
+        "title": "發送訊息",
         "target_device": "目標裝置",
         "select_device": "選擇要發送的裝置",
         "message": "訊息內容",
         "message_placeholder": "輸入要發送的訊息內容",
-        "send": "發送訊息",
+        "send": "發送",
         "sending": "發送中...",
         "send_clipboard": "發送剪貼板內容",
         "reading_clipboard": "正在讀取剪貼板內容...",

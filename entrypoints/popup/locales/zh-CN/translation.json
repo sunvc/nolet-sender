@@ -151,6 +151,22 @@
             "save_failed": "保存头像设置失败",
             "dialog_title": "设置自定义头像"
         },
+        "favicon": {
+            "title": "API 设置",
+            "icon_param": "icon 参数预览",
+            "enable": "启用网站图标作为头像",
+            "custom_api": "自定义 Favicon API",
+            "enable_help": "启用后，通知会显示网站图标，让推送更直观。",
+            "api_url_help": "此功能默认关闭，您可以随时启用或关闭。",
+            "api_url_help_2": "运作原理：扩展功能只会获取网址的域名部分，并通过服务器代理查询对应的公开图标，若您仍有隐私方面的顾虑，可以在这里更换其他 favicon 服务 (第三方服务)。",
+            "api_url_help_3": "更多说明请查看官网 Q&A 和隐私政策。",
+            "api_url_prefix": "API 前缀",
+            "api_url_suffix": "API 后缀",
+            "api_url_domain": "域名",
+            "save_failed": "保存网站图标设置失败",
+            "dialog_title": "配置 Favicon API",
+            "enable_btn": "确认并启用"
+        },
         "encryption": {
             "title": "加密设置",
             "enable": "启用加密",

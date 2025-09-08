@@ -26,6 +26,8 @@ export default defineContentScript({
         let rightClickElements: HTMLElement[] = [];
         // 是否已经打开
         let isDialogOpen = false;
+        // 存储预请求的 favicon URL
+        let prefetchedFaviconUrl: string | null = null;
 
         // 监听右键菜单事件监听器，只记录坐标和元素
         document.addEventListener('contextmenu', function (event) {
@@ -58,6 +60,24 @@ export default defineContentScript({
 
         // 显示选择内容对话框
         function showSelectionDialog(contextInfo?: any) {
+            // 通知 background 预请求当前页面的 favicon
+            const currentPageUrl = window.location.href;
+            browser.runtime.sendMessage({
+                action: 'prefetchFavicon',
+                url: currentPageUrl
+            }).then(response => {
+                if (response?.success && response?.faviconUrl) {
+                    prefetchedFaviconUrl = response.faviconUrl; // background 会返回 favicon 的 URL
+                    console.debug('Favicon 预加载 by background:', prefetchedFaviconUrl);
+                } else {
+                    prefetchedFaviconUrl = null;
+                    console.debug('Favicon 预加载 by background 失败或不可用');
+                }
+            }).catch(error => {
+                console.debug('Favicon 预加载 by background 错误:', error);
+                prefetchedFaviconUrl = null;
+            });
+
             const i18n = {
                 link: getMessage('link_address'),  // 链接
                 unknownError: getMessage('error_unknown'),  // 未知错误
@@ -90,7 +110,8 @@ export default defineContentScript({
                 sendParentElementText: getMessage('send_parent_element_text'),  // 发送父元素文本
                 pageLink: getMessage('page_link'),  // 页面链接
                 pageTitle: getMessage('page_title'),  // 页面标题
-                sendPageLink: getMessage('send_page_link')  // 发送页面链接
+                sendPageLink: getMessage('send_page_link'),  // 发送页面链接
+                text_length_tip: getMessage('text_length_tip')  // 文本长度提示
             };
             try {
                 // 发送
@@ -99,45 +120,165 @@ export default defineContentScript({
                         return;
                     }
 
-                    // console.debug(`发送${contentType}:`, content);
-
+                    const TEXT_CHUNK_SIZE = 1500; // 文本分段大小
                     const dialogContainer = getElement('.dialog-container');
-                    if (dialogContainer) {
-                        dialogContainer.classList.add('fetching');
-                    }
 
-                    try {
-                        // 设置超时
-                        const timeoutPromise = new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('请求超时')), 10000)
-                        );
+                    // 检查是否需要分段发送
+                    if (contentType === 'text' && content.length > TEXT_CHUNK_SIZE) {
+                        // 使用 text-large 类型
+                        contentType = 'text-large';
 
-                        const response = await Promise.race([
-                            browser.runtime.sendMessage({
+                        // 将文本按照 TEXT_CHUNK_SIZE 分段
+                        const chunks: string[] = [];
+                        let start = 0;
+                        while (start < content.length) {
+                            // 设置当前段的结束位置（上限）
+                            let end = Math.min(start + TEXT_CHUNK_SIZE, content.length);
+
+                            // 如果没有到达文本末尾，尝试寻找更合适的分割点
+                            if (end < content.length) {
+                                let splitPoint = -1;
+
+                                const lastNewline = content.lastIndexOf('\n', end);
+                                const lastSpace = content.lastIndexOf(' ', end);
+
+                                if (lastNewline !== -1 && lastNewline > end - 100) {
+                                    splitPoint = lastNewline;
+                                }
+                                if (lastSpace !== -1 && lastSpace > end - 50 &&
+                                    (splitPoint === -1 || lastSpace > splitPoint)) {
+                                    splitPoint = lastSpace;
+                                }
+
+                                if (splitPoint !== -1 && splitPoint > start) {
+                                    end = splitPoint;
+                                }
+                            }
+
+                            // 添加当前段
+                            chunks.push(content.substring(start, end));
+
+                            // 更新下一段的起始位置（避免跳过字符）
+                            start = end;
+                            if (content[start] === '\n' || content[start] === ' ') {
+                                start++; // 仅在分隔符时才跳过
+                            }
+                        }
+
+                        // 分段发送
+                        const totalChunks = chunks.length;
+                        const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+                        for (let i = 0; i < chunks.length; i++) {
+                            if (dialogContainer) {
+                                dialogContainer.classList.add('fetching');
+                            }
+
+                            try {
+                                // 如果不是第一段，等待200ms
+                                if (i > 0) {
+                                    await delay(200);
+                                }
+
+                                // 设置超时
+                                const timeoutPromise = new Promise((_, reject) =>
+                                    setTimeout(() => reject(new Error('请求超时')), 10000)
+                                );
+
+                                // 构建发送消息
+                                const sendMessage: any = {
+                                    action: 'send_content',
+                                    contentType,
+                                    content: chunks[i],
+                                    title: `[${i + 1}/${totalChunks}] Large Content ${i !== chunks.length - 1 ? '🔇' : ''}`,
+                                    copyContent: chunks[i],
+                                    isLastChunk: i === chunks.length - 1 // 标记是否为最后一段
+                                };
+
+                                // 如果预请求的 favicon 可用，添加到消息中
+                                if (prefetchedFaviconUrl) {
+                                    sendMessage.icon = prefetchedFaviconUrl;
+                                }
+
+                                const response = await Promise.race([
+                                    browser.runtime.sendMessage(sendMessage),
+                                    timeoutPromise
+                                ]);
+
+                                if (dialogContainer) {
+                                    dialogContainer.classList.remove('fetching');
+                                }
+
+                                // 检查响应是否成功
+                                if (!(response?.success && response?.data?.code === 200)) {
+                                    console.error('发送失败:', response);
+                                    alert(JSON.stringify(response));
+                                    return;
+                                }
+
+                                // 最后一段发送完成后关闭对话框
+                                if (i === chunks.length - 1) {
+                                    closeDialog();
+                                }
+                            } catch (error) {
+                                if (dialogContainer) {
+                                    dialogContainer.classList.remove('fetching');
+                                }
+                                console.error('发送请求出错:', error);
+                                return;
+                            }
+                        }
+                    } else {
+                        // 单段发送
+                        if (dialogContainer) {
+                            dialogContainer.classList.add('fetching');
+                        }
+
+                        try {
+                            // 设置超时
+                            const timeoutPromise = new Promise((_, reject) =>
+                                setTimeout(() => reject(new Error('请求超时')), 10000)
+                            );
+
+                            // 构建发送消息
+                            const sendMessage: any = {
                                 action: 'send_content',
                                 contentType,
                                 content,
-                                title
-                            }),
-                            timeoutPromise
-                        ]);
+                                title,
+                                copyContent: content
+                            };
 
-                        if (dialogContainer) {
-                            dialogContainer.classList.remove('fetching');
-                        }
+                            // 如果预请求的 favicon 可用，添加到消息中
+                            if (prefetchedFaviconUrl) {
+                                sendMessage.icon = prefetchedFaviconUrl;
+                                console.debug('发送消息将包含 Icon:', prefetchedFaviconUrl);
+                            } else {
+                                console.debug('发送消息将不包含 Icon');
+                            }
 
-                        // 检查响应是否成功
-                        if (response?.success && response?.data?.code === 200) {
-                            closeDialog();
-                        } else {
-                            console.error('发送失败:', response);
-                            alert(JSON.stringify(response));
+                            const response = await Promise.race([
+                                browser.runtime.sendMessage(sendMessage),
+                                timeoutPromise
+                            ]);
+
+                            if (dialogContainer) {
+                                dialogContainer.classList.remove('fetching');
+                            }
+
+                            // 检查响应是否成功
+                            if (response?.success && response?.data?.code === 200) {
+                                closeDialog();
+                            } else {
+                                console.error('发送失败:', response);
+                                alert(JSON.stringify(response));
+                            }
+                        } catch (error) {
+                            if (dialogContainer) {
+                                dialogContainer.classList.remove('fetching');
+                            }
+                            console.error('发送请求出错:', error);
                         }
-                    } catch (error) {
-                        if (dialogContainer) {
-                            dialogContainer.classList.remove('fetching');
-                        }
-                        console.error('发送请求出错:', error);
                     }
                 };
 
@@ -361,14 +502,20 @@ export default defineContentScript({
                                     <div class="input-group">
                                         <label for="current-text">${i18n.currentElementText || '当前元素文本'}:</label>
                                         <textarea id="current-text" class="textarea" spellcheck="false" autocomplete="off">${clickedElement.innerText}</textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <button class="btn btn-primary send-current-text">${i18n.sendCurrentElementText || '发送当前元素文本'}</button>
+                                        <span style="color: var(--text-secondary); font-size: 0.625em;">${i18n.text_length_tip || '文本如果过长，可能会分段发送'}</span>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="tab-pane parent-content">
                                     <div class="input-group">
                                         <label for="parent-text">${i18n.parentElementText || '父元素文本'}:</label>
                                         <textarea id="parent-text" class="textarea" spellcheck="false" autocomplete="off">${parentText}</textarea>
+                                        <div style="display: flex; justify-content: space-between; align-items: center;">
                                         <button class="btn btn-primary send-parent-text">${i18n.sendParentElementText || '发送父元素文本'}</button>
+                                        <span style="color: var(--text-secondary); font-size: 0.625em;">${i18n.text_length_tip || '文本如果过长，可能会分段发送'}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

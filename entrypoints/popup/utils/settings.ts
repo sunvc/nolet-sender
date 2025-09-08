@@ -41,6 +41,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     advancedParamsJson: JSON.stringify(DEFAULT_ADVANCED_PARAMS, null, 2), // 默认自定义参数JSON
     enableSpeedMode: false, // 极速模式，默认关闭
     speedModeCountdown: 3000, // 极速模式倒计时，默认3秒
+    enableFaviconIcon: false, // 启用 favicon 作为 icon，默认关闭
+    faviconApiUrl: '', // favicon 接口 URL 模板
 };
 
 // 获取浏览器存储API

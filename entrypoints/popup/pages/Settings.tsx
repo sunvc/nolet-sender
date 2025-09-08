@@ -51,6 +51,7 @@ import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
 import AvatarSetting from '../components/AvatarSetting';
+import FaviconSetting from '../components/FaviconSetting';
 import SpeedModeSetting from '../components/SpeedModeSetting';
 import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
 import { saveDevices } from '../utils/storage';
@@ -571,6 +572,10 @@ export default function Settings({
 
                                 {/* 自定义头像 */}
                                 <AvatarSetting />
+
+                                {/* 网站图标设置 */}
+                                {appSettings?.enableInspectSend &&
+                                    <FaviconSetting />}
 
                                 {/* 启用极速模式 */}
                                 <SpeedModeSetting disabled={devices.length === 0} />

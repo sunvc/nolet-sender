@@ -151,6 +151,22 @@
             "save_failed": "Failed to save avatar settings",
             "dialog_title": "Set Custom Avatar"
         },
+        "favicon": {
+            "title": "API Settings",
+            "icon_param": "Icon Parameter Preview",
+            "enable": "Use Website Icon as Avatar",
+            "custom_api": "Custom Favicon API",
+            "enable_help": "When enabled, notifications will display website icons for clearer context.",
+            "api_url_help": "This feature is off by default. You can enable or disable it anytime.",
+            "api_url_help_2": "How it works: The extension only extracts the domain part of a URL and uses a proxy server to fetch the public icon. If you still have privacy concerns, you can switch to another favicon service (third-party).",
+            "api_url_help_3": "For more details, please see the official Q&A and Privacy Policy.",
+            "api_url_prefix": "API Prefix",
+            "api_url_suffix": "API Suffix",
+            "api_url_domain": "Domain",
+            "save_failed": "Failed to save website icon settings",
+            "dialog_title": "Configure Favicon API",
+            "enable_btn": "Confirm & Enable"
+        },
         "encryption": {
             "title": "Encryption Settings",
             "enable": "Enable Encryption",
