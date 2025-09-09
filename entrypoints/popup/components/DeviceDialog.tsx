@@ -73,6 +73,11 @@ const concatenateServerAndDeviceKey = (server: string, deviceKey: string): strin
     return `${cleanServer}/${cleanDeviceKey}/`;
 };
 
+function isValidDeviceKey(input: string): boolean {
+    const shortUuidRegex = /^[A-HJ-NP-Za-km-z2-9]{22}$/;
+    return shortUuidRegex.test(input);
+}
+
 interface DeviceDialogProps {
     open: boolean;
     onClose: () => void;
@@ -140,8 +145,54 @@ export default function DeviceDialog({
     }, [editDevice, open]);
 
     const handleSubmit = async () => {
+        let finalApiURL = deviceApiURL.trim();
+
+        // 自建服务器模式
+        if (selfHosted) {
+            // 检查 deviceKey 格式
+            if (!isValidDeviceKey(deviceKey.trim())) {
+                setError(t('device.device_key_invalid'));
+                return;
+            }
+        } else {
+            // 非自建服务器模式
+            const shortUuidRegex = /^[A-HJ-NP-Za-km-z2-9]{22}$/; // deviceKey 是标准的 22 位的 shortuuid
+
+            let deviceKey: string | null = null;
+
+            switch (finalApiURL.length) {
+                case 22: // {22位uuid}
+                    if (shortUuidRegex.test(finalApiURL)) {
+                        deviceKey = finalApiURL;
+                    }
+                    break;
+
+                case 24: // /{22位uuid}/
+                    if (finalApiURL.startsWith("/") && finalApiURL.endsWith("/")) {
+                        const core = finalApiURL.slice(1, -1);
+                        if (shortUuidRegex.test(core)) {
+                            deviceKey = core;
+                        }
+                    }
+                    break;
+
+                default: // URL 里包含 22 位 uuid
+                    const containUuidRegex = /(?:^|\/)([A-HJ-NP-Za-km-z2-9]{22})(?:\/|$)/;
+                    const match = finalApiURL.match(containUuidRegex);
+                    if (match) {
+                        deviceKey = match[1];
+                    }
+            }
+
+            if (!deviceKey) {
+                setError(t('device.device_key_invalid'));
+                return;
+            }
+            finalApiURL = `https://api.day.app/${deviceKey}/`;
+        }
+
         // 判断是否关闭地址处理, 如果是自建服务器, 则不要截取
-        const truncatedURL = selfHosted ? deviceApiURL.trim() : truncateAfterFourthSlash(deviceApiURL.trim());
+        const truncatedURL = selfHosted ? finalApiURL : truncateAfterFourthSlash(finalApiURL);
 
         if (!validateApiURL(truncatedURL)) {
             setError(t('device.api_url_invalid'));
@@ -296,9 +347,9 @@ export default function DeviceDialog({
                             fullWidth
                             multiline
                             rows={2}
-                            error={!!error && error === t('device.api_url_invalid')}
+                            error={!!error && (error === t('device.api_url_invalid') || error === t('device.device_key_invalid'))}
                             helperText={
-                                error === t('device.api_url_invalid')
+                                (error === t('device.api_url_invalid') || error === t('device.device_key_invalid'))
                                     ? error
                                     : t('device.api_url_helper')
                             }
@@ -342,7 +393,7 @@ export default function DeviceDialog({
                             )}
                         </Box>
                     </Stack>
-                    {error && error !== t('device.api_url_invalid') && (
+                    {error && error !== t('device.api_url_invalid') && error !== t('device.device_key_invalid') && (
                         <Typography color="error" variant="body2">
                             {error}
                         </Typography>
@@ -415,7 +466,7 @@ export default function DeviceDialog({
                     variant="contained"
                     onClick={handleSubmit}
                     color={selfHosted ? 'info' : 'primary'}
-                    disabled={loading || !deviceAlias.trim() || !deviceApiURL.trim()}
+                    disabled={loading || !deviceAlias.trim() || !deviceApiURL.trim() || (selfHosted && !deviceKey.trim())}
                 >
                     {loading ? t('common.processing') : editDevice ? t('common.save') : t('common.add')}
                 </Button>
