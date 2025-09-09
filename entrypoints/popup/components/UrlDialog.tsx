@@ -136,6 +136,7 @@ export default function UrlDialog({
 }: UrlDialogProps) {
     const { t } = useTranslation();
     const [loading, setLoading] = React.useState(false);
+    const [faviconUrl, setFaviconUrl] = React.useState<string | null>(null);
     const firstOptionRef = React.useRef<HTMLButtonElement>(null);
 
     // 当对话框打开时，聚焦到第一个可用的选项
@@ -149,6 +150,28 @@ export default function UrlDialog({
             return () => clearTimeout(timer);
         }
     }, [open]);
+
+    // 预加载favicon
+    React.useEffect(() => {
+        if (open && urlParams.url) {
+            const runtime = (window as any).chrome?.runtime || (window as any).browser?.runtime;
+            if (runtime) {
+                runtime.sendMessage({
+                    action: 'prefetchFavicon',
+                    url: urlParams.url
+                }).then((response: any) => {
+                    if (response?.success && response?.faviconUrl) {
+                        setFaviconUrl(response.faviconUrl);
+                    }
+                }).catch((error: any) => {
+                    console.debug('预加载favicon失败:', error);
+                });
+            }
+        } else if (!open) {
+            // 重置favicon状态
+            setFaviconUrl(null);
+        }
+    }, [open, urlParams.url]);
 
     // 获取第一个可用选项的 ref
     const getFirstOptionRef = (index: number) => {
@@ -171,6 +194,10 @@ export default function UrlDialog({
                 undefined,
                 pushUuid,
                 urlParams.title || 'Web',
+                undefined,
+                undefined,
+                undefined,
+                faviconUrl || undefined
             );
 
             if (response.code === 200) {
@@ -200,7 +227,11 @@ export default function UrlDialog({
                 urlParams.selectionText || urlParams.title || 'Text',
                 undefined,
                 pushUuid,
-                urlParams.title || 'Text'
+                urlParams.title || 'Text',
+                undefined,
+                undefined,
+                undefined,
+                faviconUrl || undefined
             );
 
             if (response.code === 200) {
@@ -230,7 +261,11 @@ export default function UrlDialog({
                 urlParams.linkUrl,
                 undefined,
                 pushUuid,
-                urlParams.title || 'Link'
+                urlParams.title || 'Link',
+                undefined,
+                undefined,
+                undefined,
+                faviconUrl || undefined
             );
 
             if (response.code === 200) {

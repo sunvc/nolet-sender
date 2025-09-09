@@ -140,6 +140,56 @@ const getCommonTheme = (mode: 'light' | 'dark'): ThemeOptions => ({
                             : '0 2px 6px rgba(25, 118, 210, 0.15)',
                     },
                 },
+                outlined: {
+                    '&.MuiButton-outlinedPrimary': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(144, 202, 249, 0.08)'
+                                : 'rgba(25, 118, 210, 0.04)',
+                            borderColor: mode === 'dark' ? '#90caf9' : '#1976d2',
+                        },
+                    },
+                    '&.MuiButton-outlinedSecondary': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(244, 143, 177, 0.08)'
+                                : 'rgba(220, 0, 78, 0.04)',
+                            borderColor: mode === 'dark' ? '#f48fb1' : '#dc004e',
+                        },
+                    },
+                    '&.MuiButton-outlinedError': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(244, 67, 54, 0.08)'
+                                : 'rgba(211, 47, 47, 0.04)',
+                            borderColor: mode === 'dark' ? '#f44336' : '#d32f2f',
+                        },
+                    },
+                    '&.MuiButton-outlinedWarning': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(255, 152, 0, 0.08)'
+                                : 'rgba(237, 108, 2, 0.04)',
+                            borderColor: mode === 'dark' ? '#ff9800' : '#ed6c02',
+                        },
+                    },
+                    '&.MuiButton-outlinedInfo': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(41, 182, 246, 0.08)'
+                                : 'rgba(2, 136, 209, 0.04)',
+                            borderColor: mode === 'dark' ? '#29b6f6' : '#0288d1',
+                        },
+                    },
+                    '&.MuiButton-outlinedSuccess': {
+                        '&:hover': {
+                            backgroundColor: mode === 'dark'
+                                ? 'rgba(102, 187, 106, 0.08)'
+                                : 'rgba(46, 125, 50, 0.04)',
+                            borderColor: mode === 'dark' ? '#66bb6a' : '#2e7d32',
+                        },
+                    },
+                },
                 // 小尺寸按钮
                 sizeSmall: {
                     borderRadius: 12,

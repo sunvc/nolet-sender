@@ -12,6 +12,8 @@ import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionCon
  * @param title 标题
  * @param url 链接
  * @param advancedParams 自定义参数
+ * @param devices 设备列表
+ * @param icon 图标URL
  */
 export async function sendPushMessage(
     device: Device,
@@ -21,7 +23,8 @@ export async function sendPushMessage(
     title?: string,
     url?: string,
     advancedParams?: Record<string, any>,
-    devices?: Device[]
+    devices?: Device[],
+    icon?: string
 ): Promise<PushResponse> {
     let response: PushResponse;
     let method: 'GET' | 'POST' = 'GET';
@@ -46,6 +49,14 @@ export async function sendPushMessage(
             );
         }
 
+        // 确定最终使用的图标：优先级 传入的icon > 自定义头像
+        let finalIcon: string | undefined;
+        if (icon) {
+            finalIcon = icon; // 优先使用传入的favicon
+        } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
+            finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+        }
+
         const pushParams: PushParams = {
             apiURL: device.apiURL,
             message,
@@ -58,7 +69,7 @@ export async function sendPushMessage(
             title: processedAdvancedParams?.title || title,
             url: processedAdvancedParams?.url || url,
             ...(device.authorization && { authorization: device.authorization }), // 认证信息 (可选)
-            ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }), // 自定义头像 (可选)
+            ...(finalIcon && { icon: finalIcon }), // 图标 (可选)
             // 添加其他自定义参数，但排除已经处理过的 title, url
             ...(processedAdvancedParams && Object.fromEntries(
                 Object.entries(processedAdvancedParams).filter(([key]) =>

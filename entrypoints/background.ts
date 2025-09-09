@@ -72,7 +72,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices, message.icon)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -83,7 +83,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendEncryptedPush') {
-      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices)
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices, message.icon)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -452,7 +452,7 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[]) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('bark_app_settings');
@@ -470,6 +470,14 @@ export default defineBackground(() => {
         authorization
       } : undefined;
 
+      // 确定最终使用的图标：优先级为 传入的icon > 自定义头像
+      let finalIcon: string | undefined;
+      if (icon) {
+        finalIcon = icon; // 优先使用传入的icon
+      } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
+        finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+      }
+
       const pushParams: PushParams = {
         apiURL,
         message,
@@ -482,7 +490,7 @@ export default defineBackground(() => {
         device_key: singleDevice?.deviceKey, // 添加device_key
         device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
-        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+        ...(finalIcon && { icon: finalIcon })
       };
       const apiVersion = useAPIv2 ? 'v2' : 'v1';
       const response = await sendPush(pushParams, undefined, apiVersion);
@@ -495,7 +503,7 @@ export default defineBackground(() => {
   }
 
   // 处理加密推送请求
-  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[]) {
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('bark_app_settings');
@@ -513,6 +521,14 @@ export default defineBackground(() => {
         authorization
       } : undefined;
 
+      // 确定最终使用的图标：优先级为 传入的icon > 自定义头像
+      let finalIcon: string | undefined;
+      if (icon) {
+        finalIcon = icon; // 优先使用传入的icon
+      } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
+        finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+      }
+
       const pushParams: PushParams = {
         apiURL,
         message,
@@ -525,7 +541,7 @@ export default defineBackground(() => {
         device_key: singleDevice?.deviceKey, // 添加device_key
         device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
-        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+        ...(finalIcon && { icon: finalIcon })
       };
       const apiVersion = useAPIv2 ? 'v2' : 'v1';
       const response = await sendPush(pushParams, encryptionConfig, apiVersion);
@@ -904,6 +920,27 @@ export default defineBackground(() => {
 
         const pushUuid = generateUUID(); // 生成 UUID 用于请求参数 做 撤回 / 修改 请求用
 
+        // 预加载favicon（仅当发送页面或选中文本时）
+        let faviconUrl: string | null = null;
+        if (info.menuItemId === 'send-page' || info.menuItemId === 'send-selection') {
+          try {
+            const currentPageUrl = tab?.url;
+            if (currentPageUrl) {
+              faviconUrl = await prefetchFavicon(currentPageUrl);
+            }
+          } catch (error) {
+            console.debug('预加载favicon失败:', error);
+          }
+        }
+
+        // 确定最终使用的图标：优先级为 favicon > 自定义头像
+        let finalIcon: string | undefined;
+        if (settings.enableFaviconIcon && faviconUrl) {
+          finalIcon = faviconUrl; // 优先使用favicon
+        } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
+          finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+        }
+
         const pushParams: PushParams = {
           apiURL: defaultDevice.apiURL,
           message,
@@ -916,7 +953,7 @@ export default defineBackground(() => {
           device_key: defaultDevice.deviceKey, // 添加device_key
           device_keys: [defaultDevice.deviceKey].filter(Boolean) as string[], // 添加device_keys
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
-          ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+          ...(finalIcon && { icon: finalIcon })
         };
 
         // 根据设置选择发送方式
