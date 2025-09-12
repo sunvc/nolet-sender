@@ -30,7 +30,7 @@
         "timeout": "超時"
     },
     "nav": {
-        "send": "發送訊息",
+        "send": "發送通知",
         "history": "歷史記錄",
         "settings": "設定"
     },
@@ -45,7 +45,7 @@
         "api_url_placeholder": "例如: https://api.day.app/你的key/ 或 你的Key",
         "api_url_helper": "開啟 Bark App，複製網址並貼上到這裡",
         "preview_url": "預覽網址：{{url}}",
-        "test_message": "測試訊息",
+        "test_message": "測試通知",
         "no_devices": "暫時沒有裝置，請按『新增裝置』按鈕加入。",
         "api_url_invalid": "API URL 格式不正確，請檢查格式",
         "device_key_invalid": "格式不正確，請檢查 Device Key 部分是否輸入正確",
@@ -62,38 +62,38 @@
             "password_placeholder": "輸入密碼"
         },
         "self_hosted": "自建伺服器",
-        "server": "伺服器地址",
+        "server": "伺服器網址",
         "server_placeholder": "例如: https://your.server.com/",
         "device_key": "裝置 Key",
         "device_key_placeholder": "your_key",
-        "device_key_helper": "<伺服器地址>/<裝置 Key>/ 會作為最終 API URL",
-        "final_url": "最終地址"
+        "device_key_helper": "<伺服器網址>/<裝置 Key>/ 會作為最終 API URL",
+        "final_url": "最終網址"
     },
     "settings": {
         "title": "其他設定",
         "theme": {
-            "title": "主題設置",
+            "title": "主題設定",
             "light": "淺色",
             "dark": "深色",
             "system": "跟隨系統"
         },
         "language": {
-            "title": "語言設置",
+            "title": "語言設定",
             "current": "當前語言"
         },
         "context_menu": {
             "title": "右鍵選單",
             "enable": "啟用右鍵選單",
             "enable_inspect_send": "啟用右鍵分析網頁內容",
-            "send_selection_to_device": "傳送選取的文字給 {{device}}",
-            "send_page_to_device": "傳送目前頁面網址給 {{device}}",
-            "send_link_to_device": "傳送目標網址給 {{device}}",
-            "inspect_send": "分析並傳送給 {{device}}"
+            "send_selection_to_device": "發送選取的文字給 {{device}}",
+            "send_page_to_device": "發送目前頁面網址給 {{device}}",
+            "send_link_to_device": "發送目標網址給 {{device}}",
+            "inspect_send": "分析並發送給 {{device}}"
         },
         "shortcuts": {
-            "title": "快捷鍵",
-            "open_window": "開啟訊息視窗: {{key}}",
-            "guide": "由於瀏覽器政策限制，擴展暫時無法取得權限跳轉到快捷鍵設置頁面。請手動在地址列輸入以下地址進行設置。",
+            "title": "快速鍵",
+            "open_window": "開啟推送視窗: {{key}}",
+            "guide": "由於瀏覽器政策限制，擴充功能暫時無法取得權限跳轉到快速鍵設定頁面。請手動在網址列輸入以下網址進行設定。",
             "guide_firefox": "對於 Firefox，導航到 設定齒輪圖示 → 管理擴充套件快速鍵；快速鍵僅在瀏覽器聚焦時生效。"
         },
         "features": {
@@ -186,7 +186,7 @@
         },
         "api_v2": {
             "title": "啟用 API v2",
-            "update_success": "API v2 已啟用，已完整支持所有參數。",
+            "update_success": "API v2 已啟用，已完整支援所有參數。",
             "success_message": "已自動開啟 API v2 模式",
             "update_failed": "更新裝置失敗: {{message}}"
         },
@@ -201,8 +201,8 @@
             "warning_description": "啟用後，點擊擴充功能圖標時會直接進入極速模式介面，而不是常規的推送介面。",
             "how_it_works_title": "極速模式功能流程：",
             "feature_1": "自動讀取剪貼簿內容",
-            "feature_2": "倒數 {{countdown}}s 後自動傳送到預設裝置",
-            "feature_3": "點擊輸入框可以暫停傳送並手動編輯內容",
+            "feature_2": "倒數 {{countdown}}s 後自動發送到預設裝置",
+            "feature_3": "點擊輸入框可以暫停發送並手動編輯內容",
             "requirements": "右鍵擴充功能圖標即可關閉",
             "confirm_enable": "確認啟用",
             "save_failed": "儲存極速模式設定失敗"
@@ -210,21 +210,21 @@
     },
     "speed_mode_page": {
         "title": "極速模式",
-        "sending_to_device": "正在傳送剪貼簿內容到預設裝置：{{device}}",
+        "sending_to_device": "正在發送剪貼簿內容到預設裝置：{{device}}",
         "device_not_set": "未設定",
         "clipboard_reading": "正在讀取剪貼簿...",
         "clipboard_failed": "剪貼簿內容獲取失敗，點擊重新讀取",
-        "manual_input_placeholder": "或者手動輸入要傳送的內容",
+        "manual_input_placeholder": "或者手動輸入要發送的內容",
         "clipboard_empty_placeholder": "剪貼簿內容為空",
-        "send_success": "傳送成功",
-        "send_failed": "傳送失敗：{{message}}",
+        "send_success": "發送成功",
+        "send_failed": "發送失敗：{{message}}",
         "exit_speed_mode": "離開極速模式",
-        "send": "傳送",
+        "send": "發送",
         "cancel": "取消",
-        "sending": "正在傳送...",
+        "sending": "正在發送...",
         "cancelled": "已取消",
-        "can_edit_and_send": "可修改內容後手動傳送",
-        "auto_send_countdown": "{{seconds}}秒後自動傳送"
+        "can_edit_and_send": "可修改內容後手動發送",
+        "auto_send_countdown": "{{seconds}}秒後自動發送"
     },
     "about": {
         "title": "關於",
@@ -257,16 +257,16 @@
         }
     },
     "push": {
-        "title": "發送訊息",
+        "title": "發送通知",
         "target_device": "目標裝置",
-        "select_device": "選擇要發送的裝置",
-        "message": "訊息內容",
-        "message_placeholder": "輸入要發送的訊息內容",
+        "select_device": "選擇要發送通知的裝置",
+        "message": "通知內容",
+        "message_placeholder": "輸入要發送的通知內容",
         "send": "發送",
         "sending": "發送中...",
         "send_clipboard": "發送剪貼板內容",
         "reading_clipboard": "正在讀取剪貼板內容...",
-        "shortcuts_tip": "快捷鍵提示",
+        "shortcuts_tip": "快速鍵提示",
         "send_key": "{{key}} 發送",
         "open_key": "{{key}} 快速開啟推送視窗",
         "open_extension": "開啟推送視窗",
@@ -275,11 +275,11 @@
         "shortcut_esc_suffix": "取消",
         "success": "發送成功！",
         "clipboard_empty": "剪貼板為空或沒有有效內容",
-        "select_device_helper": "支持選擇多個裝置",
+        "select_device_helper": "支援選擇多個裝置",
         "select_device_length": "已選 {{count}} 個裝置",
         "recall": {
             "button": "嘗試撤回",
-            "button2": "由於 Bark 暫時對批量消息撤回的支持有限, 故此處不保證撤回成功, 請留意後續更新。",
+            "button2": "由於 Bark 暫時對批量通知撤回的支援有限，故此處不保證撤回成功，請留意後續更新。",
             "loading": "撤回中...",
             "success": "已請求撤回",
             "no_record": "沒有可撤回的推送記錄",
@@ -289,15 +289,15 @@
         },
         "errors": {
             "no_device": "請選擇一個裝置",
-            "no_content": "請輸入訊息內容",
+            "no_content": "請輸入通知內容",
             "send_failed": "發送失敗: {{message}}",
             "clipboard_failed": "發送剪貼板失敗: {{message}}"
         },
         "url_dialog": {
             "title": "選擇要發送的內容",
-            "send_current_page": "發送當前頁面",
+            "send_current_page": "發送目前頁面",
             "send_selected_text": "發送選取的文字",
-            "send_link": "發送鏈接",
+            "send_link": "發送連結",
             "info": "由於該頁面無法被解析，請在點擊上方的選項確認需要發送的內容"
         },
         "advanced_params": {
@@ -313,14 +313,14 @@
             "p_group": "通知分組",
             "p_autoCopy": "自動複製",
             "p_copy": "複製內容",
-            "p_url": "跳轉 URL",
+            "p_url": "前往 URL",
             "p_action": "點擊操作類型",
             "tips": "Tips:",
             "tips_1": "如需設定提示聲及加密參數，請點擊底部導航欄中的「設定」。",
             "tips_2": "底部的分頁顯示已修改的參數，點擊可跳轉，按右鍵可重設。",
             "tips_3": "點擊跳轉至參數｜右鍵還原為預設",
             "tips_4": "部分參數需要組合使用, 例如: 音量需要配合重要警告, 活躍, 時效性的級別才可生效。",
-            "tips_5": "所有自定義配置會在 「發送訊息」 頁中會自動記憶, 下次仍然有效!",
+            "tips_5": "所有自訂設定會在 「發送通知」 頁面自動記憶, 下次仍然有效!",
             "not_set": "未設定",
             "critical": "重要警告",
             "active": "活躍",
@@ -340,7 +340,7 @@
         "iv": "初始化向量 (IV)",
         "generate_key": "產生隨機金鑰",
         "generate_iv": "產生隨機 IV",
-        "iv_description": "僅供隨機產生 IV 示例，實際發送為隨機值",
+        "iv_description": "僅供隨機產生 IV 例子，實際發送為隨機值",
         "algorithms": {
             "aes256": "AES-256",
             "aes192": "AES-192",
@@ -359,7 +359,7 @@
         "import": "匯入記錄",
         "refresh": "重新整理",
         "toolbar": {
-            "search_placeholder": "搜尋訊息內容、裝置名稱...",
+            "search_placeholder": "搜尋通知內容、裝置名稱...",
             "clear_search": "清除搜尋",
             "search": "搜尋",
             "delete_selected": "刪除已選"
@@ -379,9 +379,9 @@
             "recalled": "已請求撤回"
         },
         "messages": {
-            "empty": "暫無歷史紀錄",
+            "empty": "暫無歷史記錄",
             "no_search_results": "找不到相符的記錄",
-            "load_failed": "載入歷史紀錄失敗",
+            "load_failed": "載入歷史記錄失敗",
             "delete_success": "已刪除 {{count}} 筆記錄",
             "delete_failed": "刪除失敗",
             "export_success": "匯出成功",
@@ -392,9 +392,9 @@
     },
     "utils": {
         "api": {
-            "network_failed": "網路請求失敗，請檢查網路連接和API地址",
+            "network_failed": "網路請求失敗，請檢查網路連接和 API 網址",
             "runtime_unavailable": "擴充套件執行時不可用"
         },
-        "open_window": "雙擊彈出到新窗口"
+        "open_window": "雙擊彈出到新視窗"
     }
 }
