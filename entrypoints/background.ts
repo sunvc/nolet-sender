@@ -134,9 +134,11 @@ export default defineBackground(() => {
         // 准备发送参数
         let title = message.title || '';
         let content = message.content?.trim() || '';
-        let url = '';
-        let copyContent = message.content?.trim() || undefined;
+        let url = undefined;
+        let copyContent = undefined;
         let level = undefined;
+        let autoCopy = undefined;
+        let notBody = false;
         // 根据内容类型设置 URL 和标题
         switch (message.contentType) {
           case 'text':
@@ -146,16 +148,25 @@ export default defineBackground(() => {
             break;
           case 'text-large':
             // 对于 text-large 类型，保持完整的 copyContent，但显示提示信息
+            copyContent = message.content?.trim() || undefined;
             content = message.isLastChunk ?
               getMessage('push.large_content.last_chunk') : // 最后一段显示完整内容
               getMessage('push.large_content.not_last_chunk'); // 其他段显示提示信息
             level = message.isLastChunk ? undefined : 'passive'; // 最后一段显示提醒出来
             break;
-          case 'image':
+          case 'image': // 策略: 点击推送能打开 Safari，下拉复制的是图片的网址，能显示推送图片，不用加密，也不用传递 body 来减少请求体大小
             url = message.content;
+            autoCopy = '1';
+            copyContent = undefined;// 避免太长，用autoCopy =1 代替
+            content = undefined; // 由于image直接用url参数，且body意义不大, 减少请求体大小
+            notBody = true;
             break;
-          case 'url':
+          case 'url': // 策略: 点击推送能打开 Safari，下来复制的是url，不用加密，也不用传递 body 来减少请求体大小
             url = message.content;
+            autoCopy = '1';
+            copyContent = undefined;// 避免太长，用autoCopy =1 代替
+            content = undefined; // 由于url直接用url参数，且body意义不大, 减少请求体大小
+            notBody = true;
             break;
           default:
             break;
@@ -177,7 +188,7 @@ export default defineBackground(() => {
 
         const pushParams: PushParams = {
           apiURL: defaultDevice.apiURL,
-          message: content,
+          message: notBody ? undefined : content, // 图片类型和url类型不传 message
           sound: settings.sound,
           image: message.contentType === 'image' ? message.content : undefined,
           url: url || undefined,
@@ -188,13 +199,15 @@ export default defineBackground(() => {
           devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(level && { level }),
-          ...(finalIcon && { icon: finalIcon })
+          ...(finalIcon && { icon: finalIcon }),
+          ...(autoCopy && { autoCopy })
         };
 
         // 根据设置选择是否加密, 避免 414 Request-URI Too Large 错误, 使用 POST 请求（API v2 使用POST, 默认 4Kb)
         let isEncrypted = false;
 
-        const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
+        // 如果是image类型，不加密
+        const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key && !notBody
           ? (isEncrypted = true, sendPush(pushParams, settings.encryptionConfig, 'v2'))
           : sendPush(pushParams, undefined, 'v2');
 
@@ -224,7 +237,7 @@ export default defineBackground(() => {
               title: title || undefined,
               sound: settings.sound || undefined,
               url: url || undefined,
-              isEncrypted: isEncrypted,
+              isEncrypted: notBody ? false : isEncrypted, // 图片类型和url类型不加密
               createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
@@ -280,7 +293,7 @@ export default defineBackground(() => {
               title: title || undefined,
               sound: settings.sound || undefined,
               url: url || undefined,
-              isEncrypted: isEncrypted,
+              isEncrypted: notBody ? false : isEncrypted,
               createdAt: new Date(requestTimestamp).toLocaleString('zh-CN', {
                 year: 'numeric',
                 month: '2-digit',
