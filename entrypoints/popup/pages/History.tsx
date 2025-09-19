@@ -279,13 +279,14 @@ export default function History() {
                 title: t('history.table.recalled')
             };
         }
-        if (record.responseJson.code === 200) {
+
+        if (record.responseJson?.code === 200) {
             return {
                 icon: <CheckCircleIcon sx={{ fontSize: '16px', color: '#4caf50' }} />,
                 color: '#4caf50',
                 title: t('common.success')
             };
-        } else if (record.responseJson.code === -1) {
+        } else if (record.responseJson?.code === -1) {
             return {
                 icon: <ErrorIcon sx={{ fontSize: '16px', color: '#f44336' }} />,
                 color: '#f44336',
@@ -302,6 +303,7 @@ export default function History() {
 
     // 截取长文本
     const truncateText = (text: string, maxLength: number = 30) => {
+        if (!text) return ''; // 处理 undefined、null 或空字符串
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
     };
 
