@@ -13,6 +13,7 @@ import {
     DialogContent,
     DialogActions,
     Slide,
+    Collapse,
     IconButton,
     Tooltip
 } from '@mui/material';
@@ -564,6 +565,25 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setResult({ type: 'error', message: error });
     };
 
+    const [alertToShow, setAlertToShow] = React.useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+    // 当 result 变化时，更新要显示的 alert 内容
+    React.useEffect(() => {
+        if (result) {
+            setAlertToShow(result);
+        }
+    }, [result]);
+
+    // 处理关闭 Alert 的函数
+    const handleCloseAlert = () => {
+        setResult(null); // 触发 Slide 退出动画
+    };
+
+    // 当退出动画完成后清除显示内容
+    const handleExited = () => {
+        setAlertToShow(null);
+    };
+
     return (
         <>
             <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -576,7 +596,8 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         display: 'flex',
                         flexDirection: 'column',
                         gap: 3,
-                        transformOrigin: 'center center'
+                        transformOrigin: 'center center',
+                        // transition: 'gap 0.3s ease-in-out'
                     }}
                 >
                     <Typography variant="h6" gutterBottom>
@@ -600,79 +621,110 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                         />
                     )}
 
-                    <TextField
-                        /* 推送内容 */
-                        label={t('push.message')}
-                        /* 输入要推送的消息内容 */
-                        placeholder={t('push.message_placeholder')}
-                        multiline
-                        rows={3}
-                        value={message}
-                        onChange={handleMessageChange}
-                        onKeyDown={handleKeyDown}
-                        variant="outlined"
-                        size="small"
-                        fullWidth
-                        autoFocus
-                    />
+                    <Stack gap={2}>
+                        <TextField
+                            /* 推送内容 */
+                            label={t('push.message')}
+                            /* 输入要推送的消息内容 */
+                            placeholder={t('push.message_placeholder')}
+                            multiline
+                            rows={3}
+                            value={message}
+                            onChange={handleMessageChange}
+                            onKeyDown={handleKeyDown}
+                            variant="outlined"
+                            size="small"
+                            fullWidth
+                            autoFocus
+                        />
 
-                    {result && (
-                        <Alert
-                            severity={result.type}
-                            action={
-                                result.type === 'success' && lastPushUuid ? (
-                                    <Stack direction="row" gap={1}>
-                                        {/* 选择了两个设备时, 不要显示撤回按钮 */}
-                                        {selectedDevices.length > 1 ?
-                                            <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button2')}>
-                                                <IconButton
-                                                    size="small"
-                                                    aria-label="recall"
-                                                    color="inherit"
-                                                    onClick={handleRecall}
-                                                    disabled={recallLoading}
-                                                >
-                                                    {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em', color: 'text.secondary' }} />}
-                                                </IconButton>
-                                            </Tooltip> :
-                                            (
-                                                <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button')}>
+                        <Collapse
+                            in={!!result}
+                            timeout={{
+                                enter: 200,
+                                exit: 400,
+                            }}
+                            sx={{
+                                '& .MuiCollapse-wrapper': {
+                                    transition: 'height 0.2s ease-in-out !important'
+                                }
+                            }}
+                        >
+                            <Slide
+                                direction="left"
+                                in={!!result} // 基于 result 控制显示/隐藏
+                                mountOnEnter
+                                unmountOnExit
+                                timeout={{
+                                    enter: 300,
+                                    exit: 200,
+                                }}
+                                onExited={handleExited} // 退出动画完成后的回调
+                            >
+                                <div>
+                                    {alertToShow && (
+                                        <Alert
+                                            sx={{
+                                                py: .3,
+                                            }}
+                                            severity={alertToShow.type}
+                                            action={
+                                                alertToShow.type === 'success' && lastPushUuid ? (
+                                                    <Stack direction="row" gap={1}>
+                                                        {/* 选择了两个设备时, 不要显示撤回按钮 */}
+                                                        {selectedDevices.length > 1 ?
+                                                            <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button2')}>
+                                                                <IconButton
+                                                                    size="small"
+                                                                    aria-label="recall"
+                                                                    color="inherit"
+                                                                    onClick={handleRecall}
+                                                                    disabled={recallLoading}
+                                                                >
+                                                                    {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em', color: 'text.secondary' }} />}
+                                                                </IconButton>
+                                                            </Tooltip> :
+                                                            (
+                                                                <Tooltip title={recallLoading ? t('push.recall.loading') : t('push.recall.button')}>
+                                                                    <IconButton
+                                                                        size="small"
+                                                                        aria-label="recall"
+                                                                        color="warning"
+                                                                        onClick={handleRecall}
+                                                                        disabled={recallLoading}
+                                                                    >
+                                                                        {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em' }} />}
+                                                                    </IconButton>
+                                                                </Tooltip>
+                                                            )}
+                                                        <IconButton
+                                                            size="small"
+                                                            aria-label="close"
+                                                            color="inherit"
+                                                            onClick={handleCloseAlert}
+                                                        >
+                                                            <CloseIcon fontSize="small" />
+                                                        </IconButton>
+                                                    </Stack>
+                                                ) : (
                                                     <IconButton
                                                         size="small"
-                                                        aria-label="recall"
-                                                        color="warning"
-                                                        onClick={handleRecall}
-                                                        disabled={recallLoading}
+                                                        aria-label="close"
+                                                        color="inherit"
+                                                        onClick={handleCloseAlert}
                                                     >
-                                                        {recallLoading ? <CircularProgress size={16} /> : <UndoIcon sx={{ fontSize: '1em' }} />}
+                                                        <CloseIcon fontSize="small" />
                                                     </IconButton>
-                                                </Tooltip>
-                                            )}
-                                        <IconButton
-                                            size="small"
-                                            aria-label="close"
-                                            color="inherit"
-                                            onClick={() => setResult(null)}
+                                                )
+                                            }
                                         >
-                                            <CloseIcon fontSize="small" />
-                                        </IconButton>
-                                    </Stack>
-                                ) : (
-                                    <IconButton
-                                        size="small"
-                                        aria-label="close"
-                                        color="inherit"
-                                        onClick={() => setResult(null)}
-                                    >
-                                        <CloseIcon fontSize="small" />
-                                    </IconButton>
-                                )
-                            }
-                        >
-                            {result.message}
-                        </Alert>
-                    )}
-
+                                            {alertToShow.message}
+                                        </Alert>
+                                    )}
+                                </div>
+                            </Slide>
+                        </Collapse>
+                    </Stack>
                     <Stack spacing={2} sx={{ mt: 'auto' }}>
                         <Button
                             variant="contained"
@@ -699,12 +751,31 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             {clipboardLoading ? t('push.reading_clipboard') : t('push.send_clipboard')}
                         </Button>
 
-                        <ShortcutTips
-                            tips={[
-                                { key: shortcutKeys.send, description: t('push.send') },
-                                { key: shortcutKeys.openExtension, description: t('push.open_extension') }
-                            ]}
-                        />
+                        <Collapse
+                            in={!result}
+                            timeout={{
+                                enter: 400,
+                                exit: 200,
+                            }}
+                            sx={{
+                                '& .MuiCollapse-wrapper': {
+                                    transition: 'height 0.2s ease-in-out !important'
+                                }
+                            }}
+                            style={{
+                                margin: 0,
+                            }}
+                        >
+                            <ShortcutTips
+                                tips={[
+                                    { description: t('push.send'), key: shortcutKeys.send, },
+                                    { description: t('push.tips_omnibox') },
+                                    { description: t('push.open_extension'), key: shortcutKeys.openExtension, },
+                                    { description: t('push.tips_dbl_appbar') },
+                                ]}
+                                interval={12000}
+                            />
+                        </Collapse>
                     </Stack>
                 </Paper>
 

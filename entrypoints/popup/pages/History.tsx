@@ -4,7 +4,6 @@ import {
     Typography,
     Stack,
     Button,
-    Checkbox,
     IconButton,
     Tooltip,
     Alert,
@@ -13,33 +12,20 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    TextField,
-    useTheme,
-    InputAdornment
 } from '@mui/material';
 import LottiePlayer from '../components/LottiePlayer';
 import {
     Delete as DeleteIcon,
     Download as DownloadIcon,
     Upload as UploadIcon,
-    Refresh as RefreshIcon,
-    Search as SearchIcon,
-    Clear as ClearIcon,
-    CheckCircle as CheckCircleIcon,
-    Error as ErrorIcon,
-    Help as HelpIcon,
-    NavigateBefore as NavigateBeforeIcon,
-    NavigateNext as NavigateNextIcon,
-    Undo as UndoIcon
 } from '@mui/icons-material';
+import HistoryTable from '../components/HistoryTable';
 import { useTranslation } from 'react-i18next';
 import { HistoryRecord, dbManager } from '../utils/database';
 
 export default function History() {
     const { t } = useTranslation();
-    const theme = useTheme();
     const [records, setRecords] = useState<HistoryRecord[]>([]);
-    const [allRecordsCount, setAllRecordsCount] = useState(0);
     const [hasData, setHasData] = useState(false);
     const [loading, setLoading] = useState(true);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -50,13 +36,6 @@ export default function History() {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const hasInitialized = useRef(false); // 防止重复初始化
     const importLock = useRef(false); // 导入锁，防止重复导入
-
-    // 分页相关状态
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
-    const [pageSize] = useState(10); // 每页显示10条记录
-    const [pageInputValue, setPageInputValue] = useState('1');
-    const [allRecords, setAllRecords] = useState<HistoryRecord[]>([]);
 
     // 导入 storage.local 中的暂存历史记录到IndexedDB
     const importStorageHistory = async () => {
@@ -144,40 +123,11 @@ export default function History() {
 
             // 从IndexedDB读取历史记录用于显示
             const data = await dbManager.getAllRecords();
-            setAllRecords(data); // 保存所有记录
+            setRecords(data);
             setHasData(data.length > 0);
-            setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
-
-            // 更新当前页显示的记录
-            const startIndex = (currentPage - 1) * pageSize;
-            setRecords(data.slice(startIndex, startIndex + pageSize));
-            setAllRecordsCount(data.length);
         } catch (error) {
             console.error('加载历史记录失败:', error);
             setAlert({ type: 'error', message: t('history.messages.load_failed') }); // 加载历史记录失败
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    // 搜索记录
-    const searchRecords = async () => {
-        if (!searchKeyword.trim()) {
-            await loadRecords(true); // 强制刷新
-            return;
-        }
-
-        try {
-            setLoading(true);
-            const data = await dbManager.searchRecords(searchKeyword.trim());
-            setAllRecords(data);
-            setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
-            setCurrentPage(1);
-            setPageInputValue('1');
-            setRecords(data.slice(0, pageSize));
-        } catch (error) {
-            console.error('搜索失败:', error);
-            setAlert({ type: 'error', message: t('common.error_unknown') }); // 搜索失败显示未知错误
         } finally {
             setLoading(false);
         }
@@ -252,89 +202,6 @@ export default function History() {
         }
     };
 
-    // 全选/取消全选
-    const handleSelectAll = (checked: boolean) => {
-        if (checked) {
-            setSelectedIds(records.map(r => r.id!).filter(id => id !== undefined));
-        } else {
-            setSelectedIds([]);
-        }
-    };
-
-    // 单选切换
-    const handleSelectRecord = (id: number, checked: boolean) => {
-        if (checked) {
-            setSelectedIds(prev => [...prev, id]);
-        } else {
-            setSelectedIds(prev => prev.filter(selectedId => selectedId !== id));
-        }
-    };
-
-    // 格式化响应状态
-    const getStatusDisplay = (record: HistoryRecord) => {
-        if (record.status === 'recalled') {
-            return {
-                icon: <UndoIcon sx={{ fontSize: '16px', color: '#ff9800' }} />,
-                color: '#ff9800',
-                title: t('history.table.recalled')
-            };
-        }
-
-        if (record.responseJson?.code === 200) {
-            return {
-                icon: <CheckCircleIcon sx={{ fontSize: '16px', color: '#4caf50' }} />,
-                color: '#4caf50',
-                title: t('common.success')
-            };
-        } else if (record.responseJson?.code === -1) {
-            return {
-                icon: <ErrorIcon sx={{ fontSize: '16px', color: '#f44336' }} />,
-                color: '#f44336',
-                title: t('common.failed')
-            };
-        } else {
-            return {
-                icon: <HelpIcon sx={{ fontSize: '16px', color: '#ff9800' }} />,
-                color: '#ff9800',
-                title: t('common.other')
-            };
-        }
-    };
-
-    // 截取长文本
-    const truncateText = (text: string, maxLength: number = 30) => {
-        if (!text) return ''; // 处理 undefined、null 或空字符串
-        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-    };
-
-    // 处理页码变化
-    const handlePageChange = (newPage: number) => {
-        if (newPage < 1 || newPage > totalPages) return;
-
-        setCurrentPage(newPage);
-        setPageInputValue(newPage.toString());
-        const startIndex = (newPage - 1) * pageSize;
-        setRecords(allRecords.slice(startIndex, startIndex + pageSize));
-    };
-
-    // 处理页码输入
-    const handlePageInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setPageInputValue(value);
-
-        const pageNum = parseInt(value);
-        if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
-            handlePageChange(pageNum);
-        }
-    };
-
-    // 处理页码输入框失焦
-    const handlePageInputBlur = () => {
-        const pageNum = parseInt(pageInputValue);
-        if (isNaN(pageNum) || pageNum < 1 || pageNum > totalPages) {
-            setPageInputValue(currentPage.toString());
-        }
-    };
 
     useEffect(() => {
         loadRecords();
@@ -351,64 +218,16 @@ export default function History() {
     return (
         <Box sx={{ p: 2, height: '100%', display: 'flex', flexDirection: 'column' }}>
             {/* 操作栏 */}
-            <Stack spacing={1} sx={{ mb: 2 }}>
-                {/* 搜索相关 */}
-                <Stack direction="row" spacing={1} alignItems="center"
-                    sx={{ pointerEvents: !hasData && searchKeyword.trim() === '' ? 'none' : 'auto', opacity: !hasData && searchKeyword.trim() === '' ? 0.5 : 1 }}>
-                    <TextField
-                        size="small"
-                        placeholder={t('history.toolbar.search_placeholder')} // 搜索消息内容、设备名称...
-                        value={searchKeyword}
-                        onChange={(e) => {
-                            const newValue = e.target.value;
-                            setSearchKeyword(newValue);
-                            // 当搜索框清空时，自动恢复原始历史记录
-                            if (!newValue.trim()) {
-                                console.debug('搜索框清空，自动恢复原始历史记录');
-                                loadRecords(true);
-                            }
-                        }}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter') {
-                                searchRecords();
-                            }
-                        }}
-                        sx={{ flex: 1 }}
-                    />
-                    {/* 搜索 */}
-                    <IconButton
-                        onClick={searchRecords}
-                        color="primary"
-                        size="small"
-                        disabled={!hasData || searchKeyword.trim() === ''}
-                        aria-label={t('history.toolbar.search')}
-                    >
-                        <SearchIcon />
-                    </IconButton>
-                    {/* 清除搜索 */}
-                    <IconButton
-                        onClick={() => {
-                            setSearchKeyword('');
-                            loadRecords(true);
-                        }}
-                        disabled={searchKeyword.trim() === ''}
-                        size="small"
-                        aria-label={t('history.toolbar.clear_search')}
-                    >
-                        <ClearIcon />
-                    </IconButton>
+            <Stack spacing={1} sx={{ mb: 0.5 }} direction="row" justifyContent="space-between">
+                <Stack direction="row" gap={1} alignItems="flex-end" justifyContent="space-between" sx={{ mb: 1, mt: 0 }}>
+                    {/* 记录统计 */}
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 1, pl: .3 }}>
+                        {selectedIds.length > 0 ? `${t('history.table.selected_count', { count: selectedIds.length })}` : t('history.table.records_count', { count: records.length })}
+                    </Typography>
                 </Stack>
-
                 {/* 操作按钮 */}
                 <Stack direction="row" spacing={1} alignItems="center" justifyContent="space-between">
                     <Stack direction="row" spacing={1}>
-                        <Tooltip title={t('history.refresh')}>
-                            <span>
-                                <IconButton onClick={() => loadRecords(true)} color="primary" size="small">
-                                    <RefreshIcon />
-                                </IconButton>
-                            </span>
-                        </Tooltip>
                         <Tooltip title={t('history.export')}>
                             <span>
                                 <IconButton
@@ -491,261 +310,12 @@ export default function History() {
                 </Box>
                 :
                 <>
-                    <Stack direction="row" gap={1} alignItems="flex-end" justifyContent="space-between" sx={{ mb: 1, mt: 0 }}>
-                        {/* 记录统计 */}
-                        < Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                            {selectedIds.length > 0 ? `${t('history.table.selected_count', { count: selectedIds.length })}` : t('history.table.records_count', { count: allRecordsCount })}
-                        </Typography>
-
-                        {/* 分页控制 */}
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 2 }}>
-                            <Tooltip title={t('common.previous_page')} placement="top" arrow>
-                                <span>
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => handlePageChange(currentPage - 1)}
-                                        disabled={currentPage <= 1 || !hasData}
-                                    >
-                                        <NavigateBeforeIcon />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
-
-                            <TextField
-                                size="small"
-                                value={pageInputValue}
-                                onChange={handlePageInputChange}
-                                onBlur={handlePageInputBlur}
-                                sx={{
-                                    width: '60px',
-                                    '& input': {
-                                        padding: '4px 8px',
-                                        textAlign: 'center'
-                                    }
-                                }}
-                                aria-label={t('common.page')}
-                                InputProps={{
-                                    endAdornment: <InputAdornment position="end">/{totalPages}</InputAdornment>,
-                                }}
-                                disabled={!hasData}
-                            />
-
-                            <Tooltip title={t('common.next_page')} placement="top" arrow>
-                                <span>
-                                    <IconButton
-                                        size="small"
-                                        onClick={() => handlePageChange(currentPage + 1)}
-                                        disabled={currentPage >= totalPages || !hasData}
-                                    >
-                                        <NavigateNextIcon />
-                                    </IconButton>
-                                </span>
-                            </Tooltip>
-                        </Box>
-                    </Stack>
-                    <Box
-                        sx={{
-                            flex: 1,
-                            borderRadius: '6px',
-                            overflow: 'hidden',
-                            border: 1,
-                            borderColor: 'divider',
-                            bgcolor: 'background.paper'
-                        }}
-                    >
-                        <Box
-                            sx={{
-                                height: '100%',
-                                overflow: 'auto',
-                                bgcolor: 'background.paper'
-                            }}
-                        >
-                            <table style={{
-                                width: '100%',
-                                borderCollapse: 'collapse',
-                                fontSize: '14px',
-                                backgroundColor: 'transparent'
-                            }}>
-                                <thead>
-                                    <tr style={{
-                                        backgroundColor: theme.palette.background.paper,
-                                        borderBottom: `1px solid ${theme.palette.divider}`,
-                                        position: 'sticky',
-                                        top: 0,
-                                        zIndex: 1
-                                    }}>
-                                        <th style={{
-                                            padding: '8px 4px',
-                                            textAlign: 'center',
-                                            width: '40px',
-                                            backgroundColor: theme.palette.background.paper
-                                        }}>
-                                            <Checkbox
-                                                size="small"
-                                                checked={records.length > 0 && selectedIds.length === records.length}
-                                                indeterminate={selectedIds.length > 0 && selectedIds.length < records.length}
-                                                onChange={(e) => handleSelectAll(e.target.checked)}
-                                            />
-                                        </th>
-                                        {/* 时间 */}
-                                        <th style={{
-                                            padding: '8px',
-                                            textAlign: 'left',
-                                            width: '120px',
-                                            backgroundColor: theme.palette.background.paper,
-                                            color: theme.palette.text.primary
-                                        }}>{t('history.table.time')}</th>
-                                        {/* 消息 */}
-                                        <th style={{
-                                            padding: '8px',
-                                            textAlign: 'left',
-                                            minWidth: '200px',
-                                            backgroundColor: theme.palette.background.paper,
-                                            color: theme.palette.text.primary
-                                        }}>{t('history.table.content')}</th>
-                                        {/* 设备 */}
-                                        <th style={{
-                                            padding: '8px',
-                                            textAlign: 'left',
-                                            width: '100px',
-                                            minWidth: '100px',
-                                            backgroundColor: theme.palette.background.paper,
-                                            color: theme.palette.text.primary
-                                        }}>{t('history.table.device')}</th>
-                                        {/* 状态 */}
-                                        <th style={{
-                                            padding: '8px',
-                                            textAlign: 'left',
-                                            width: '100px',
-                                            minWidth: '100px',
-                                            backgroundColor: theme.palette.background.paper,
-                                            color: theme.palette.text.primary
-                                        }}>{t('history.table.status')}</th>
-                                        {/* 加密 */}
-                                        <th style={{
-                                            padding: '8px',
-                                            textAlign: 'left',
-                                            width: '60px',
-                                            minWidth: '60px',
-                                            backgroundColor: theme.palette.background.paper,
-                                            color: theme.palette.text.primary
-                                        }}>{t('history.table.encrypted')}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {records.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={6} style={{
-                                                padding: '40px',
-                                                textAlign: 'center',
-                                                color: theme.palette.text.secondary
-                                            }}>
-                                                {searchKeyword ? t('history.messages.no_search_results') : t('history.messages.empty')}
-                                            </td>
-                                        </tr>
-                                    ) : (
-                                        records.map((record) => {
-                                            const status = getStatusDisplay(record);
-                                            const isSelected = selectedIds.includes(record.id!);
-
-                                            return (
-                                                <tr
-                                                    key={record.id}
-                                                    style={{
-                                                        borderBottom: `1px solid ${theme.palette.divider}`,
-                                                        backgroundColor: isSelected ? theme.palette.action.selected : 'transparent',
-                                                        opacity: record.status === 'recalled' ? 0.6 : 1 // 撤回的记录 透明度降低
-                                                    }}
-                                                >
-                                                    <td style={{ padding: '8px 4px', textAlign: 'center' }}>
-                                                        <Checkbox
-                                                            size="small"
-                                                            checked={isSelected}
-                                                            onChange={(e) => handleSelectRecord(record.id!, e.target.checked)}
-                                                        />
-                                                    </td>
-                                                    <td style={{
-                                                        padding: '8px',
-                                                        fontSize: '12px',
-                                                        color: theme.palette.text.secondary
-                                                    }}>
-                                                        {record.createdAt}
-                                                    </td>
-                                                    <td style={{ padding: '8px' }}>
-                                                        <div style={{ fontWeight: 500 }}>
-                                                            {record.title && (
-                                                                <div style={{
-                                                                    fontSize: '12px',
-                                                                    color: theme.palette.text.secondary,
-                                                                    marginBottom: '2px'
-                                                                }}>
-                                                                    {t('history.table.title_prefix')}: {truncateText(record.title)}
-                                                                </div>
-                                                            )}
-                                                            <div title={record.body} style={{
-                                                                color: theme.palette.text.primary
-                                                            }}>
-                                                                {truncateText(record.body, 50)}
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td style={{ padding: '8px' }}>
-                                                        <div style={{
-                                                            fontSize: '13px',
-                                                            fontWeight: 500,
-                                                            color: theme.palette.text.primary,
-                                                            width: '100px',
-                                                            minWidth: '100px',
-                                                            overflow: 'hidden',
-                                                            textOverflow: 'ellipsis',
-                                                            whiteSpace: 'nowrap'
-                                                        }}>
-                                                            {record.deviceName}
-                                                        </div>
-                                                    </td>
-                                                    <td style={{
-                                                        padding: '8px',
-                                                        width: '100px',
-                                                        minWidth: '100px'
-                                                    }}>
-                                                        <div style={{
-                                                            display: 'flex',
-                                                            alignItems: 'flex-start',
-                                                            justifyContent: 'left',
-                                                            gap: '4px'
-                                                        }}>
-                                                            <span style={{
-                                                                fontSize: '12px',
-                                                                color: status.color,
-                                                                fontWeight: 500
-                                                            }}>
-                                                                {status.title}
-                                                            </span>
-                                                            <span>
-                                                                {status.icon}
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td style={{
-                                                        padding: '8px',
-                                                        textAlign: 'left',
-                                                        width: '60px',
-                                                        minWidth: '50px'
-                                                    }}>
-                                                        <span style={{
-                                                            fontSize: '12px',
-                                                            color: record.isEncrypted ? '#4caf50' : theme.palette.text.disabled
-                                                        }}>
-                                                            {record.isEncrypted ? t('common.yes') : t('common.no')}
-                                                        </span>
-                                                    </td>
-                                                </tr>
-                                            );
-                                        })
-                                    )}
-                                </tbody>
-                            </table>
-                        </Box>
+                    <Box sx={{ flex: 1, }}>
+                        <HistoryTable
+                            records={records}
+                            selectedIds={selectedIds}
+                            onSelectionChanged={setSelectedIds}
+                        />
                     </Box>
                 </>
             }
