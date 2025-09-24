@@ -593,7 +593,8 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
                 <AgGridReact
                     key={`ag-grid-${i18n.language}`} // 强制在语言切换时重新渲染
                     rowData={records}
-
+                    styleNonce="416d1177"
+                    enableCellExpressions={false} // 禁用单元格表达式
                     suppressMovableColumns={true}
                     columnDefs={columnDefs}
                     defaultColDef={defaultColDef}

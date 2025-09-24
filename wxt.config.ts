@@ -93,6 +93,28 @@ export default defineConfig({
               }
             });
           }
+
+          // hack: 移除不安全的 new Function 调用 (针对 ag-grid@34.2.0)
+          const chunksDir = path.join(browserDir, 'chunks');
+          if (fs.existsSync(chunksDir)) {
+            fs.readdirSync(chunksDir).forEach(file => {
+              if (file.endsWith('.js')) {
+                const filePath = path.join(chunksDir, file);
+                let content = fs.readFileSync(filePath, 'utf8');
+                const originalContent = content;
+
+                content = content.replace(
+                  // /new Function\s*\([^)]*\)/g,
+                  /new Function\s*\([^)]*\)/,
+                  'function() { return null; }' // ag-grid@34.2.0 的 new Function 调用只产生了一处
+                );
+                if (content !== originalContent) {
+                  fs.writeFileSync(filePath, content, 'utf8');
+                  console.log(`移除不安全的 new Function 调用: ${filePath}`);
+                }
+              }
+            });
+          }
         }
       });
     },

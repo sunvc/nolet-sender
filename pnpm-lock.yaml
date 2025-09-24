@@ -24,10 +24,10 @@ importers:
         specifier: ^10.0.0
         version: 10.0.0
       ag-grid-community:
-        specifier: ^34.2.0
+        specifier: 34.2.0
         version: 34.2.0
       ag-grid-react:
-        specifier: ^34.2.0
+        specifier: 34.2.0
         version: 34.2.0(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
       dayjs:
         specifier: ^1.11.13
