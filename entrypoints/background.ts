@@ -142,9 +142,18 @@ export default defineBackground(() => {
         // 根据内容类型设置 URL 和标题
         switch (message.contentType) {
           case 'text':
-            if (content.length > 128) {
-              content = content.slice(0, 30) + '...';
-            }
+            content = content;
+            autoCopy = '1';
+            /* note:
+               Bark App 在 1.5.3 的时候修复了推送内容过长无法正常复制的问题
+               bark servet 还是会限制请求体 4kB
+               常见 3Byte 一个汉字，不常见 4Byte 一个汉字
+               加上其他自符标点符号通常文本分段大小为 1500 个字符 (TEXT_CHUNK_SIZE = 1500)
+               所以用 autoCopy = '1' 配合 copyContent 可以不写来节省请求体大小
+
+               从 8bc5e41 (受影响版本 1.3.0 - 1.4.1) 开始 copyContent = copyContent.slice(0, 1500); 被改漏了
+               都会出现长度在 1500 以内的内容不管多少都会截掉 128 - 1500 之间的内容
+            */
             break;
           case 'text-large':
             // 对于 text-large 类型，保持完整的 copyContent，但显示提示信息
