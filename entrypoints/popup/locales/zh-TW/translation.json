@@ -277,6 +277,8 @@
         "clipboard_empty": "剪貼簿為空或沒有可用內容",
         "select_device_helper": "支援選擇多個裝置",
         "select_device_length": "已選 {{count}} 個裝置",
+        "tips_dbl_appbar": "雙擊標題欄可以彈出到新窗口",
+        "tips_omnibox": "在地址欄輸入 bb <內容> 即可發送推播",
         "recall": {
             "button": "嘗試撤回",
             "button2": "由於 Bark 暫時對批量通知撤回的支援有限，故此處不保證撤回成功，請留意後續更新。",

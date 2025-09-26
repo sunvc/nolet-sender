@@ -277,6 +277,8 @@
         "clipboard_empty": "Clipboard is empty or contains no valid content",
         "select_device_helper": "Support selecting multiple devices",
         "select_device_length": "{{count}} devices selected",
+        "tips_dbl_appbar": "Double-click the app bar to pop out",
+        "tips_omnibox": "Type 'bb <content>' in the address bar to push",
         "recall": {
             "button": "Try Recall",
             "button2": "Due to the limited support for batch message recall by Bark, this function cannot guarantee successful recall. Please pay attention to future updates.",

@@ -27,6 +27,7 @@ export interface HistoryRecord {
         pwd: string; // 密码 (用于显示)
         value: string; // Basic <凭证> (用于请求)
     }; // Basic Auth (可选)
+    inspectType?: string; // 推送类型
 }
 
 // 数据库结构定义

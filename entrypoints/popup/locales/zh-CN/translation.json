@@ -277,6 +277,8 @@
         "clipboard_empty": "剪切板为空或无有效内容",
         "select_device_helper": "支持选择多个设备",
         "select_device_length": "已选 {{count}} 个设备",
+        "tips_dbl_appbar": "双击标题栏可以弹出到新窗口",
+        "tips_omnibox": "在地址栏输入 bb <内容> 即可快速推送",
         "recall": {
             "button": "尝试撤回",
             "button2": "由于 Bark 暂时对批量消息撤回的支持有限, 故此处不保证撤回成功, 请留意后续更新。",
