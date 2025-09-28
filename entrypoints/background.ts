@@ -1,11 +1,80 @@
 import { initBackgroundI18n, watchLanguageChanges, getMessage } from './background/i18n-helper';
 import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from './shared/push-service';
 import { Device } from './popup/types';
+import { DEFAULT_ADVANCED_PARAMS } from './popup/utils/settings';
 
 export default defineBackground(() => {
   // 初始化 i18n
   initBackgroundI18n();
   watchLanguageChanges();
+
+  // 检查自定义参数差异，只返回与默认配置不同的参数
+  function getCustomParametersDifference(settings: any): Record<string, any> {
+    const customParams: Record<string, any> = {};
+
+    // 如果未启用自定义参数，返回空对象
+    if (!settings.enableAdvancedParams) {
+      return customParams;
+    }
+
+    try {
+      // 解析用户自定义的参数配置
+      const userParams = settings.advancedParamsJson ?
+        JSON.parse(settings.advancedParamsJson) : {};
+
+      // 对比每个参数，只保留与默认值不同的参数
+      Object.keys(DEFAULT_ADVANCED_PARAMS).forEach(key => {
+        const defaultValue = DEFAULT_ADVANCED_PARAMS[key as keyof typeof DEFAULT_ADVANCED_PARAMS];
+        const userValue = userParams[key];
+
+        // 如果用户设置的值与默认值不同且不为空 则添加到自定义参数中
+        if (userValue !== undefined && userValue !== defaultValue && userValue !== '') {
+          customParams[key] = userValue;
+        }
+      });
+
+      console.debug('自定义参数差异:', customParams);
+      return customParams;
+    } catch (error) {
+      console.error('解析自定义参数失败:', error);
+      return customParams;
+    }
+  }
+
+  // 过滤与解析内容冲突的自定义参数
+  function filterConflictingParams(
+    customParams: Record<string, any>,
+    parsedContent: {
+      title?: string;
+      url?: string;
+      copyContent?: string;
+      autoCopy?: string;
+      level?: string;
+      contentType?: string;
+    }
+  ): Record<string, any> {
+    const filtered = { ...customParams };
+
+    // 定义冲突检查规则
+    const conflictRules = [
+      { condition: () => !!parsedContent.title, removeKeys: ['title'] },
+      { condition: () => !!parsedContent.url, removeKeys: ['url'] },
+      { condition: () => !!parsedContent.copyContent, removeKeys: ['copy'] },
+      { condition: () => !!parsedContent.autoCopy, removeKeys: ['autoCopy'] },
+      { condition: () => !!parsedContent.level, removeKeys: ['level'] },
+      { condition: () => parsedContent.contentType === 'image', removeKeys: ['image'] }
+    ];
+
+    // 应用冲突规则，移除冲突的自定义参数
+    conflictRules.forEach(rule => {
+      if (rule.condition()) {
+        rule.removeKeys.forEach(key => delete filtered[key]);
+      }
+    });
+
+    // console.debug('过滤后的自定义参数:', filtered);
+    return filtered;
+  }
 
   // 预请求 favicon
   async function prefetchFavicon(url: string): Promise<string | null> {
@@ -195,6 +264,17 @@ export default defineBackground(() => {
           finalIcon = settings.barkAvatarUrl;
         }
 
+        // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
+        const customParams = getCustomParametersDifference(settings);
+        const filteredCustomParams = filterConflictingParams(customParams, {
+          title,
+          url,
+          copyContent,
+          autoCopy,
+          level,
+          contentType: message.contentType
+        });
+
         const pushParams: PushParams = {
           apiURL: defaultDevice.apiURL,
           message: notBody ? undefined : content, // 图片类型和url类型不传 message
@@ -209,7 +289,8 @@ export default defineBackground(() => {
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(level && { level }),
           ...(finalIcon && { icon: finalIcon }),
-          ...(autoCopy && { autoCopy })
+          ...(autoCopy && { autoCopy }),
+          ...filteredCustomParams // 添加过滤后的自定义参数差异
         };
 
         // 根据设置选择是否加密, 避免 414 Request-URI Too Large 错误, 使用 POST 请求（API v2 使用POST, 默认 4Kb)
