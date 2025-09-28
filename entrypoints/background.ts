@@ -709,6 +709,13 @@ export default defineBackground(() => {
 
       // 发送推送
       const pushUuid = generateUUID();
+
+      // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
+      const customParams = getCustomParametersDifference(settings);
+      const filteredCustomParams = filterConflictingParams(customParams, {
+        // 地址栏只有 body, 不需要过滤
+      });
+
       const pushParams: PushParams = {
         apiURL: defaultDevice.apiURL,
         message: message,
@@ -718,7 +725,8 @@ export default defineBackground(() => {
         useAPIv2: settings.enableApiV2,
         devices: [defaultDevice],
         ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
-        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl })
+        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }),
+        ...filteredCustomParams
       };
 
       let isEncrypted = false;
@@ -1048,6 +1056,13 @@ export default defineBackground(() => {
           finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
         }
 
+        // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
+        const customParams = getCustomParametersDifference(settings);
+        const filteredCustomParams = filterConflictingParams(customParams, {
+          title,
+          url
+        });
+
         const pushParams: PushParams = {
           apiURL: defaultDevice.apiURL,
           message,
@@ -1060,7 +1075,8 @@ export default defineBackground(() => {
           device_key: defaultDevice.deviceKey, // 添加device_key
           device_keys: [defaultDevice.deviceKey].filter(Boolean) as string[], // 添加device_keys
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
-          ...(finalIcon && { icon: finalIcon })
+          ...(finalIcon && { icon: finalIcon }),
+          ...filteredCustomParams
         };
 
         // 根据设置选择发送方式
