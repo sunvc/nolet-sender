@@ -43,6 +43,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     speedModeCountdown: 3000, // 极速模式倒计时，默认3秒
     enableFaviconIcon: false, // 启用 favicon 作为 icon，默认关闭
     faviconApiUrl: '', // favicon 接口 URL 模板
+    enableSystemNotifications: true, // 仅发送必要的系统通知提醒，默认开启
 };
 
 // 获取浏览器存储API

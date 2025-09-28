@@ -263,7 +263,7 @@ export default defineBackground(() => {
             saveHistoryRecord(historyRecord);
 
             // 只在非 text-large 类型或是最后一段时显示通知
-            if (message.contentType !== 'text-large' || message.isLastChunk) {
+            if ((message.contentType !== 'text-large' || message.isLastChunk) && (settings.enableSystemNotifications !== false)) {
               browser.notifications.create({
                 type: 'basic',
                 iconUrl: '/icon/128.png',
@@ -688,12 +688,14 @@ export default defineBackground(() => {
       await saveHistoryRecord(historyRecord);
 
       // 显示成功通知
-      browser.notifications.create({
-        type: 'basic',
-        iconUrl: '/icon/128.png',
-        title: getMessage('bark_sender_title'),
-        message: getMessage('sent_to_device', [defaultDevice.alias])
-      });
+      if (settings.enableSystemNotifications !== false) {
+        browser.notifications.create({
+          type: 'basic',
+          iconUrl: '/icon/128.png',
+          title: getMessage('bark_sender_title'),
+          message: getMessage('sent_to_device', [defaultDevice.alias])
+        });
+      }
 
     } catch (error) {
       console.error('地址栏推送发送失败:', error);
@@ -833,12 +835,14 @@ export default defineBackground(() => {
         await browser.storage.local.set({ bark_app_settings: updatedSettings });
 
         // 显示通知
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          title: getMessage('bark_sender_title'),
-          message: getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode')
-        });
+        if (settings.enableSystemNotifications !== false) {
+          browser.notifications.create({
+            type: 'basic',
+            iconUrl: '/icon/128.png',
+            title: getMessage('bark_sender_title'),
+            message: getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode')
+          });
+        }
 
         // 更新右键菜单
         updateContextMenus();
@@ -1029,14 +1033,14 @@ export default defineBackground(() => {
         await saveHistoryRecord(historyRecord);
 
         // 显示通知
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          // title: 'Bark Sender',
-          // message: `已发送到 ${defaultDevice.alias}`
-          title: getMessage('bark_sender_title'),
-          message: getMessage('sent_to_device', [defaultDevice.alias])
-        });
+        if (settings.enableSystemNotifications !== false) {
+          browser.notifications.create({
+            type: 'basic',
+            iconUrl: '/icon/128.png',
+            title: getMessage('bark_sender_title'),
+            message: getMessage('sent_to_device', [defaultDevice.alias])
+          });
+        }
       }
 
     } catch (error) {

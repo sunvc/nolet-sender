@@ -206,6 +206,11 @@
             "requirements": "右鍵點擊擴充功能圖示即可關閉",
             "confirm_enable": "確認啟用",
             "save_failed": "儲存極速模式設定失敗"
+        },
+        "system_notifications": {
+            "title": "系統通知設定",
+            "enable": "僅發送必要的系統通知提醒",
+            "enable_success": "從現在起，只會出現與錯誤相關的系统通知"
         }
     },
     "speed_mode_page": {
@@ -417,6 +422,25 @@
             "export_failed": "匯出失敗",
             "import_failed": "匯入失敗",
             "import_success_message": "匯入完成：成功 {{success}} 筆，已略過 {{skipped}} 筆，失敗 {{errors}} 筆"
+        },
+        "detail": {
+            "title": "推播詳情",
+            "time": "發送時間",
+            "device": "目標設備",
+            "sound": "鈴聲",
+            "url": "連結",
+            "api_url": "API URL",
+            "response": "回應資訊",
+            "parameters": "請求參數",
+            "authorization": "認證資訊",
+            "recreate_encrypted_btn": "重新生成 IV 和密文",
+            "recreate_encrypted_data": "重新生成加密數據"
+        },
+        "drag": {
+            "releaseToPrev": "上一個",
+            "releaseToNext": "下一個",
+            "noMore": "沒有了",
+            "noNext": "到底了"
         }
     },
     "utils": {

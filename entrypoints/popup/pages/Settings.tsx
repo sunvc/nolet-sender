@@ -251,6 +251,21 @@ export default function Settings({
         }
     };
 
+    // 处理系统通知开关切换
+    const handleSystemNotificationsToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('enableSystemNotifications', enabled);
+            if (enabled) {
+                setToast({
+                    open: true,
+                    message: t('settings.system_notifications.enable_success')
+                });
+            }
+        } catch (error) {
+            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
     const handleAddDevice = async (alias: string, apiURL: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }) => {
         setLoading(true);
         setError('');
@@ -600,6 +615,7 @@ export default function Settings({
                                     sx={{ userSelect: 'none' }}
                                 />
                                 <Divider sx={{ pt: 1 }} />
+
                                 {/* API v2 开关 */}
                                 <FormControlLabel
                                     control={
@@ -642,8 +658,23 @@ export default function Settings({
                             </Typography>
                             <LanguageSelector />
                         </Box>
-
-
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 系统通知设置 */}
+                                {t('settings.system_notifications.title')}
+                            </Typography>
+                            {/* 系统通知开关 */}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={appSettings?.enableSystemNotifications ?? true}
+                                        onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
+                                    />
+                                }
+                                label={t('settings.system_notifications.enable')}
+                                sx={{ userSelect: 'none' }}
+                            />
+                        </Box>
                         <Box>
                             <Stack direction="row" alignItems="center" justifyContent="space-between">
                                 <Typography variant="subtitle1" gutterBottom>

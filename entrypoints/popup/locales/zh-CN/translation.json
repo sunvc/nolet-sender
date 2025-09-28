@@ -206,6 +206,11 @@
             "requirements": "右键扩展栏的图标可以关闭",
             "confirm_enable": "确认启用",
             "save_failed": "保存极速模式设置失败"
+        },
+        "system_notifications": {
+            "title": "系统通知设置",
+            "enable": "仅发送必要的系统通知提醒",
+            "enable_success": "从现在起，只会出现与错误相关的系统通知"
         }
     },
     "speed_mode_page": {
@@ -417,6 +422,25 @@
             "export_failed": "导出失败",
             "import_failed": "导入失败",
             "import_success_message": "导入完成：成功 {{success}} 条，跳过 {{skipped}} 条，失败 {{errors}} 条"
+        },
+        "detail": {
+            "title": "推送详情",
+            "time": "发送时间",
+            "device": "目标设备",
+            "sound": "铃声",
+            "url": "链接",
+            "api_url": "API URL",
+            "response": "响应状态",
+            "parameters": "请求参数",
+            "authorization": "认证信息",
+            "recreate_encrypted_btn": "重新生成 IV 和密文",
+            "recreate_encrypted_data": "重新生成加密数据"
+        },
+        "drag": {
+            "releaseToPrev": "上一个",
+            "releaseToNext": "下一个",
+            "noMore": "没有了",
+            "noNext": "到底了"
         }
     },
     "utils": {

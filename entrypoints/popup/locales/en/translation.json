@@ -206,6 +206,11 @@
             "requirements": "You can right-click the extension icon to disable",
             "confirm_enable": "Confirm Enable",
             "save_failed": "Failed to save Speed Mode settings"
+        },
+        "system_notifications": {
+            "title": "System Notifications",
+            "enable": "Only Send Essential System Notifications",
+            "enable_success": "Only error notifications will appear"
         }
     },
     "speed_mode_page": {
@@ -417,6 +422,25 @@
             "export_failed": "Export failed",
             "import_failed": "Import failed",
             "import_success_message": "Import complete: {{success}} succeeded, {{skipped}} skipped, {{errors}} failed"
+        },
+        "detail": {
+            "title": "Push Details",
+            "time": "Send Time",
+            "device": "Target Device",
+            "sound": "Sound",
+            "url": "URL",
+            "api_url": "API URL",
+            "response": "Response Info",
+            "parameters": "Request Parameters",
+            "authorization": "Authorization Info",
+            "recreate_encrypted_btn": "Recreate IV and Encrypted Data",
+            "recreate_encrypted_data": "Recreate encrypted data"
+        },
+        "drag": {
+            "releaseToPrev": "previous",
+            "releaseToNext": "next",
+            "noMore": "no more",
+            "noNext": "no next"
         }
     },
     "utils": {
