@@ -81,15 +81,43 @@ export interface EncryptedPushParams extends PushParams {
 }
 
 /**
- * 生成 UUID
+ * 生成 ID
+ * 时间戳转成 base62 并拼接随机大小写的 UUID 加强唯一性
  */
-export function generateUUID(): string {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-        const r = Math.random() * 16 | 0;
-        const v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-    });
+export function generateID(): string {
+    function toBase62(num: number): string {
+        const chars = 'ij369BARKSENder0124578abcfghklmnopqstuvwxyzCDFGHIJLMOPQTUVWXYZ';
+        let result = '';
+        if (num === 0) return 'i';
+        while (num > 0) {
+            result = chars[num % 62] + result;
+            num = Math.floor(num / 62);
+        }
+        return result;
+    }
+
+    const timestamp = Date.now(); // 将时间戳转成 base62
+    const base62Timestamp = toBase62(timestamp);
+
+    // 生成 UUID
+    const bytes = crypto.getRandomValues(new Uint8Array(16));
+    bytes[6] = (bytes[6] & 0x0f) | 0x40;
+    bytes[8] = (bytes[8] & 0x3f) | 0x80;
+
+    // 转十六进制并随机大小写
+    const uuid = Array.from(bytes)
+        .map(b => {
+            const hex = b.toString(16).padStart(2, '0');
+            return hex
+                .split('')
+                .map(c => /[a-f]/.test(c) ? (Math.random() < 0.5 ? c.toUpperCase() : c) : c)
+                .join('');
+        })
+        .join('');
+
+    return `${base62Timestamp}${uuid}`;
 }
+
 
 /**
  * 生成指定长度 ASCII 字符串
@@ -430,7 +458,7 @@ export async function sendPush(params: PushParams, encryptionConfig?: Encryption
     const msgPayload: MessagePayload = {
         // 特殊字段映射
         body: params.message,
-        id: params.uuid || generateUUID(),
+        id: params.uuid || generateID(),
 
         // 复制其他所有字段 (除去前端内部使用的 apiURL, authorization, devices 等)
         ...Object.entries(params)

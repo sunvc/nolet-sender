@@ -26,7 +26,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslation } from 'react-i18next';
 import { Sound } from '../types';
 import { sendPushMessage } from '../utils/api';
-import { generateUUID } from '../../shared/push-service';
+import { generateID } from '../../shared/push-service';
 
 const Transition = forwardRef(function Transition(
     props: TransitionProps & {
@@ -214,7 +214,7 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
             }
 
             const testMessage = `${t('settings.sound.test_message', { sound: soundName })}`;
-            await sendPushMessage(defaultDevice, testMessage, soundName, generateUUID());
+            await sendPushMessage(defaultDevice, testMessage, soundName, generateID());
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'push.errors.send_failed';

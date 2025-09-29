@@ -209,8 +209,11 @@
         },
         "system_notifications": {
             "title": "System Notifications",
-            "enable": "Only Send Essential System Notifications",
-            "enable_success": "Only error notifications will appear"
+            "enable": "Send all notifications",
+            "enable_success": "Only error notifications will appear",
+            "guide_title": "Disable extension sending system notifications",
+            "guide": "Please copy the following address into the address bar and press Enter to control the extension's notification permissions",
+            "guide_firefox": "For Firefox, please copy the following address to the address bar and press Enter, click the extension's \"Manifest URL\", press Ctrl+I > Permissions to find"
         }
     },
     "speed_mode_page": {

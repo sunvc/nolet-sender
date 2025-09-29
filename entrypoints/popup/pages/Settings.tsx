@@ -89,6 +89,7 @@ export default function Settings({
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
     const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
+    const [notificationGuideAnchor, setNotificationGuideAnchor] = useState<HTMLElement | null>(null);
     const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
     const [version, setVersion] = useState<string | null>(null);
 
@@ -103,6 +104,16 @@ export default function Settings({
             // 可以添加一个成功提示，但这里暂时省略
         } catch (error) {
             // 复制失败的处理，这里暂时省略
+            console.error('复制失败:', error);
+        }
+    };
+
+    // 复制系统通知设置地址
+    const handleCopyNotificationUrl = async () => {
+        const url = browserType === 'firefox' ? 'about:debugging#/runtime/this-firefox' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://settings/content/siteDetails?site=${browserType === 'chrome' ? 'chrome' : 'edge'}-extension://${browser.runtime.id}`;
+        try {
+            await navigator.clipboard.writeText(url);
+        } catch (error) {
             console.error('复制失败:', error);
         }
     };
@@ -255,7 +266,7 @@ export default function Settings({
     const handleSystemNotificationsToggle = async (enabled: boolean) => {
         try {
             await updateAppSetting('enableSystemNotifications', enabled);
-            if (enabled) {
+            if (!enabled) {
                 setToast({
                     open: true,
                     message: t('settings.system_notifications.enable_success')
@@ -663,17 +674,35 @@ export default function Settings({
                                 {/* 系统通知设置 */}
                                 {t('settings.system_notifications.title')}
                             </Typography>
-                            {/* 系统通知开关 */}
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={appSettings?.enableSystemNotifications ?? true}
-                                        onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
-                                    />
-                                }
-                                label={t('settings.system_notifications.enable')}
-                                sx={{ userSelect: 'none' }}
-                            />
+                            <Stack gap={1}>
+                                {/* 系统通知开关 */}
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={appSettings?.enableSystemNotifications ?? true}
+                                            onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
+                                        />
+                                    }
+                                    label={t('settings.system_notifications.enable')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <IconButton
+                                            onClick={(event) => setNotificationGuideAnchor(event.currentTarget)}
+                                            size="small"
+                                            sx={{
+                                                mx: 1.5
+                                            }}
+                                            color='inherit'
+                                        >
+                                            <InfoIcon />
+                                        </IconButton>
+                                    }
+                                    label={t('settings.system_notifications.guide_title')}
+                                    sx={{ userSelect: 'none' }}
+                                />
+                            </Stack>
                         </Box>
                         <Box>
                             <Stack direction="row" alignItems="center" justifyContent="space-between">
@@ -740,6 +769,62 @@ export default function Settings({
                                         <IconButton
                                             size="small"
                                             onClick={handleCopyShortcutUrl}
+                                            sx={{ flexShrink: 0 }}
+                                            color='inherit'
+                                        >
+                                            <ContentCopyIcon fontSize="small" />
+                                        </IconButton>
+                                    </Box>
+                                </Box>
+                            </Popover>
+                            <Popover
+                                open={Boolean(notificationGuideAnchor)}
+                                anchorEl={notificationGuideAnchor}
+                                onClose={() => setNotificationGuideAnchor(null)}
+                                anchorOrigin={{
+                                    vertical: 'bottom',
+                                    horizontal: 'left',
+                                }}
+                                transformOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                            >
+                                <Box sx={{ p: 2, maxWidth: 320 }}>
+                                    <Typography variant="body2" gutterBottom>
+                                        {t('settings.system_notifications.guide')}
+                                    </Typography>
+
+                                    {browserType === 'firefox' && (
+                                        <Typography variant="body2" gutterBottom>
+                                            {t('settings.system_notifications.guide_firefox')}
+                                        </Typography>
+                                    )}
+
+                                    <Box sx={{
+                                        mt: 2,
+                                        p: 1,
+                                        backgroundColor: 'text.secondary',
+                                        color: 'background.paper',
+                                        borderRadius: 1,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        gap: 1
+                                    }}>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontFamily: 'monospace',
+                                                fontSize: '0.8rem',
+                                                wordBreak: 'break-all'
+                                            }}
+                                        >
+                                            {browserType === 'firefox' ? 'about:debugging#/runtime/this-firefox' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://settings/content/siteDetails?site=${browserType === 'chrome' ? 'chrome' : 'edge'}-extension://${browser.runtime.id}`}
+                                        </Typography>
+                                        <IconButton
+                                            size="small"
+                                            onClick={handleCopyNotificationUrl}
                                             sx={{ flexShrink: 0 }}
                                             color='inherit'
                                         >

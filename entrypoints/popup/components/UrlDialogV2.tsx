@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import DeviceSelectV2 from './DeviceSelectV2';
 import { sendPushMessage } from '../utils/api';
-import { generateUUID } from '../../shared/push-service';
+import { generateID } from '../../shared/push-service';
 
 const Transition = React.forwardRef(function Transition(
     props: TransitionProps & {
@@ -187,7 +187,7 @@ export default function UrlDialogV2({
 
         setLoading(true);
         try {
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             const response = await sendPushMessage(
                 selectedDevices[0],
                 urlParams.url,
@@ -221,7 +221,7 @@ export default function UrlDialogV2({
 
         setLoading(true);
         try {
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             const response = await sendPushMessage(
                 selectedDevices[0],
                 urlParams.selectionText || urlParams.title || 'Text',
@@ -255,7 +255,7 @@ export default function UrlDialogV2({
 
         setLoading(true);
         try {
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             const response = await sendPushMessage(
                 selectedDevices[0],
                 urlParams.linkUrl,

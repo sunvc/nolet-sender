@@ -1,7 +1,7 @@
 import { PushResponse, Device } from '../types';
 import { getAppSettings } from './settings';
 import { recordPushHistory } from './database';
-import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from '../../shared/push-service';
+import { sendPush, getRequestParameters, generateID, PushParams, EncryptionConfig } from '../../shared/push-service';
 
 /**
  * 发送推送消息 - 通过background script
@@ -36,7 +36,7 @@ export async function sendPushMessage(
         const settings = await getAppSettings();
 
         // 使用传入的UUID或生成新的
-        const pushUuid = uuid || generateUUID();
+        const pushUuid = uuid || generateID();
 
         // 处理自定义参数
         let processedAdvancedParams: Record<string, any> | undefined;
@@ -139,7 +139,7 @@ export async function sendPushMessage(
                         sound,
                         url,
                         isEncrypted,
-                        uuid: uuid || generateUUID(),
+                        uuid: uuid || generateID(),
                         parameters: [],
                         authorization: device.authorization // 添加authorization到历史记录
                     }

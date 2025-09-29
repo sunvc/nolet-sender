@@ -1,5 +1,5 @@
 import { initBackgroundI18n, watchLanguageChanges, getMessage } from './background/i18n-helper';
-import { sendPush, getRequestParameters, generateUUID, PushParams, EncryptionConfig } from './shared/push-service';
+import { sendPush, getRequestParameters, generateID, PushParams, EncryptionConfig } from './shared/push-service';
 import { Device } from './popup/types';
 import { DEFAULT_ADVANCED_PARAMS } from './popup/utils/settings';
 
@@ -251,7 +251,7 @@ export default defineBackground(() => {
         }
 
         // 发送推送
-        const pushUuid = generateUUID();
+        const pushUuid = generateID();
         // 确定最终使用的图标
         let finalIcon: string | undefined;
 
@@ -563,7 +563,7 @@ export default defineBackground(() => {
 
       // 如果没有传入 devices，则创建一个单设备对象
       const singleDevice = authorization ? {
-        id: uuid || generateUUID(),
+        id: uuid || generateID(),
         apiURL,
         deviceKey: apiURL.split('/').filter(Boolean).pop() || '',
         server: new URL(apiURL).origin,
@@ -614,7 +614,7 @@ export default defineBackground(() => {
 
       // 如果没有传入 devices，则创建一个单设备对象
       const singleDevice = authorization ? {
-        id: uuid || generateUUID(),
+        id: uuid || generateID(),
         apiURL,
         deviceKey: apiURL.split('/').filter(Boolean).pop() || '',
         server: new URL(apiURL).origin,
@@ -708,7 +708,7 @@ export default defineBackground(() => {
       }
 
       // 发送推送
-      const pushUuid = generateUUID();
+      const pushUuid = generateID();
 
       // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
       const customParams = getCustomParametersDifference(settings);
@@ -1033,7 +1033,7 @@ export default defineBackground(() => {
         let isEncrypted = false;
         let parameters: any[] = [];
 
-        const pushUuid = generateUUID(); // 生成 UUID 用于请求参数 做 撤回 / 修改 请求用
+        const pushUuid = generateID(); // 生成 UUID 用于请求参数 做 撤回 / 修改 请求用
 
         // 预加载favicon（仅当发送页面或选中文本时）
         let faviconUrl: string | null = null;
@@ -1156,7 +1156,7 @@ export default defineBackground(() => {
 
         const historyRecord = {
           id: Date.now(),
-          uuid: generateUUID(),
+          uuid: generateID(),
           timestamp: requestTimestamp,
           body: message,
           apiUrl: defaultDevice.apiURL,

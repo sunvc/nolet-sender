@@ -209,8 +209,11 @@
         },
         "system_notifications": {
             "title": "系統通知設定",
-            "enable": "僅發送必要的系統通知提醒",
-            "enable_success": "從現在起，只會出現與錯誤相關的系统通知"
+            "enable": "發送所有通知提醒",
+            "enable_success": "從現在起，只會出現與錯誤相關的系統通知",
+            "guide_title": "禁用擴充功能發送系統通知",
+            "guide": "請拷貝以下地址輸入到地址欄並回車控制擴充功能的通知權限",
+            "guide_firefox": "對於 Firefox，請拷貝以下地址到地址欄並回車, 單擊擴充功能的\"Manifest URL\"，按 Ctrl+I > 權限 可以找到"
         }
     },
     "speed_mode_page": {

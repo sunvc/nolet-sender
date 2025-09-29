@@ -26,7 +26,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import { sendPushMessage } from '../utils/api';
-import { generateUUID } from '../../shared/push-service';
+import { generateID } from '../../shared/push-service';
 import { readClipboard } from '../utils/clipboard';
 import { getHistoryRecordByUuid, updateHistoryRecordStatus } from '../utils/database';
 import { useAppContext } from '../contexts/AppContext';
@@ -214,7 +214,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
         setLoading(true);
 
         try {
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             setLastPushUuid(pushUuid);
 
             // 如果 JSON 格式有误, 显示提示但继续发送
@@ -358,7 +358,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
         try {
             // 生成新的 UUID 记录
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             setLastPushUuid(pushUuid);
 
             const response = await sendPushMessage(
@@ -419,7 +419,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 return;
             }
 
-            const pushUuid = generateUUID();
+            const pushUuid = generateID();
             setLastPushUuid(pushUuid);
 
             const response = await sendPushMessage(
