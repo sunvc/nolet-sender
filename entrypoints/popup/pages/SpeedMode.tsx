@@ -15,6 +15,7 @@ import { Device, PushResponse } from '../types';
 import { readClipboard } from '../utils/clipboard';
 import { useAppContext } from '../contexts/AppContext';
 import { sendPush } from '../../shared/push-service';
+import { DEFAULT_ADVANCED_PARAMS } from '../utils/settings';
 import gsap from 'gsap';
 
 interface SpeedModeProps {
@@ -40,6 +41,65 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
 
     const cancelButtonRef = useRef<HTMLButtonElement>(null); // 用于自动聚焦到取消
     const speedModeRef = useRef<HTMLDivElement>(null);
+
+    // 检查自定义参数差异，只返回与默认配置不同的参数
+    const getCustomParametersDifference = useCallback((settings: any): Record<string, any> => {
+        const customParams: Record<string, any> = {};
+
+        if (!settings.enableAdvancedParams) {
+            return customParams;
+        }
+
+        try {
+            const userParams = settings.advancedParamsJson ?
+                JSON.parse(settings.advancedParamsJson) : {};
+
+            Object.keys(DEFAULT_ADVANCED_PARAMS).forEach(key => {
+                const defaultValue = DEFAULT_ADVANCED_PARAMS[key as keyof typeof DEFAULT_ADVANCED_PARAMS];
+                const userValue = userParams[key];
+
+                if (userValue !== undefined && userValue !== defaultValue && userValue !== '') {
+                    customParams[key] = userValue;
+                }
+            });
+            return customParams;
+        } catch (error) {
+            console.error('解析自定义参数失败:', error);
+            return customParams;
+        }
+    }, []);
+
+    // 过滤与解析内容冲突的自定义参数
+    const filterConflictingParams = useCallback((
+        customParams: Record<string, any>,
+        parsedContent: {
+            title?: string;
+            url?: string;
+            copyContent?: string;
+            autoCopy?: string;
+            level?: string;
+            contentType?: string;
+        }
+    ): Record<string, any> => {
+        const filtered = { ...customParams };
+
+        const conflictRules = [
+            { condition: () => !!parsedContent.title, removeKeys: ['title'] },
+            { condition: () => !!parsedContent.url, removeKeys: ['url'] },
+            { condition: () => !!parsedContent.copyContent, removeKeys: ['copy'] },
+            { condition: () => !!parsedContent.autoCopy, removeKeys: ['autoCopy'] },
+            { condition: () => !!parsedContent.level, removeKeys: ['level'] },
+            { condition: () => parsedContent.contentType === 'image', removeKeys: ['image'] }
+        ];
+
+        conflictRules.forEach(rule => {
+            if (rule.condition()) {
+                rule.removeKeys.forEach(key => delete filtered[key]);
+            }
+        });
+
+        return filtered;
+    }, []);
 
     useEffect(() => { // 读取剪贴板内容
         let isMounted = true;
@@ -76,13 +136,27 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
         try {
             setSending(true);
 
+            // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
+            const customParams = getCustomParametersDifference(appSettings);
+            // console.debug('自定义参数差异:', customParams);
+            const filteredCustomParams = filterConflictingParams(customParams, {});
+
+            // 确定最终使用的图标
+            let finalIcon: string | undefined;
+            if (appSettings?.enableCustomAvatar && appSettings.barkAvatarUrl) {
+                finalIcon = appSettings.barkAvatarUrl;
+            }
+
             const response = await sendPush(
                 {
                     apiURL: defaultDevice.apiURL,
                     message: clipboardContent,
                     authorization: defaultDevice.authorization,
                     useAPIv2: appSettings?.enableApiV2,
-                    devices: [defaultDevice]
+                    devices: [defaultDevice],
+                    sound: appSettings?.sound,
+                    ...(finalIcon && { icon: finalIcon }),
+                    ...filteredCustomParams // 过滤后的自定义参数差异
                 },
                 appSettings?.enableEncryption ? appSettings.encryptionConfig : undefined,
                 appSettings?.enableApiV2 ? 'v2' : 'v1'
@@ -96,7 +170,7 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
             // 延迟关闭窗口
             setTimeout(() => window.close(), 1000);
         }
-    }, [defaultDevice, clipboardContent, sending, appSettings]);
+    }, [defaultDevice, clipboardContent, sending, appSettings, getCustomParametersDifference, filterConflictingParams]);
 
     // 进度条倒计时
     useEffect(() => {
