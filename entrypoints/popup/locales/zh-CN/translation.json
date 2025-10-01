@@ -210,10 +210,7 @@
         "system_notifications": {
             "title": "系统通知设置",
             "enable": "发送所有通知提醒",
-            "enable_success": "从现在起，只会出现与错误相关的系统通知",
-            "guide_title": "禁用扩展发送系统通知",
-            "guide": "请拷贝以下地址输入到地址栏并回车控制扩展的通知权限",
-            "guide_firefox": "对于 Firefox，请拷贝以下地址到地址栏并回车, 单击扩展的\"Manifest URL\"，按 Ctrl+I > 权限 可以找到"
+            "enable_success": "从现在起，只会出现与错误相关的系统通知"
         }
     },
     "speed_mode_page": {

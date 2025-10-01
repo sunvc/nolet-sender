@@ -89,7 +89,6 @@ export default function Settings({
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
     const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
-    const [notificationGuideAnchor, setNotificationGuideAnchor] = useState<HTMLElement | null>(null);
     const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
     const [version, setVersion] = useState<string | null>(null);
 
@@ -686,22 +685,6 @@ export default function Settings({
                                     label={t('settings.system_notifications.enable')}
                                     sx={{ userSelect: 'none' }}
                                 />
-                                <FormControlLabel
-                                    control={
-                                        <IconButton
-                                            onClick={(event) => setNotificationGuideAnchor(event.currentTarget)}
-                                            size="small"
-                                            sx={{
-                                                mx: 1.5
-                                            }}
-                                            color='inherit'
-                                        >
-                                            <InfoIcon />
-                                        </IconButton>
-                                    }
-                                    label={t('settings.system_notifications.guide_title')}
-                                    sx={{ userSelect: 'none' }}
-                                />
                             </Stack>
                         </Box>
                         <Box>
@@ -769,62 +752,6 @@ export default function Settings({
                                         <IconButton
                                             size="small"
                                             onClick={handleCopyShortcutUrl}
-                                            sx={{ flexShrink: 0 }}
-                                            color='inherit'
-                                        >
-                                            <ContentCopyIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                            </Popover>
-                            <Popover
-                                open={Boolean(notificationGuideAnchor)}
-                                anchorEl={notificationGuideAnchor}
-                                onClose={() => setNotificationGuideAnchor(null)}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                            >
-                                <Box sx={{ p: 2, maxWidth: 320 }}>
-                                    <Typography variant="body2" gutterBottom>
-                                        {t('settings.system_notifications.guide')}
-                                    </Typography>
-
-                                    {browserType === 'firefox' && (
-                                        <Typography variant="body2" gutterBottom>
-                                            {t('settings.system_notifications.guide_firefox')}
-                                        </Typography>
-                                    )}
-
-                                    <Box sx={{
-                                        mt: 2,
-                                        p: 1,
-                                        backgroundColor: 'text.secondary',
-                                        color: 'background.paper',
-                                        borderRadius: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 1
-                                    }}>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.8rem',
-                                                wordBreak: 'break-all'
-                                            }}
-                                        >
-                                            {browserType === 'firefox' ? 'about:debugging#/runtime/this-firefox' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://settings/content/siteDetails?site=${browserType === 'chrome' ? 'chrome' : 'edge'}-extension://${browser.runtime.id}`}
-                                        </Typography>
-                                        <IconButton
-                                            size="small"
-                                            onClick={handleCopyNotificationUrl}
                                             sx={{ flexShrink: 0 }}
                                             color='inherit'
                                         >
