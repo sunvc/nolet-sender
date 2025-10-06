@@ -107,6 +107,10 @@ Bark Sender 是一个浏览器扩展，允许你将网页中的文字内容或 P
 3. 在扩展配置页里添加设备，格式为：`https://api.day.app/:key/`；
 4. 选中文字，右键发送文字；未选中文字时，右键将发送当前页面链接。
 
+## 演示
+
+[https://www.youtube.com/watch?v=oRxYjg2clbk](https://www.youtube.com/watch?v=oRxYjg2clbk)
+
 ## 构建说明
 
 📋 **扩展构建**
