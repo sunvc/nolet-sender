@@ -9,17 +9,20 @@ Just click the badge/ link below to install it from your browser's extension sto
   <tr>
     <td align="left">
       <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">
-        <img src="./docs/assets/badge-fx.png" alt="Firefox" height="75">
+        <img src="./docs/assets/badge-fx.png" alt="Firefox" height="66">
       </a><br>
       <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">For Mozilla Firefox</a>
     </td>
     <td align="left">
       <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">
-        <img src="./docs/assets/badge-cr.png" alt="Chrome" height="75">
+        <img src="./docs/assets/badge-cr.png" alt="Chrome" height="66">
       </a><br>
       <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">For Google Chrome</a>
     </td>
     <td align="left">
+          <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">
+        <img src="./docs/assets/badge-eg.png" alt="Edge" height="66">
+      </a><br>
       <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">For Edge Browser</a>
     </td>
   </tr>
