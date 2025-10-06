@@ -23,7 +23,7 @@ Just click the badge/ link below to install it from your browser's extension sto
           <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">
         <img src="./docs/assets/badge-eg.png" alt="Edge" height="66">
       </a><br>
-      <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">For Edge Browser</a>
+      <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">For Microsoft Edge</a>
     </td>
   </tr>
 </table>
