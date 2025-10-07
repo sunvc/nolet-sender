@@ -124,6 +124,10 @@ export default defineConfig({
       });
     },
     'build:manifestGenerated': (wxt, manifest) => {
+      if (wxt.config.mode === 'development' && import.meta.env.VITE_DEV_KEY) {
+        manifest.key = import.meta.env.VITE_DEV_KEY
+        // https://developer.chrome.com/docs/extensions/how-to/integrate/oauth#upload_to_dashboard
+      }
       /*
         如果是 Firefox: 
         1. 移除 global 属性, Firefox 不支持 global 属性
