@@ -6,7 +6,7 @@ set -e
 
 echo "🚀 开始构建 Bark Sender 多浏览器扩展..."
 echo "🚀 Starting Bark Sender Multi-Browser Extension Build..."
-echo "📦 目标浏览器 / Target Browsers: Firefox, Chrome, Edge"
+echo "📦 目标浏览器 / Target Browsers: Chrome, Firefox, Edge"
 echo ""
 
 # 动态读取项目版本号
@@ -133,6 +133,18 @@ pnpm run compile
 echo "✅ TypeScript 类型检查通过"
 echo ""
 
+# 构建 Chrome 扩展
+echo "🔨 构建 Chrome 扩展 / Building Chrome extension..."
+pnpm run build:chrome
+echo "✅ Chrome 扩展构建完成"
+echo ""
+
+# 打包 Chrome 扩展
+echo "📦 打包 Chrome 扩展 / Packaging Chrome extension..."
+pnpm run zip:chrome
+echo "✅ Chrome 扩展打包完成"
+echo ""
+
 # 构建 Firefox 扩展
 echo "🔨 构建 Firefox 扩展 / Building Firefox extension..."
 pnpm run build:firefox
@@ -145,20 +157,31 @@ pnpm run zip:firefox
 echo "✅ Firefox 扩展打包完成"
 echo ""
 
-# 构建 Chrome/Edge 扩展
-echo "🔨 构建 Chrome/Edge 扩展 / Building Chrome/Edge extension..."
-pnpm run build
-echo "✅ Chrome/Edge 扩展构建完成"
+# 构建 Edge 扩展
+echo "🔨 构建 Edge 扩展 / Building Edge extension..."
+pnpm run build:edge
+echo "✅ Edge 扩展构建完成"
 echo ""
 
-# 打包 Chrome/Edge 扩展
-echo "📦 打包 Chrome/Edge 扩展 / Packaging Chrome/Edge extension..."
-pnpm run zip
-echo "✅ Chrome/Edge 扩展打包完成"
+# 打包 Edge 扩展
+echo "📦 打包 Edge 扩展 / Packaging Edge extension..."
+pnpm run zip:edge
+echo "✅ Edge 扩展打包完成"
 echo ""
 
 # 检查输出文件
 echo "📋 检查构建输出 / Checking build output..."
+
+# 检查 Chrome 扩展
+CHROME_SUCCESS=false
+if [ -f ".output/bark-sender-$PACKAGE_VERSION-chrome.zip" ]; then
+    echo "✅ Chrome 扩展构建成功"
+    echo "✅ Chrome extension build successful"
+    CHROME_SUCCESS=true
+else
+    echo "❌ 错误: 未找到 Chrome 扩展包"
+    echo "❌ Error: Chrome extension package not found"
+fi
 
 # 检查 Firefox 扩展
 FIREFOX_SUCCESS=false
@@ -171,21 +194,27 @@ else
     echo "❌ Error: Firefox extension package not found"
 fi
 
-# 检查 Chrome/Edge 扩展
-CHROME_SUCCESS=false
-if [ -f ".output/bark-sender-$PACKAGE_VERSION-chrome.zip" ]; then
-    echo "✅ Chrome/Edge 扩展构建成功"
-    echo "✅ Chrome/Edge extension build successful"
-    CHROME_SUCCESS=true
+# 检查 Edge 扩展
+EDGE_SUCCESS=false
+if [ -f ".output/bark-sender-$PACKAGE_VERSION-edge.zip" ]; then
+    echo "✅ Edge 扩展构建成功"
+    echo "✅ Edge extension build successful"
+    EDGE_SUCCESS=true
 else
-    echo "❌ 错误: 未找到 Chrome/Edge 扩展包"
-    echo "❌ Error: Chrome/Edge extension package not found"
+    echo "❌ 错误: 未找到 Edge 扩展包"
+    echo "❌ Error: Edge extension package not found"
 fi
 
 # 检查是否至少有一个构建成功
-if [ "$FIREFOX_SUCCESS" = true ] || [ "$CHROME_SUCCESS" = true ]; then
+if [ "$CHROME_SUCCESS" = true ] || [ "$FIREFOX_SUCCESS" = true ] || [ "$EDGE_SUCCESS" = true ]; then
     echo ""
     echo "📁 输出文件位置 / Output file locations:"
+    
+    if [ "$CHROME_SUCCESS" = true ]; then
+        echo "   📦 Chrome: .output/bark-sender-$PACKAGE_VERSION-chrome.zip"
+        echo "   📏 文件大小 / File size:"
+        ls -lh .output/bark-sender-$PACKAGE_VERSION-chrome.zip
+    fi
     
     if [ "$FIREFOX_SUCCESS" = true ]; then
         echo "   📦 Firefox: .output/bark-sender-$PACKAGE_VERSION-firefox.zip"
@@ -193,10 +222,10 @@ if [ "$FIREFOX_SUCCESS" = true ] || [ "$CHROME_SUCCESS" = true ]; then
         ls -lh .output/bark-sender-$PACKAGE_VERSION-firefox.zip
     fi
     
-    if [ "$CHROME_SUCCESS" = true ]; then
-        echo "   📦 Chrome/Edge: .output/bark-sender-$PACKAGE_VERSION-chrome.zip"
+    if [ "$EDGE_SUCCESS" = true ]; then
+        echo "   📦 Edge: .output/bark-sender-$PACKAGE_VERSION-edge.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-$PACKAGE_VERSION-chrome.zip
+        ls -lh .output/bark-sender-$PACKAGE_VERSION-edge.zip
     fi
     
     echo ""

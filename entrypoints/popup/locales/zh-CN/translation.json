@@ -99,6 +99,12 @@
         "features": {
             "title": "功能开关"
         },
+        "cache": {
+            "title": "资源缓存",
+            "enable": "加速历史记录的加载",
+            "cache_enabled": "资源将缓存到本地，以加快历史记录的加载",
+            "cache_disabled": "本地缓存资源均已清空"
+        },
         "sound": {
             "title": "铃声设置",
             "select": "选择铃声",
@@ -237,15 +243,11 @@
         "github": {
             "title": "GitHub",
             "description": "查看源码或提交问题",
-            "description2": "❤️ 如果你喜欢这个项目，欢迎 Star 或 Fork～"
+            "description2": "❤️ 如果你喜欢这个项目，欢迎 Star 支持～"
         },
         "store_rating": {
             "title": "商店评分",
-            "description": "喜欢的话给我评分鼓励！"
-        },
-        "telegram": {
-            "title": "Telegram 频道",
-            "description": "查看最新动态"
+            "description": "喜欢的话，欢迎在商店里留下评分支持～"
         },
         "contact": {
             "title": "联系方式",
@@ -371,6 +373,19 @@
             "search": "搜索",
             "delete_selected": "删除所选"
         },
+        "context_menu": {
+            "view_detail": "查看详情",
+            "copy_value": "拷贝值",
+            "copy_success": "复制成功",
+            "copy_failed": "复制失败",
+            "recall": "撤回",
+            "delete": "删除",
+            "delete_current": "删除当前行",
+            "delete_selected": "删除所选 ({{count}})",
+            "export": "导出",
+            "export_current": "导出当前行",
+            "export_selected": "导出所选 ({{count}})"
+        },
         "confirm_delete": "确认删除",
         "confirm_delete_message": "确定要删除选中的 {{count}} 条记录吗？此操作不可撤销。",
         "table": {
@@ -449,5 +464,90 @@
             "runtime_unavailable": "扩展运行时不可用"
         },
         "open_window": "双击弹出到新窗口"
+    },
+    "backup": {
+        "title": "备份 / 还原",
+        "local": "本地同步",
+        "backup": "备份",
+        "backup_description": "导出当前配置到本地文件",
+        "restore": "还原",
+        "restore_description": "从本地文件恢复配置",
+        "gd_sync": "Google Drive 同步",
+        "authorize_description": "请先授权 Google Drive 访问权限才能使用云同步功能",
+        "revoke_auth": "撤销授权",
+        "authorize_status_success": "Google Drive 访问已授权",
+        "authorize_status_failed": "Google Drive 访问未授权",
+        "authorize": "授权",
+        "authorize_failed": "授权失败, 请确认您是从 Chrome 应用商店安装的最新版本: {{message}}",
+        "processing": "处理中",
+        "gd_backup": "备份",
+        "gd_backup_description": "将配置上传到 Google Drive",
+        "gd_restore": "还原",
+        "gd_restore_description": "从 Google Drive 恢复配置",
+        "cloud_backup_dialog": {
+            "title": "备份到 Google Drive",
+            "description": "您可以选择加密备份文件以保护敏感信息，或直接直接备份到 Google Drive.",
+            "password_label": "密码",
+            "password_placeholder": "建议最少 4 位",
+            "password_hint_label": "密码提示",
+            "password_hint_placeholder": "可选，帮助记忆密码",
+            "backup_button": "直接备份",
+            "backup_encrypted_button": "备份（加密）",
+            "backing_up": "备份中...",
+            "success": "备份到云端成功！",
+            "failed": "云备份失败: {{message}}"
+        },
+        "cloud_restore_dialog": {
+            "title": "从 Google Drive 恢复",
+            "description": "选择要还原的备份文件，点击文件即可开始还原流程。",
+            "no_files": "Google Drive 中没有找到备份文件",
+            "loading": "加载中...",
+            "refresh": "刷新",
+            "clear_all": "清空所有",
+            "confirm_clear_all_title": "确认清空所有备份",
+            "confirm_clear_all_message": "确定要删除所有备份文件吗？共 {{count}} 个文件，此操作无法撤销。",
+            "clear_all_success": "成功清空 {{count}} 个备份文件",
+            "clear_all_failed": "清空备份文件失败: {{message}}",
+            "file_size": "大小: {{size}}",
+            "file_time": "时间: {{time}}",
+            "download_failed": "下载备份文件失败: {{message}}",
+            "confirm_delete_title": "确认删除",
+            "confirm_delete_message": "确定要删除这个备份文件吗？此操作无法撤销。",
+            "delete_success": "删除成功",
+            "delete_failed": "删除备份文件失败: {{message}}",
+            "load_failed": "加载备份文件失败: {{message}}"
+        },
+        "restore_dialog": {
+            "confirm_title": "确认还原",
+            "encrypted_title": "输入解密密码",
+            "confirm_description": "确认要还原这个备份吗？还原操作将会覆盖当前的所有配置。",
+            "encrypted_description": "确认要还原这个备份吗？还原操作将会覆盖当前的所有配置。",
+            "password_label": "密码",
+            "password_placeholder": "请输入解密密码",
+            "password_helper": "该备份文件已加密",
+            "password_hint": "密码提示: {{hint}}",
+            "password_required": "请输入密码",
+            "confirm_restore": "确认还原",
+            "restoring": "还原中...",
+            "success": "还原成功！",
+            "failed": "还原失败: {{message}}",
+            "decrypt_failed": "无法解密，请检查密码是否正确"
+        },
+        "backup_dialog": {
+            "title": "是否需要加密？",
+            "description_line1": "备份包括：Device Key 和加密密钥等敏感信息。",
+            "description_line2": "您可以选择加密备份文件以保护这些敏感信息，或直接进行明文备份。",
+            "password_label": "密码",
+            "password_placeholder": "建议最少 4 位",
+            "password_hint_label": "密码提示",
+            "password_hint_placeholder": "可选，帮助记忆密码",
+            "password_required": "请输入密码",
+            "direct_backup": "直接备份",
+            "encrypted_backup": "加密备份",
+            "success": "备份成功！",
+            "failed": "备份失败: {{message}}",
+            "language_fetch_failed": "获取语言设置失败",
+            "collect_data_failed": "收集备份数据失败"
+        }
     }
 }

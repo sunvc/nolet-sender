@@ -44,6 +44,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     enableFaviconIcon: false, // 启用 favicon 作为 icon，默认关闭
     faviconApiUrl: '', // favicon 接口 URL 模板
     enableSystemNotifications: true, // 仅发送必要的系统通知提醒，默认开启
+    enableFileCache: true, // 文件缓存，默认开启
 };
 
 // 获取浏览器存储API

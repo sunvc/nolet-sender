@@ -39,6 +39,11 @@ export function openTelegramChannel() {
     window.open(url, '_blank');
 }
 
+export function openOfficialWebsite() {
+    const url = 'https://bark-sender.uuphy.com';
+    window.open(url, '_blank');
+}
+
 export function openBarkApp() {
     const url = 'https://apps.apple.com/app/bark-custom-notifications/id1403753865';
     window.open(url, '_blank');

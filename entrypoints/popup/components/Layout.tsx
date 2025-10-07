@@ -104,7 +104,7 @@ export default function Layout({
                 }}
             >
                 {/* 顶部AppBar */}
-                <AppBar position="static" elevation={2}>
+                <AppBar position="static" elevation={2} sx={{ borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>
                     <Toolbar variant="dense" sx={{ minHeight: 48 }}>
                         <Typography variant="h6" component="div"
                             sx={{ flexGrow: 1, fontSize: '1.1rem', userSelect: 'none' }}

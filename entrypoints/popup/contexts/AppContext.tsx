@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo, useState, useEffect, useCall
 import { AppContextType, AppContextState, AppSettings, EncryptionConfig } from '../types';
 import { detectPlatform, isAppleDevice, getShortcutKeys } from '../utils/platform';
 import { getAppSettings, updateAppSetting as updateAppSettingUtil, saveAppSettings } from '../utils/settings';
+import { cleanupFaviconBlobs } from '../utils/favicon-manager';
 
 // 创建Context
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -15,6 +16,11 @@ interface AppProviderProps {
 export function AppProvider({ children }: AppProviderProps) {
     const [appSettings, setAppSettings] = useState<AppSettings | null>(null);
     const [loading, setLoading] = useState(true);
+
+    // 清理 blob URLs
+    const cleanupBlobs = useCallback(() => {
+        cleanupFaviconBlobs();
+    }, []);
 
     // 加载应用设置
     const loadSettings = useCallback(async () => {
@@ -102,14 +108,16 @@ export function AppProvider({ children }: AppProviderProps) {
         updateEncryptionConfig,
         updateAppSetting,
         reloadSettings,
-        shouldShowEncryptionToggle
+        shouldShowEncryptionToggle,
+        cleanupBlobs
     }), [
         appState,
         toggleEncryption,
         updateEncryptionConfig,
         updateAppSetting,
         reloadSettings,
-        shouldShowEncryptionToggle
+        shouldShowEncryptionToggle,
+        cleanupBlobs
     ]);
 
     return (

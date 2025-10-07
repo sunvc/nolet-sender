@@ -55,8 +55,165 @@ export default defineContentScript({
                     return Promise.resolve({ success: false, error: errorMessage });
                 }
             }
+
+            // 处理缓存图片的请求
+            if (message.action === 'cacheImage') {
+                console.debug('收到缓存图片请求:', message);
+                const { imageUrl, pushID } = message;
+                if (imageUrl && pushID) {
+                    cacheImageToBlobDatabase(imageUrl, pushID)
+                        .then(() => {
+                            console.debug('图片缓存请求已发送:', imageUrl);
+                        })
+                        .catch(error => {
+                            console.error('图片缓存失败:', error);
+                        });
+                } else {
+                    console.warn('缓存图片请求缺少必要参数:', { imageUrl, pushID });
+                }
+                return Promise.resolve({ success: true });
+            }
+
             return Promise.resolve({ success: false, error: 'Unknown action' });
         });
+
+        // 缓存图片到数据库
+        async function cacheImageToBlobDatabase(imageUrl: string, pushID: string): Promise<void> {
+            try {
+                console.debug('开始缓存图片:', imageUrl, pushID);
+
+                try { // 首先尝试内容脚本获取图片数据
+                    const response = await fetch(imageUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP ${response.status}`);
+                    }
+
+                    const blob = await response.blob();
+                    console.debug('图片数据获取成功，大小:', blob.size, 'bytes');
+
+                    // 转换为 ArrayBuffer
+                    const arrayBuffer = await blob.arrayBuffer();
+
+                    // 首先尝试使用 Port 传输
+                    try {
+                        await sendImageViaPort(imageUrl, arrayBuffer, pushID);
+                        console.debug('图片缓存保存成功 (Port):', imageUrl);
+                        return; // 成功后直接返回
+                    } catch (portError) {
+                        console.warn('Port 传输失败，尝试 base64 兜底:', portError);
+
+                        // 兜底方案：使用 base64
+                        const base64Data = await blobToBase64(blob);
+                        await sendImageViaBase64(imageUrl, base64Data, pushID);
+                        console.debug('图片缓存保存成功 (base64):', imageUrl);
+                        return; // 成功后直接返回
+                    }
+                } catch (fetchError) {
+                    console.warn('内容脚本获取图片失败 (可能是跨域)，尝试 background 兜底:', fetchError);
+
+                    // 跨域兜底：让 background 脚本处理
+                    try {
+                        const response = await browser.runtime.sendMessage({
+                            action: 'fetchAndCacheImage',
+                            imageUrl,
+                            pushID
+                        });
+
+                        if (response?.success) {
+                            console.debug('图片缓存保存成功 (background 兜底):', imageUrl);
+                        } else {
+                            throw new Error(response?.error || 'Background 兜底失败');
+                        }
+                    } catch (backgroundError) {
+                        console.error('Background 兜底方案也失败，放弃缓存:', backgroundError);
+                        // 不抛出错误，让流程继续
+                    }
+                }
+            } catch (error) {
+                console.error('图片缓存过程失败:', error);
+                // 不抛出错误，让主流程继续
+            }
+        }
+
+        // 通过 Port 传输图片数据
+        async function sendImageViaPort(imageUrl: string, arrayBuffer: ArrayBuffer, pushID: string): Promise<void> {
+            return new Promise((resolve, reject) => {
+                const port = browser.runtime.connect({ name: 'imageCache' });
+                let completed = false;
+
+                // 设置超时
+                const timeout = setTimeout(() => {
+                    if (!completed) {
+                        completed = true;
+                        port.disconnect();
+                        reject(new Error('Port 传输超时'));
+                    }
+                }, 30000); // 30秒超时
+
+                port.onMessage.addListener((response) => {
+                    if (completed) return;
+
+                    if (response.success) {
+                        completed = true;
+                        clearTimeout(timeout);
+                        port.disconnect();
+                        resolve();
+                    } else {
+                        completed = true;
+                        clearTimeout(timeout);
+                        port.disconnect();
+                        reject(new Error(response.error || 'Port 传输失败'));
+                    }
+                });
+
+                port.onDisconnect.addListener(() => {
+                    if (!completed) {
+                        completed = true;
+                        clearTimeout(timeout);
+                        reject(new Error('Port 连接断开'));
+                    }
+                });
+
+                // 发送图片数据
+                try {
+                    port.postMessage({
+                        action: 'saveImageCache',
+                        imageUrl,
+                        imageData: arrayBuffer,
+                        pushID
+                    });
+                } catch (error) {
+                    completed = true;
+                    clearTimeout(timeout);
+                    port.disconnect();
+                    reject(error);
+                }
+            });
+        }
+
+        // 通过 base64 传输图片数据（兜底方案）
+        async function sendImageViaBase64(imageUrl: string, base64Data: string, pushID: string): Promise<void> {
+            const response = await browser.runtime.sendMessage({
+                action: 'saveImageCacheBase64',
+                imageUrl,
+                imageData: base64Data,
+                pushID
+            });
+
+            if (!response?.success) {
+                throw new Error(response?.error || 'Base64 传输失败');
+            }
+        }
+
+        // 将 Blob 转换为 base64
+        function blobToBase64(blob: Blob): Promise<string> {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result as string);
+                reader.onerror = () => reject(new Error('Failed to convert blob to base64'));
+                reader.readAsDataURL(blob);
+            });
+        }
 
         // 显示选择内容对话框
         function showSelectionDialog(contextInfo?: any) {

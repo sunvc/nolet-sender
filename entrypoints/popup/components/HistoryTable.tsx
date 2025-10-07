@@ -1,7 +1,9 @@
-import React, { useCallback, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { AgGridReact } from 'ag-grid-react';
 import type { ITextFilterParams, RowClassParams, RowClassRules, ValueFormatterParams } from 'ag-grid-community';
 import { themeQuartz } from 'ag-grid-community'; // 主题
+import { Menu, useContextMenu } from 'react-contexify';
+import 'react-contexify/dist/ReactContexify.css';
 /* AG-Grid 更新很频繁，必要时需要查看历史版本文档
 https://www.ag-grid.com/documentation-archive/ 
 "ag-grid-community": "^34.2.0",
@@ -11,6 +13,7 @@ import {
     ValidationModule,         // 开发验证
     LocaleModule,             // 本地化
     ClientSideRowModelModule, // Row Model 为 Client-Side
+    ClientSideRowModelApiModule,  // forEachNodeAfterFilterAndSort 需要
     DateFilterModule,         // 日期过滤器
     TextFilterModule,         // 文本过滤器
     // TooltipModule,
@@ -21,10 +24,12 @@ import {
     GridApi,                  // 网格 API
     GridReadyEvent,           // 网格就绪事件
     ColDef,                   // 列定义
-    ICellRendererParams       // 自定义单元格渲染
+    ICellRendererParams,      // 自定义单元格渲染
+    RowApiModule,             // 获取行节点 用来跳转
+    ScrollApiModule,          // 滚动 API
 } from 'ag-grid-community';
-import { Box, Card, Paper, TextField, useTheme } from '@mui/material';
-import { HistoryRecord } from '../utils/database';
+import { Box, Card, Paper, TextField, useTheme, Snackbar, Alert, CircularProgress, Button, MenuItem, Divider } from '@mui/material';
+import { HistoryRecord, getHistoryRecordByUuid, updateHistoryRecordStatus } from '../utils/database';
 import { useTranslation } from 'react-i18next';
 import {
     Search as SearchIcon,
@@ -34,6 +39,7 @@ import {
     Undo as UndoIcon,
 } from '@mui/icons-material';
 import dayjs from 'dayjs';
+import { writeToClipboard } from '../utils/clipboardWrite';
 
 // 注册AG-Grid模块
 ModuleRegistry.registerModules([
@@ -47,6 +53,9 @@ ModuleRegistry.registerModules([
     ClientSideRowModelModule,
     ValidationModule,
     RowStyleModule,
+    RowApiModule,
+    ScrollApiModule,
+    ClientSideRowModelApiModule,
 ]);
 
 // AG-Grid 本地化配置 (仅用到的部分, 已作删减, 完整版在 community-modules/locale/src)
@@ -246,7 +255,7 @@ const createAgGridTheme = (muiTheme: any) => {
         // rowBorder: true,
         // rowVerticalPaddingScale: 0.8,
         // sidePanelBorder: true,
-        spacing: '7.5px',
+        spacing: '7.2px',
         wrapperBorder: true,
         wrapperBorderRadius: 14, // 表格整体圆角和主题的 Card 圆角一致
     });
@@ -257,6 +266,12 @@ interface HistoryTableProps {
     records: HistoryRecord[];
     selectedIds: number[];
     onSelectionChanged: (selectedIds: number[]) => void;
+    onRowDoubleClick?: (record: HistoryRecord) => void;
+    scrollToRecordId?: number; // 需要滚动到的记录ID
+    onFilteredDataChanged?: (filteredRecords: HistoryRecord[]) => void; // 过滤后数据变化回调
+    onRecallSuccess?: () => void; // 撤回成功回调
+    onDeleteRecords?: (recordIds: number[]) => void; // 删除记录回调
+    onExportRecords?: (records: HistoryRecord[]) => void; // 导出记录回调
 }
 
 // 状态单元格渲染器
@@ -268,33 +283,105 @@ const StatusCellRenderer = (props: ICellRendererParams) => {
     if (record.status === 'recalled') {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: theme.palette.warning.main }}>{t('history.table.recalled')}</span>
                 <UndoIcon sx={{ fontSize: '16px', color: theme.palette.warning.main }} />
+                <span style={{ color: theme.palette.warning.main }}>{t('history.table.recalled')}</span>
             </div>
         );
     }
-    if (record.responseJson.code === 200) {
+
+    const responseCode = record.responseJson?.code;
+
+    if (responseCode === 200) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: theme.palette.success.main }}>{t('common.success')}</span>
                 <CheckCircleIcon sx={{ fontSize: '16px', color: theme.palette.success.main }} />
+                <span style={{ color: theme.palette.success.main }}>{t('common.success')}</span>
             </div>
         );
-    } else if (record.responseJson.code === -1) {
+    } else if (responseCode === -1) {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: theme.palette.error.main }}>{t('common.failed')}</span>
                 <ErrorIcon sx={{ fontSize: '16px', color: theme.palette.error.main }} />
+                <span style={{ color: theme.palette.error.main }}>{t('common.failed')}</span>
             </div>
         );
     } else {
         return (
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <span style={{ color: theme.palette.warning.main }}>{t('common.other')}</span>
                 <HelpIcon sx={{ fontSize: '16px', color: theme.palette.warning.main }} />
+                <span style={{ color: theme.palette.warning.main }}>{t('common.other')}</span>
             </div>
         );
     }
+};
+
+const DateTimeCellRenderer = (props: ICellRendererParams) => {
+    const theme = useTheme();
+
+    let date = props.value;
+    if (!(date instanceof Date) && props.data?.createdAt) {
+        date = new Date(props.data.createdAt);
+    }
+
+    const timeStr = dayjs(date).isSame(dayjs(), 'day') ? dayjs(date).format('HH:mm:ss') : dayjs(date).format('HH:mm:ss DD/MM'); // 如果是今天，则显示HH:mm:ss，否则显示MM/DD HH:mm:ss
+    const fullTsStr = dayjs(date).format('YYYY-MM-DD HH:mm:ss');
+
+    return (
+        <div
+            title={fullTsStr}
+            style={{
+                color: theme.palette.text.secondary,
+            }}
+        >
+            {/* 时间部分 */}
+            <div>{timeStr}</div>
+
+
+        </div>
+    );
+};
+
+const BodyCellRenderer = (props: ICellRendererParams) => {
+    const { t } = useTranslation();
+    const theme = useTheme();
+    const body = props.value;
+    const title = props.data?.title;
+
+    return (
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '2px',
+            height: '100%',
+            justifyContent: 'center'
+        }}>
+            {title && (
+                <div style={{
+                    fontSize: '0.625rem',
+                    fontWeight: 500,
+                    color: theme.palette.text.secondary,
+                    lineHeight: 1.5,
+                    opacity: 0.8,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                    {title}
+                </div>
+            )}
+            <div title={body}
+                style={{
+                    fontSize: '0.75rem',
+                    color: theme.palette.text.primary,
+                    lineHeight: 1.2,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                {body}
+            </div>
+        </div >
+    );
 };
 
 // 加密状态单元格渲染器
@@ -313,10 +400,38 @@ const EncryptedCellRenderer = (props: ICellRendererParams) => {
     );
 };
 
-export default function HistoryTable({ records, selectedIds, onSelectionChanged }: HistoryTableProps) {
+const MENU_ID = 'history-table-context-menu';
+
+export default function HistoryTable({ records, selectedIds, onSelectionChanged, onRowDoubleClick, scrollToRecordId, onFilteredDataChanged, onRecallSuccess, onDeleteRecords, onExportRecords }: HistoryTableProps) {
     const { t, i18n } = useTranslation();
     const theme = useTheme();
     const gridApi = useRef<GridApi | null>(null);
+
+    // 右键菜单相关状态
+    const [contextMenuData, setContextMenuData] = useState<{
+        record: HistoryRecord;
+        field: string;
+        value: any;
+    } | null>(null);
+
+    const { show: showContextMenu, hideAll: hideContextMenu } = useContextMenu({
+        id: MENU_ID,
+    });
+
+    // Toast 相关状态
+    const [toastOpen, setToastOpen] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastSeverity, setToastSeverity] = useState<'success' | 'error' | 'warning' | 'info'>('success');
+
+    // 撤回
+    const [recalling, setRecalling] = useState(false);
+
+    // 显示 toast 消息
+    const showToast = useCallback((message: string, severity: 'success' | 'error' | 'warning' | 'info' = 'success') => {
+        setToastMessage(message);
+        setToastSeverity(severity);
+        setToastOpen(true);
+    }, []);
 
     // 基于MUI主题创建AG-Grid主题
     const agGridTheme = useMemo(() => createAgGridTheme(theme), [theme]);
@@ -336,7 +451,8 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
             headerName: t('history.table.time'),
             sortable: true,
             filter: 'agDateColumnFilter',
-            width: 105,
+            width: 111,
+            minWidth: 102,
             // 将字符串转换为 Date 对象用于过滤器
             valueGetter: (params) => {
                 // createdAt 是中文本地化格式字符串，如 '2024/09/19 14:30:25'，需要转换为 Date 对象
@@ -345,15 +461,7 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
                 }
                 return null;
             },
-            // 时间格式化显示
-            valueFormatter: (params: ValueFormatterParams) => {
-                // 如果 params.value 是 Date 对象，直接使用；否则从原始数据解析
-                let date = params.value;
-                if (!(date instanceof Date) && params.data?.createdAt) {
-                    date = new Date(params.data.createdAt);
-                }
-                return dayjs(date).format('HH:mm:ss');
-            },
+            cellRenderer: DateTimeCellRenderer,
             filterParams: {
                 buttons: ["reset"],
                 closeOnApply: true,
@@ -382,32 +490,25 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
             }
         },
         {
-            field: 'body',
+            field: 'body', // 内容
             headerName: t('history.table.content'),
             sortable: true,
             filter: 'agTextColumnFilter',
             minWidth: 150,
             flex: 1,
+            cellRenderer: BodyCellRenderer,
             // tooltipField: 'body',
         },
         {
-            field: 'title',
+            field: 'title', // 标题
             headerName: t('history.table.title'),
             sortable: true,
             filter: 'agTextColumnFilter',
             width: 150,
+            hide: true,
             // tooltipField: 'title'
-        },
-        {
-            field: 'deviceName',
-            headerName: t('history.table.device'),
-            sortable: true,
-            filter: 'agTextColumnFilter',
-            width: 150,
-            // tooltipField: 'deviceName'
-        },
-        {
-            field: 'status',
+        }, {
+            field: 'status', // 状态
             headerName: t('history.table.status'),
             width: 128,
             cellRenderer: StatusCellRenderer,
@@ -469,7 +570,16 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
             }
         },
         {
-            field: 'isEncrypted',
+            field: 'deviceName', // 设备名称
+            headerName: t('history.table.device'),
+            sortable: true,
+            filter: 'agTextColumnFilter',
+            width: 150,
+            // tooltipField: 'deviceName'
+        },
+
+        {
+            field: 'isEncrypted', // 是否加密
             headerName: t('history.table.encrypted'),
             width: 128,
             cellRenderer: EncryptedCellRenderer,
@@ -531,6 +641,200 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
         onSelectionChanged(newSelectedIds);
     }, [onSelectionChanged]);
 
+    // 行双击事件处理
+    const onRowDoubleClickHandler = useCallback((event: any) => {
+        if (onRowDoubleClick && event.data) {
+            onRowDoubleClick(event.data);
+        }
+    }, [onRowDoubleClick]);
+
+    // 单元格右键菜单处理
+    const onCellContextMenu = useCallback((event: any) => {
+        // 更强力地阻止默认右键菜单
+        event.event.preventDefault();
+
+        if (event.data && event.colDef && event.value !== undefined) {
+            setContextMenuData({
+                record: event.data,
+                field: event.colDef.field,
+                value: event.value
+            });
+
+            showContextMenu({
+                event: event.event,
+                props: {
+                    record: event.data,
+                    field: event.colDef.field,
+                    value: event.value
+                }
+            });
+        }
+    }, [showContextMenu]);
+
+    // 查看详情
+    const handleViewDetail = useCallback(() => {
+        if (contextMenuData && onRowDoubleClick) {
+            onRowDoubleClick(contextMenuData.record);
+        }
+    }, [contextMenuData, onRowDoubleClick]);
+
+    // 复制单元格值
+    const handleCopyValue = useCallback(async () => {
+        if (contextMenuData && contextMenuData.value !== undefined) {
+            try {
+                let textToCopy = '';
+
+                // 根据字段类型处理复制内容 (后面再改 switch)
+                if (typeof contextMenuData.value === 'string') {
+                    textToCopy = contextMenuData.value;
+                } else if (typeof contextMenuData.value === 'number') {
+                    textToCopy = contextMenuData.value.toString();
+                } else if (contextMenuData.value instanceof Date) {
+                    textToCopy = contextMenuData.value.toLocaleString();
+                } else if (typeof contextMenuData.value === 'object') {
+                    textToCopy = JSON.stringify(contextMenuData.value, null, 2);
+                } else {
+                    textToCopy = String(contextMenuData.value);
+                }
+
+                await writeToClipboard(textToCopy);
+                showToast(t('history.context_menu.copy_success'));
+
+            } catch (error) {
+                console.error('复制失败:', error);
+                showToast(t('history.context_menu.copy_failed'), 'error');
+            }
+        }
+    }, [contextMenuData, showToast, t]);
+
+    // 撤回功能
+    const handleRecall = useCallback(async () => {
+        if (!contextMenuData || !contextMenuData.record.uuid) {
+            showToast(t('push.recall.record_not_found'), 'error');
+            return;
+        }
+
+        setRecalling(true);
+        hideContextMenu();
+
+        try {
+            const historyRecord = await getHistoryRecordByUuid(contextMenuData.record.uuid);
+
+            if (!historyRecord) {
+                showToast(t('push.recall.record_not_found'), 'error');
+                return;
+            }
+
+            const recallUrl = `${historyRecord.apiUrl}?id=${encodeURIComponent(contextMenuData.record.uuid)}&delete=1`;
+
+            const headers: Record<string, string> = {};
+            if (historyRecord.authorization && historyRecord.authorization.value) {
+                headers['Authorization'] = historyRecord.authorization.value;
+            }
+
+            const response = await fetch(recallUrl, {
+                method: 'GET',
+                mode: 'cors',
+                cache: 'no-cache',
+                ...(Object.keys(headers).length > 0 && { headers })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+
+            if (result.code === 200) {
+                await updateHistoryRecordStatus(contextMenuData.record.uuid, 'recalled');
+                showToast(t('push.recall.success'));
+                onRecallSuccess?.();
+            } else {
+                showToast(t('push.recall.failed'), 'error');
+            }
+        } catch (error) {
+            console.error('撤回失败:', error);
+            showToast(t('push.recall.failed'), 'error');
+        } finally {
+            setRecalling(false);
+        }
+    }, [contextMenuData, showToast, t, hideContextMenu, onRecallSuccess]);
+
+    // 删除功能
+    const handleDeleteCurrent = useCallback(() => {
+        if (contextMenuData && onDeleteRecords && contextMenuData.record.id) {
+            onDeleteRecords([contextMenuData.record.id]);
+            hideContextMenu();
+        }
+    }, [contextMenuData, onDeleteRecords, hideContextMenu]);
+
+    const handleDeleteSelected = useCallback(() => {
+        if (onDeleteRecords && selectedIds.length > 0) {
+            onDeleteRecords(selectedIds);
+            hideContextMenu();
+        }
+    }, [onDeleteRecords, selectedIds, hideContextMenu]);
+
+    // 导出功能
+    const handleExportCurrent = useCallback(() => {
+        if (contextMenuData && onExportRecords) {
+            onExportRecords([contextMenuData.record]);
+            hideContextMenu();
+        }
+    }, [contextMenuData, onExportRecords, hideContextMenu]);
+
+    const handleExportSelected = useCallback(() => {
+        if (onExportRecords && selectedIds.length > 0) {
+            const selectedRecords = records.filter(record => record.id && selectedIds.includes(record.id));
+            onExportRecords(selectedRecords);
+            hideContextMenu();
+        }
+    }, [onExportRecords, selectedIds, records, hideContextMenu]);
+
+    // 阻止容器上的右键菜单
+    const handleContainerContextMenu = useCallback((event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        hideContextMenu(); // 关闭自定义右键菜单
+    }, [hideContextMenu]);
+
+    // 获取过滤后的数据
+    const getFilteredData = useCallback(() => {
+        if (!gridApi.current) return [];
+        const filteredData: HistoryRecord[] = [];
+        gridApi.current.forEachNodeAfterFilterAndSort((node) => {
+            if (node.data) {
+                filteredData.push(node.data);
+            }
+        });
+        return filteredData;
+    }, []);
+
+    // 监听过滤变化，通知父组件过滤后的数据
+    const onFilterChanged = useCallback(() => {
+        if (onFilteredDataChanged) {
+            const filteredData = getFilteredData();
+            onFilteredDataChanged(filteredData);
+        }
+    }, [getFilteredData, onFilteredDataChanged]);
+
+    const [focusRecordId, setFocusRecordId] = useState<number | undefined>(undefined);
+    // 滚动到指定记录
+    useEffect(() => {
+        if (scrollToRecordId && gridApi.current) {
+            const rowNode = gridApi.current.getRowNode(scrollToRecordId.toString());
+            if (rowNode) {
+
+                gridApi.current.ensureIndexVisible(rowNode.rowIndex!, 'top');
+                // 聚焦到行
+                // console.log('scrollToRecordId', scrollToRecordId);
+                setFocusRecordId(scrollToRecordId);
+                gridApi.current.setFocusedCell(rowNode.rowIndex!, 'body'); // 聚焦到内容单元格
+            }
+        }
+    }, [scrollToRecordId]);
+
+
     const [quickFilterText, setQuickFilterText] = useState('');
 
     const selectionColumnDef = useMemo(() => { // https://www.ag-grid.com/react-data-grid/row-selection-multi-row/#customising-the-checkbox-column
@@ -569,27 +873,29 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
                     }}
                 />
             </Box>
-            <Paper sx={{
-                height: 'calc(100% - 60px - ' + (isComposing ? '12' : '0') + 'px)',
-                position: 'relative',
-                width: '100%',
-                '& .ag-checkbox-input-wrapper': {
-                    borderRadius: '4.5px !important'
-                },
-                '& .ag-picker-field-wrapper': {
-                    borderRadius: '9px !important'
-                },
-                '& .ag-filter-apply-panel-button': {
-                    width: '100% !important',
-                    padding: '2px !important',
-                    margin: '0px !important'
-                },
-                '& .ag-cell': {
-                    paddingRight: '0px !important'
-                },
-                border: 'none',
-                // boxShadow: 'lg'
-            }}>
+            <Paper
+                onContextMenu={handleContainerContextMenu}
+                sx={{
+                    height: 'calc(100% - 60px - ' + (isComposing ? '12' : '0') + 'px)',
+                    position: 'relative',
+                    width: '100%',
+                    '& .ag-checkbox-input-wrapper': {
+                        borderRadius: '4.5px !important'
+                    },
+                    '& .ag-picker-field-wrapper': {
+                        borderRadius: '9px !important'
+                    },
+                    '& .ag-filter-apply-panel-button': {
+                        width: '100% !important',
+                        padding: '2px !important',
+                        margin: '0px !important'
+                    },
+                    '& .ag-cell': {
+                        paddingRight: '0px !important'
+                    },
+                    border: 'none',
+                    // boxShadow: 'lg'
+                }}>
                 <AgGridReact
                     key={`ag-grid-${i18n.language}`} // 强制在语言切换时重新渲染
                     rowData={records}
@@ -601,18 +907,21 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
                     rowSelection={{
                         mode: "multiRow",
                         enableClickSelection: true, // 启用点击行选中
-                        enableSelectionWithoutKeys: true, // 启用点击行选中
+                        // enableSelectionWithoutKeys: true, // 启用点击行选中
                         selectAll: 'filtered',
                         checkboxes: true,
                         // headerCheckbox: false
                     }}
                     scrollbarWidth={11} // hack: 这个版本的 ag-grid 在 dev 环境下渲染导致 popup 宽度问题, 虽然生产环境其实并不需要, 加上无所谓
-                    suppressContextMenu // 阻止右键菜单
+                    suppressContextMenu={true} // 阻止默认右键菜单
                     theme={agGridTheme}
                     loading={false}
                     localeText={agGridLocale}
                     onGridReady={onGridReady}
                     onSelectionChanged={onSelectionChangedHandler}
+                    onRowDoubleClicked={onRowDoubleClickHandler}
+                    onCellContextMenu={onCellContextMenu}
+                    onFilterChanged={onFilterChanged}
                     getRowId={params => params.data.id.toString()}
                     rowClassRules={rowClassRules}
                     animateRows
@@ -621,6 +930,96 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged 
                 // suppressHorizontalScroll={true}
                 />
             </Paper>
+
+            {/* 右键菜单 */}
+            <Menu id={MENU_ID} animation="scale" style={{
+                backgroundColor: theme.palette.mode === 'dark' ? '#1E1E1E' : '#fff',
+                borderRadius: '14px',
+                boxShadow: theme.palette.mode === 'dark' ? '0 2px 8px rgba(0, 0, 0, 0.2)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
+                border: theme.palette.mode === 'dark' ? '1px solid rgba(255, 255, 255, 0.12)' : '1px solid rgba(0, 0, 0, 0.12)',
+            }}>
+                {/* 查看详情 */}
+                {/* <Item >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <VisibilityIcon fontSize="small" />
+
+                    </div>
+                </Item> */}
+                <MenuItem selected dense onClick={handleViewDetail}>{t('history.context_menu.view_detail')}</MenuItem>
+
+                {/* 拷贝值 */}
+                {/* <Item onClick={handleCopyValue} disabled={contextMenuData?.field === 'isEncrypted' || contextMenuData?.field === 'status'}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <ContentCopyIcon fontSize="small" />
+                        {t('history.context_menu.copy_value')}
+                    </div>
+                </Item> */}
+                <MenuItem dense onClick={handleCopyValue} disabled={contextMenuData?.field === 'isEncrypted' || contextMenuData?.field === 'status'}>{t('history.context_menu.copy_value')}</MenuItem>
+                {/* 撤回 */}
+                {/* <Item onClick={handleRecall} disabled={recalling || contextMenuData?.record.status === 'recalled'}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        {recalling ? <CircularProgress size={16} /> : <UndoIcon fontSize="small" />}
+                        {t('push.recall.button')}
+                    </div>
+                </Item> */}
+                <MenuItem dense onClick={handleRecall} disabled={recalling || contextMenuData?.record.status === 'recalled'}>{t('push.recall.button')}</MenuItem>
+
+                {selectedIds.length > 0 && <Divider />}
+
+                {/* <Separator /> */}
+
+                {/* <Item onClick={handleDeleteCurrent}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <DeleteIcon fontSize="small" />
+                        {t('history.context_menu.delete_current')}
+                    </div>
+                </Item>
+
+                {selectedIds.length > 0 && (
+                    <Item onClick={handleDeleteSelected}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <DeleteIcon fontSize="small" />
+                            {t('history.context_menu.delete_selected', { count: selectedIds.length })}
+                        </div>
+                    </Item>
+                )} */}
+
+                {/* <Separator /> */}
+                {/* 
+                <Item onClick={handleExportCurrent}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <DownloadIcon fontSize="small" />
+                        {t('history.context_menu.export_current')}
+                    </div>
+                </Item> */}
+
+                {selectedIds.length > 0 && (
+                    // <Item onClick={handleExportSelected}>
+                    //     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    //         <DownloadIcon fontSize="small" />
+                    //         {t('history.context_menu.export_selected', { count: selectedIds.length })}
+                    //     </div>
+                    // </Item>
+                    <MenuItem dense onClick={handleExportSelected}>{t('history.context_menu.export_selected', { count: selectedIds.length })}</MenuItem>
+                )}
+
+            </Menu>
+
+            {/* Toast 消息 */}
+            <Snackbar
+                open={toastOpen}
+                autoHideDuration={3000}
+                onClose={() => setToastOpen(false)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+            >
+                <Alert
+                    onClose={() => setToastOpen(false)}
+                    severity={toastSeverity}
+                    variant="filled"
+                >
+                    {toastMessage}
+                </Alert>
+            </Snackbar>
         </>
     );
 }

@@ -26,7 +26,8 @@ export default defineConfig({
       'contextMenus',
       'activeTab',
       'notifications',
-      'clipboardRead' // Firefox 不支持 clipboardRead 权限
+      'clipboardRead', // Firefox 不支持 clipboardRead 权限
+      'identity' // Chrome 特有
     ],
     host_permissions: [
       'https://*/*',
@@ -34,6 +35,10 @@ export default defineConfig({
     ],
     content_security_policy: {
       extension_pages: "script-src 'self'; object-src 'self';"
+    },
+    oauth2: {
+      client_id: "1015101043935-97vmnmdsqgql2lne6stun1b4lhluhtgc.apps.googleusercontent.com",
+      scopes: ["https://www.googleapis.com/auth/drive.file"]
     },
     commands: {
       "send-clipboard": {
@@ -131,17 +136,34 @@ export default defineConfig({
               }
             };
             source: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings
+        如果是Edge: 
+        移除 identity 和 oauth2，保留其他功能
       */
       if (wxt.config.browser === 'firefox') {
         if (manifest.commands && manifest.commands['send-clipboard']) {
           delete manifest.commands['send-clipboard'].global;
-          manifest.browser_specific_settings = {
-            gecko: {
-              id: 'bark_sender@uuphy.com',
-              strict_min_version: '109.0'
-            }
-          };
         }
+
+        if (manifest.permissions) {
+          manifest.permissions = manifest.permissions.filter(
+            (permission: string) => permission !== 'identity'
+          );
+        }
+        delete manifest.oauth2;
+
+        manifest.browser_specific_settings = {
+          gecko: {
+            id: 'bark_sender@uuphy.com',
+            strict_min_version: '109.0'
+          }
+        };
+      } else if (wxt.config.browser === 'edge') {
+        if (manifest.permissions) {
+          manifest.permissions = manifest.permissions.filter(
+            (permission: string) => permission !== 'identity'
+          );
+        }
+        delete manifest.oauth2;
       }
     }
   }

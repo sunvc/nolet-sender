@@ -19,7 +19,7 @@ import {
     LinearProgress,
     Divider,
     Snackbar,
-    Chip
+
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -34,7 +34,7 @@ import GitHubIcon from '@mui/icons-material/GitHub';
 // import BugReportIcon from '@mui/icons-material/BugReport';
 import EmailIcon from '@mui/icons-material/Email';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import TelegramIcon from '@mui/icons-material/Telegram';
+// import TelegramIcon from '@mui/icons-material/Telegram';
 import SecurityIcon from '@mui/icons-material/Security';
 import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -53,7 +53,9 @@ import SoundDialog from '../components/SoundDialog';
 import AvatarSetting from '../components/AvatarSetting';
 import FaviconSetting from '../components/FaviconSetting';
 import SpeedModeSetting from '../components/SpeedModeSetting';
-import { openGitHub, openFeedback, openTelegramChannel, openBarkWebsite, openBarkApp, openStoreRating } from '../utils/extension';
+import CacheSetting from '../components/CacheSetting';
+import BackupRestoreCard from '../components/BackupRestoreCard';
+import { openGitHub, openBarkWebsite, openBarkApp, openStoreRating, } from '../utils/extension';
 import { saveDevices } from '../utils/storage';
 import { DEFAULT_ADVANCED_PARAMS } from '../utils/settings';
 
@@ -687,6 +689,16 @@ export default function Settings({
                                 />
                             </Stack>
                         </Box>
+                        {/* 启用文件缓存 */}
+                        {appSettings?.enableInspectSend &&
+                            <Box>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    {/* 文件缓存设置 */}
+                                    {t('settings.cache.title')}
+                                </Typography>
+                                <CacheSetting />
+                            </Box>
+                        }
                         <Box>
                             <Stack direction="row" alignItems="center" justifyContent="space-between">
                                 <Typography variant="subtitle1" gutterBottom>
@@ -778,6 +790,16 @@ export default function Settings({
                     </Stack>
                 </Paper>
 
+                {/* 备份/还原配置卡片 */}
+                <BackupRestoreCard
+                    devices={devices}
+                    defaultDeviceId={defaultDeviceId}
+                    onSettingsChange={onSettingsChange}
+                    onAddDevice={onAddDevice}
+                    onEditDevice={onEditDevice}
+                    onSetDefaultDevice={onSetDefaultDevice}
+                    onThemeChange={onThemeChange}
+                />
                 {/* 了解 Bark 卡片 */}
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Stack spacing={3}>
@@ -863,8 +885,6 @@ export default function Settings({
                                     </Tooltip>
                                 </ListItem>
 
-                                <Divider sx={{ my: 1 }} />
-
                                 <ListItem sx={{ px: 0 }}>
                                     <ListItemText
                                         primary={
@@ -885,25 +905,7 @@ export default function Settings({
                                     </IconButton>
                                 </ListItem>
 
-                                <ListItem sx={{ px: 0 }}>
-                                    <ListItemText
-                                        primary={
-                                            <Stack direction="row" alignItems="center" spacing={1}>
-                                                <TelegramIcon fontSize="small" />
-                                                <Typography variant="body1">
-                                                    {/* Telegram 频道 */}
-                                                    {t('about.telegram.title')}
-                                                </Typography>
-                                            </Stack>
-                                        }
-                                        secondary={<span style={{ paddingLeft: '2.4em', fontSize: '0.75rem' }}>{t('about.telegram.description')}</span>}
-                                        onClick={openTelegramChannel}
-                                        sx={{ cursor: 'pointer' }}
-                                    />
-                                    <IconButton edge="end" onClick={openTelegramChannel}>
-                                        <OpenInNewIcon />
-                                    </IconButton>
-                                </ListItem>
+
 
                             </List>
                         </Stack>
@@ -920,6 +922,7 @@ export default function Settings({
                         }} gap={.3}>
 
                             <Stack direction="row" alignItems="center" justifyContent="center" gap={.6}>
+
                                 <Typography variant="caption" color="text.secondary">
                                     <Link
                                         onClick={() => window.open('https://bark-sender.uuphy.com/', '_blank')}
@@ -931,7 +934,7 @@ export default function Settings({
                                 </Typography>
                             </Stack>
                             <Stack direction="row" alignItems="center" justifyContent="center" gap={.6} sx={{ flex: 1, color: 'text.secondary' }}>
-                                <EmailIcon style={{ fontSize: '0.8rem' }} titleAccess='contact' />
+                                <EmailIcon style={{ fontSize: '0.8rem' }} aria-label='contact' />
                                 <Link
                                     href={`mailto:${t('about.contact.email')}`}
                                     underline="hover"

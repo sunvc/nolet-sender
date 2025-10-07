@@ -2,6 +2,7 @@ import { initBackgroundI18n, watchLanguageChanges, getMessage } from './backgrou
 import { sendPush, getRequestParameters, generateID, PushParams, EncryptionConfig } from './shared/push-service';
 import { Device } from './popup/types';
 import { DEFAULT_ADVANCED_PARAMS } from './popup/utils/settings';
+import { fileCacheManager, dbManager } from './popup/utils/database';
 
 export default defineBackground(() => {
   // 初始化 i18n
@@ -188,6 +189,9 @@ export default defineBackground(() => {
         const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
         const settings = settingsResult.bark_app_settings || { enableEncryption: false };
 
+        // console.debug('获取到的设置:', settings);
+        // console.debug('文件缓存设置:', settings.enableFileCache);
+
         if (!defaultDevice) {
           console.error(getMessage('device_not_found'));
           browser.notifications.create({
@@ -353,8 +357,23 @@ export default defineBackground(() => {
               });
             }
 
+            // 如果是图片类型且启用了文件缓存，通知 content script 缓存图片
+            if (message.contentType === 'image' && settings.enableFileCache && message.content) {
+              // 发送消息给 content script 请求图片缓存
+              // console.debug('发送消息给 content script 请求图片缓存:', message.content, pushUuid);
+              if (sender.tab?.id) {
+                browser.tabs.sendMessage(sender.tab.id, {
+                  action: 'cacheImage',
+                  imageUrl: message.content,
+                  pushID: pushUuid
+                }).catch(error => {
+                  console.debug('发送缓存图片消息失败:', error);
+                });
+              }
+            }
+
             // 返回成功响应给content script
-            sendResponse({ success: true, data: response });
+            sendResponse({ success: true, data: response, pushID: pushUuid });
           })
           .catch(error => {
             console.error('发送失败:', error);
@@ -412,35 +431,194 @@ export default defineBackground(() => {
 
       return true; // 保持消息通道开放
     }
+
+    // 处理来自 content script 的图片缓存数据 (有类图片只能网站内请求到, 其他环境 background 反而请求不到)
+    if (message.action === 'saveImageCache') {
+      // console.debug('收到来自 content script 的图片缓存数据:', message.imageUrl, message.imageData, message.pushID);
+      const { imageUrl, imageData, pushID } = message;
+
+      if (!imageUrl || !imageData || !pushID) {
+        sendResponse({ success: false, error: '缺少必要参数' });
+        return true;
+      }
+
+      try {
+        // 直接使用传入的 ArrayBuffer（Structured Clone）
+        if (!(imageData instanceof ArrayBuffer)) {
+          throw new Error('图片数据类型错误，期望 ArrayBuffer');
+        }
+
+        // 保存到数据库
+        fileCacheManager.saveImage(imageUrl, imageData, pushID)
+          .then(record => {
+            console.debug('图片缓存保存成功:', record);
+            sendResponse({ success: true, record });
+          })
+          .catch(error => {
+            console.error('保存图片缓存失败:', error);
+            sendResponse({ success: false, error: error.message });
+          });
+      } catch (error) {
+        console.error('处理图片数据失败:', error);
+        sendResponse({ success: false, error: error instanceof Error ? error.message : '处理图片数据失败' });
+      }
+
+      return true;
+    }
+
+    // 处理来自 content script 的 base64 图片缓存数据（port 不行的话用该兜底）
+    if (message.action === 'saveImageCacheBase64') {
+      const { imageUrl, imageData, pushID } = message;
+
+      if (!imageUrl || !imageData || !pushID) {
+        sendResponse({ success: false, error: '缺少必要参数' });
+        return true;
+      }
+
+      try {
+        // 将 base64 数据转换为 ArrayBuffer
+        if (typeof imageData !== 'string') {
+          throw new Error('图片数据类型错误，期望 base64 字符串');
+        }
+
+        const base64Data = imageData.split(',')[1]; // 移除 data:image/xxx;base64, 前缀
+        if (!base64Data) {
+          throw new Error('无效的 base64 数据');
+        }
+
+        const binaryString = atob(base64Data);
+        const arrayBuffer = new ArrayBuffer(binaryString.length);
+        const uint8Array = new Uint8Array(arrayBuffer);
+
+        for (let i = 0; i < binaryString.length; i++) {
+          uint8Array[i] = binaryString.charCodeAt(i);
+        }
+
+        // 保存到数据库
+        fileCacheManager.saveImage(imageUrl, arrayBuffer, pushID)
+          .then(record => {
+            console.debug('图片缓存保存成功 (base64):', record);
+            sendResponse({ success: true, record });
+          })
+          .catch(error => {
+            console.error('保存图片缓存失败 (base64):', error);
+            sendResponse({ success: false, error: error.message });
+          });
+      } catch (error) {
+        console.error('处理 base64 图片数据失败:', error);
+        sendResponse({ success: false, error: error instanceof Error ? error.message : '处理图片数据失败' });
+      }
+
+      return true;
+    }
+
+    // 处理跨域图片获取和缓存（兜底: 一些图片因为跨域但能用 background 请求到）
+    if (message.action === 'fetchAndCacheImage') {
+      const { imageUrl, pushID } = message;
+
+      if (!imageUrl || !pushID) {
+        sendResponse({ success: false, error: '缺少必要参数' });
+        return true;
+      }
+
+      // 使用 background 脚本获取图片数据
+      fetch(imageUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          return response.arrayBuffer();
+        })
+        .then(arrayBuffer => {
+          console.debug('Background 获取图片数据成功，大小:', arrayBuffer.byteLength, 'bytes');
+          // 保存到数据库
+          return fileCacheManager.saveImage(imageUrl, arrayBuffer, pushID);
+        })
+        .then(record => {
+          console.debug('图片缓存保存成功 (background):', record);
+          sendResponse({ success: true, record });
+        })
+        .catch(error => {
+          console.error('Background 获取并缓存图片失败:', error);
+          sendResponse({ success: false, error: error.message || 'Background 获取图片失败' });
+        });
+
+      return true; // 保持消息通道开放
+    }
+  });
+
+  // 处理 Port 连接
+  browser.runtime.onConnect.addListener((port) => {
+    if (port.name === 'imageCache') {
+      port.onMessage.addListener(async (message) => {
+        if (message.action === 'saveImageCache') {
+          const { imageUrl, imageData, pushID } = message;
+
+          try {
+            if (!imageUrl || !imageData || !pushID) {
+              throw new Error('缺少必要参数');
+            }
+
+            // 确保 imageData 是 ArrayBuffer
+            if (!(imageData instanceof ArrayBuffer)) {
+              throw new Error('图片数据类型错误，期望 ArrayBuffer');
+            }
+
+            // 保存到数据库
+            const record = await fileCacheManager.saveImage(imageUrl, imageData, pushID);
+            console.debug('图片缓存保存成功 (Port):', record);
+
+            port.postMessage({ success: true, record });
+          } catch (error) {
+            console.error('Port 保存图片缓存失败:', error);
+            port.postMessage({
+              success: false,
+              error: error instanceof Error ? error.message : '保存失败'
+            });
+          }
+        }
+      });
+
+      port.onDisconnect.addListener(() => {
+        console.debug('图片缓存 Port 连接断开');
+      });
+    }
   });
 
   // 存储最后一次右键点击的元素信息
   let lastRightClickedElementInfo: any = null;
 
-  // 保存历史记录到 chrome.storage.local 进行暂存 ，在打开历史页面时，再从 chrome.storage.local 写入历史记录
+  // 保存历史记录：优先直接存储到 IndexedDB，暂存作为兜底
   async function saveHistoryRecord(record: any) {
+    let directSaveSuccess = false;
+
     try {
-      // 获取现有历史记录
-      const result = await browser.storage.local.get('bark_history');
-      const existingHistory = result.bark_history || [];
+      // 优先尝试直接存储到 IndexedDB
+      await dbManager.addRecord(record);
+      console.debug(getMessage('save_history_record'), record, '(直接存储)');
+      directSaveSuccess = true;
+    } catch (directError) {
+      console.warn('直接存储历史记录失败，使用暂存兜底:', directError);
 
-      // 添加新记录到数组开头（最新的在前面）
-      existingHistory.unshift(record);
+      try {
+        // 兜底：暂存到 chrome.storage.local
+        const result = await browser.storage.local.get('bark_history');
+        const existingHistory = result.bark_history || [];
 
-      // 限制历史记录数量，比如最多保存1000条
-      if (existingHistory.length > 1000) {
-        existingHistory.splice(1000);
+        // 添加新记录到数组开头（最新的在前面）
+        existingHistory.unshift(record);
+
+        // 限制历史记录数量，比如最多保存1000条
+        if (existingHistory.length > 1000) {
+          existingHistory.splice(1000);
+        }
+
+        await browser.storage.local.set({ bark_history: existingHistory });
+        console.debug(getMessage('save_history_record'), record, '(暂存兜底)');
+        console.debug(getMessage('current_history_total', [existingHistory.length.toString()]));
+      } catch (tempError) {
+        console.error(getMessage('save_history_failed'), tempError);
       }
-
-      await browser.storage.local.set({ bark_history: existingHistory });
-
-      // console.debug('历史记录已保存:', record);
-      // console.debug('当前历史记录总数:', existingHistory.length);
-      console.debug(getMessage('save_history_record'), record);
-      console.debug(getMessage('current_history_total', [existingHistory.length.toString()]));
-    } catch (error) {
-      // console.error('保存历史记录失败:', error);
-      console.error(getMessage('save_history_failed'), error);
     }
   }
 

@@ -71,6 +71,7 @@ export interface AppSettings {
     enableFaviconIcon?: boolean; // 是否启用 favicon 作为 icon
     faviconApiUrl?: string; // favicon 接口 URL 模板
     enableSystemNotifications?: boolean; // 是否仅发送必要的系统通知提醒
+    enableFileCache?: boolean; // 是否启用文件缓存
 }
 // 平台类型
 export type PlatformType = 'mac' | 'windows' | 'linux' | 'unknown';
@@ -96,4 +97,5 @@ export interface AppContextType extends AppContextState {
     updateAppSetting: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => Promise<void>;
     reloadSettings: () => Promise<void>;
     shouldShowEncryptionToggle: boolean;
+    cleanupBlobs: () => void;    // blob 管理
 }

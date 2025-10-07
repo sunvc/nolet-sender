@@ -30,6 +30,27 @@ export interface HistoryRecord {
     inspectType?: string; // 推送类型
 }
 
+// Favicon 缓存记录接口
+export interface FaviconRecord {
+    id?: number; // 自增ID
+    url: string; // 图片地址
+    timestamp: number; // 存储时间戳
+    createdAt: string; // 创建时间字符串
+    size: number; // 字节大小
+    content: ArrayBuffer; // 文件内容
+}
+
+// 图片缓存记录接口
+export interface ImageRecord {
+    id?: number; // 自增ID
+    url: string; // 图片地址
+    timestamp: number; // 存储时间戳
+    createdAt: string; // 创建时间字符串
+    size: number; // 字节大小
+    content: ArrayBuffer; // 文件内容
+    pushID: string; // 推送ID，用于关联特定的推送记录
+}
+
 // 数据库结构定义
 interface BarkDB extends DBSchema {
     history: {
@@ -38,6 +59,27 @@ interface BarkDB extends DBSchema {
         indexes: {
             'by-timestamp': number;
             'by-uuid': string;
+        };
+    };
+}
+
+// 文件缓存数据库结构定义
+interface BarkFileDB extends DBSchema {
+    fav: {
+        key: number;
+        value: FaviconRecord;
+        indexes: {
+            'by-url': string;
+            'by-timestamp': number;
+            'by-url-size': [string, number];
+        };
+    };
+    img: {
+        key: number;
+        value: ImageRecord;
+        indexes: {
+            'by-pushID': string;
+            'by-timestamp': number;
         };
     };
 }
@@ -308,3 +350,289 @@ export async function recordPushHistory(
         authorization: options.authorization,
     });
 }
+
+// 文件缓存管理器类
+class FileCacheManager {
+    private fileDb: IDBPDatabase<BarkFileDB> | null = null;
+    private readonly FILE_DB_NAME = 'BarkSenderFileDB';
+    private readonly FILE_DB_VERSION = 1;
+
+    // 关闭数据库连接
+    async close(): Promise<void> {
+        if (this.fileDb) {
+            this.fileDb.close();
+            this.fileDb = null;
+            console.debug('文件缓存数据库连接已关闭');
+        }
+    }
+
+    // 完全销毁数据库
+    async destroy(): Promise<void> {
+        // 先关闭连接
+        await this.close();
+
+        // 删除整个数据库
+        return new Promise<void>((resolve, reject) => {
+            console.debug('正在销毁文件缓存数据库...');
+            const deleteReq = indexedDB.deleteDatabase(this.FILE_DB_NAME);
+
+            deleteReq.onsuccess = () => {
+                console.debug('文件缓存数据库销毁成功');
+                resolve();
+            };
+
+            deleteReq.onerror = () => {
+                console.error('销毁文件缓存数据库失败:', deleteReq.error);
+                reject(deleteReq.error);
+            };
+
+            deleteReq.onblocked = () => {
+                console.warn('销毁数据库被阻塞，可能有其他连接未关闭');
+                // 等待一段时间后重试
+                setTimeout(() => {
+                    reject(new Error('数据库销毁被阻塞'));
+                }, 5000);
+            };
+        });
+    }
+
+    // 初始化文件缓存数据库
+    async init(): Promise<void> {
+        if (this.fileDb) return;
+
+        this.fileDb = await openDB<BarkFileDB>(this.FILE_DB_NAME, this.FILE_DB_VERSION, {
+            upgrade(db) {
+                // 创建 favicon 缓存表
+                const favStore = db.createObjectStore('fav', {
+                    keyPath: 'id',
+                    autoIncrement: true,
+                });
+
+                // 创建索引
+                favStore.createIndex('by-url', 'url', { unique: false });
+                favStore.createIndex('by-timestamp', 'timestamp', { unique: false });
+                favStore.createIndex('by-url-size', ['url', 'size'], { unique: true });
+
+                // 创建图片缓存表
+                const imgStore = db.createObjectStore('img', {
+                    keyPath: 'id',
+                    autoIncrement: true,
+                });
+
+                // 只创建必要的索引
+                imgStore.createIndex('by-pushID', 'pushID', { unique: true }); // pushID 唯一
+                imgStore.createIndex('by-timestamp', 'timestamp', { unique: false });
+            },
+        });
+    }
+
+    // 保存 favicon 到缓存
+    async saveFavicon(url: string, content: ArrayBuffer): Promise<FaviconRecord> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        const now = Date.now();
+        const size = content.byteLength;
+        const createdAt = new Date(now).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        });
+
+        // 检查是否已存在相同 URL 和大小的记录
+        try {
+            const existing = await this.fileDb.getFromIndex('fav', 'by-url-size', [url, size]);
+            if (existing) {
+                console.debug('Favicon 已存在缓存中:', url);
+                return existing;
+            }
+        } catch (error) {
+            // 索引不存在或查询失败，继续保存
+        }
+
+        const record: FaviconRecord = {
+            url,
+            timestamp: now,
+            createdAt,
+            size,
+            content,
+        };
+
+        try {
+            const id = await this.fileDb.add('fav', record);
+            return { ...record, id };
+        } catch (error) {
+            console.error('保存 favicon 失败:', error);
+            throw error;
+        }
+    }
+
+    // 根据 URL 和时间戳获取 favicon
+    async getFavicon(url: string, timestamp?: number): Promise<string | null> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        try {
+            // 获取所有匹配 URL 的记录
+            const records = await this.fileDb.getAllFromIndex('fav', 'by-url', url);
+
+            if (records.length === 0) {
+                return null;
+            }
+
+            let targetRecord: FaviconRecord;
+
+            if (records.length === 1) {
+                // 只有一个记录，直接返回
+                targetRecord = records[0];
+            } else if (timestamp) {
+                // 多个记录，根据时间戳筛选
+                const validRecords = records.filter(record => record.timestamp <= timestamp);
+                if (validRecords.length === 0) {
+                    return null;
+                }
+                // 返回最近的那一个
+                targetRecord = validRecords.reduce((latest, current) =>
+                    current.timestamp > latest.timestamp ? current : latest
+                );
+            } else {
+                // 没有提供时间戳，返回最新的
+                targetRecord = records.reduce((latest, current) =>
+                    current.timestamp > latest.timestamp ? current : latest
+                );
+            }
+
+            // 创建 Blob URL
+            const blob = new Blob([targetRecord.content]);
+            return URL.createObjectURL(blob);
+        } catch (error) {
+            console.error('获取 favicon 失败:', error);
+            return null;
+        }
+    }
+
+    // 删除指定时间前的 favicon 缓存
+    async deleteFaviconsBefore(timestamp: number): Promise<void> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        const tx = this.fileDb.transaction('fav', 'readwrite');
+        const store = tx.objectStore('fav');
+        const index = store.index('by-timestamp');
+
+        const range = IDBKeyRange.upperBound(timestamp);
+        const cursor = await index.openCursor(range);
+
+        const deletePromises: Promise<void>[] = [];
+
+        if (cursor) {
+            do {
+                deletePromises.push(cursor.delete());
+            } while (await cursor.continue());
+        }
+
+        await Promise.all(deletePromises);
+        await tx.done;
+    }
+
+    // 保存图片到缓存
+    async saveImage(url: string, content: ArrayBuffer, pushID: string): Promise<ImageRecord> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        const now = Date.now();
+        const size = content.byteLength;
+        const createdAt = new Date(now).toLocaleString('zh-CN', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        });
+
+        // 图片缓存每次都保存，pushID 确保唯一性
+        const record: ImageRecord = {
+            url,
+            timestamp: now,
+            createdAt,
+            size,
+            content,
+            pushID,
+        };
+
+        try {
+            const id = await this.fileDb.add('img', record);
+            console.debug('图片缓存保存成功:', { url, pushID, size });
+            return { ...record, id };
+        } catch (error) {
+            // 如果是 pushID 重复错误，查询现有记录并返回
+            if (error instanceof DOMException && error.name === 'ConstraintError') {
+                try {
+                    const existing = await this.fileDb.getFromIndex('img', 'by-pushID', pushID);
+                    if (existing) {
+                        console.debug('Image 已存在缓存中 (pushID):', pushID);
+                        return existing;
+                    }
+                } catch (queryError) {
+                    console.error('查询现有图片记录失败:', queryError);
+                }
+            }
+            console.error('保存 image 失败:', error);
+            throw error;
+        }
+    }
+
+    // 根据 pushID 获取图片
+    async getImageByPushID(pushID: string): Promise<string | null> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        try {
+            const record = await this.fileDb.getFromIndex('img', 'by-pushID', pushID);
+
+            if (!record) {
+                return null;
+            }
+
+            // 创建 Blob URL
+            const blob = new Blob([record.content]);
+            return URL.createObjectURL(blob);
+        } catch (error) {
+            console.error('获取 image 失败:', error);
+            return null;
+        }
+    }
+
+    // 删除指定时间前的图片缓存
+    async deleteImagesBefore(timestamp: number): Promise<void> {
+        await this.init();
+        if (!this.fileDb) throw new Error('文件缓存数据库未初始化');
+
+        const tx = this.fileDb.transaction('img', 'readwrite');
+        const store = tx.objectStore('img');
+        const index = store.index('by-timestamp');
+
+        const range = IDBKeyRange.upperBound(timestamp);
+        const cursor = await index.openCursor(range);
+
+        const deletePromises: Promise<void>[] = [];
+
+        if (cursor) {
+            do {
+                deletePromises.push(cursor.delete());
+            } while (await cursor.continue());
+        }
+
+        await Promise.all(deletePromises);
+        await tx.done;
+    }
+}
+
+// 导出文件缓存管理器单例
+export const fileCacheManager = new FileCacheManager();
