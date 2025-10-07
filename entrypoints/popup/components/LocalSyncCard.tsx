@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { BackupData } from './BackupRestoreCard';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
@@ -37,7 +38,33 @@ export default function LocalSyncCard({
 }: LocalSyncCardProps) {
     const [backupDialogOpen, setBackupDialogOpen] = useState(false);
     const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
+    const [backupData, setBackupData] = useState<BackupData | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const { t } = useTranslation();
+
+    // 处理文件选择
+    const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) {
+            return;
+        }
+
+        try {
+            const fileContent = await file.text();
+            const parsedBackupData: BackupData = JSON.parse(fileContent);
+
+            // 验证备份文件格式
+            if (!parsedBackupData.version || !parsedBackupData.runId || typeof parsedBackupData.encrypted !== 'boolean') {
+                throw new Error('无效的备份文件格式');
+            }
+
+            setBackupData(parsedBackupData);
+            setRestoreDialogOpen(true);
+        } catch (error) {
+            console.error('文件解析失败:', error);
+            // 可以在这里添加错误提示
+        }
+    };
     return (
         <>
             <Paper elevation={2} sx={{ p: 3 }}>
@@ -61,7 +88,7 @@ export default function LocalSyncCard({
                     </ListItem>
 
                     <ListItem disablePadding>
-                        <ListItemButton onClick={() => setRestoreDialogOpen(true)}>
+                        <ListItemButton onClick={() => fileInputRef.current?.click()}>
                             <ListItemIcon>
                                 <RestoreIcon color="warning" />
                             </ListItemIcon>
@@ -74,6 +101,15 @@ export default function LocalSyncCard({
                 </List>
             </Paper>
 
+            {/* 文件输入 */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                accept=".json"
+                onChange={handleFileSelect}
+                style={{ display: 'none' }}
+            />
+
             {/* 备份对话框 */}
             <BackupDialog
                 open={backupDialogOpen}
@@ -85,7 +121,13 @@ export default function LocalSyncCard({
             {/* 还原对话框 */}
             <RestoreDialog
                 open={restoreDialogOpen}
-                onClose={() => setRestoreDialogOpen(false)}
+                onClose={() => {
+                    setRestoreDialogOpen(false);
+                    setBackupData(null);
+                    if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                    }
+                }}
                 devices={devices}
                 defaultDeviceId={defaultDeviceId}
                 onSettingsChange={onSettingsChange}
@@ -93,6 +135,7 @@ export default function LocalSyncCard({
                 onEditDevice={onEditDevice}
                 onSetDefaultDevice={onSetDefaultDevice}
                 onThemeChange={onThemeChange}
+                cloudBackupData={backupData}
             />
         </>
     );

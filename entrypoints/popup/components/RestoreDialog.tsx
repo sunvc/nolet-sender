@@ -60,63 +60,19 @@ export default function RestoreDialog({
 }: RestoreDialogProps) {
     const { t } = useTranslation();
     const { reloadSettings } = useAppContext();
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [backupData, setBackupData] = useState<BackupData | null>(null);
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [toast, setToast] = useState<{ open: boolean; message: string; severity: 'success' | 'error' }>({
-        open: false,
-        message: '',
-        severity: 'success'
-    });
+    const [successToast, setSuccessToast] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
 
     // 当有云端备份数据时，直接使用它
     useEffect(() => {
         if (cloudBackupData) {
-            setBackupData(cloudBackupData);
             setPassword(''); // 重置密码
         }
     }, [cloudBackupData]);
 
-    // 当对话框打开时，如果没有云端数据，自动触发文件选择
-    React.useEffect(() => {
-        if (open && !backupData && !cloudBackupData) {
-            // 延迟一点时间让对话框完全打开
-            setTimeout(() => {
-                fileInputRef.current?.click();
-            }, 100);
-        }
-    }, [open, backupData, cloudBackupData]);
-
-    // 处理文件选择
-    const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) {
-            // 如果用户取消选择文件，关闭对话框
-            onClose();
-            return;
-        }
-
-        try {
-            const fileContent = await file.text();
-            const parsedBackupData: BackupData = JSON.parse(fileContent);
-
-            // 验证备份文件格式
-            if (!parsedBackupData.version || !parsedBackupData.runId || typeof parsedBackupData.encrypted !== 'boolean') {
-                throw new Error('无效的备份文件格式');
-            }
-
-            setBackupData(parsedBackupData);
-            setPassword(''); // 重置密码
-        } catch (error) {
-            setToast({
-                open: true,
-                message: `文件解析失败: ${error instanceof Error ? error.message : '未知错误'}`,
-                severity: 'error'
-            });
-            onClose(); // 解析失败时关闭对话框
-        }
-    };
+    const backupData = cloudBackupData;
 
     // 合并设备配置
     const mergeDevicesWithOperations = async (backupDevices: Device[]): Promise<void> => {
@@ -230,27 +186,27 @@ export default function RestoreDialog({
 
         // 如果是加密文件但没有输入密码
         if (backupData.encrypted && !password.trim()) {
-            setToast({
-                open: true,
-                // 请输入密码
-                message: t('backup.restore_dialog.password_required'),
-                severity: 'error'
-            });
+            setErrorMessage(t('backup.restore_dialog.password_required'));
             return;
         }
 
         try {
             setLoading(true);
+            setErrorMessage(''); // 清除错误信息
             let restoredData: BackupData['data'];
 
             if (backupData.encrypted && backupData.encryptedData && backupData.iv && backupData.salt) {
-                // 解密数据
-                restoredData = await BackupCrypto.decrypt(
-                    backupData.encryptedData,
-                    backupData.iv,
-                    backupData.salt,
-                    password
-                );
+                try {
+                    // 解密数据
+                    restoredData = await BackupCrypto.decrypt(
+                        backupData.encryptedData,
+                        backupData.iv,
+                        backupData.salt,
+                        password
+                    );
+                } catch (decryptError) {
+                    throw new Error('decrypt_failed');
+                }
             } else if (!backupData.encrypted && backupData.data) {
                 // 明文数据
                 restoredData = backupData.data;
@@ -261,25 +217,21 @@ export default function RestoreDialog({
             // 执行还原
             await performRestore(restoredData);
 
-            setToast({
-                open: true,
-                // 还原成功！
-                message: t('backup.restore_dialog.success'),
-                severity: 'success'
-            });
-
+            setSuccessToast(true);
             handleClose();
         } catch (error) {
             console.error('还原失败:', error);
-            setToast({
-                open: true,
-                message: error instanceof Error && error.message.includes('decrypt')
-                    // 无法解密，请检查密码是否正确
-                    ? t('backup.restore_dialog.decrypt_failed')
-                    // 还原失败: {{message}}
-                    : t('backup.restore_dialog.failed', { message: error instanceof Error ? error.message : '未知错误' }),
-                severity: 'error'
-            });
+            setErrorMessage(
+                error instanceof Error
+                    ? error.message === 'decrypt_failed'
+                        ? t('backup.restore_dialog.decrypt_failed')
+                        : t('backup.restore_dialog.failed', {
+                            message: error.message === 'Error'
+                                ? t('common.error_unknown')
+                                : error.message
+                        })
+                    : t('backup.restore_dialog.failed', { message: t('common.error_unknown') })
+            );
         } finally {
             setLoading(false);
         }
@@ -287,28 +239,15 @@ export default function RestoreDialog({
 
     const handleClose = () => {
         if (loading) return;
-        setBackupData(null);
         setPassword('');
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
         onClose();
     };
 
     return (
         <>
-            {/* 隐藏的文件输入 */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept=".json"
-                onChange={handleFileSelect}
-                style={{ display: 'none' }}
-            />
-
             {/* 确认还原对话框 */}
             <Dialog
-                open={!!backupData}
+                open={open}
                 onClose={handleClose}
                 maxWidth="sm"
                 fullWidth
@@ -337,15 +276,16 @@ export default function RestoreDialog({
                                     {t('backup.restore_dialog.encrypted_description')}
                                 </Typography>
                                 <TextField
-                                    // 密码
                                     label={t('backup.restore_dialog.password_label')}
                                     type="password"
                                     value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                        setErrorMessage(''); // 清除错误信息
+                                    }}
                                     fullWidth
                                     autoFocus
                                     variant='standard'
-                                    // 请输入解密密码
                                     placeholder={t('backup.restore_dialog.password_placeholder')}
                                     disabled={loading}
                                     onKeyDown={(e) => {
@@ -353,8 +293,8 @@ export default function RestoreDialog({
                                             handleConfirmRestore();
                                         }
                                     }}
-                                    // 该备份文件已加密
-                                    helperText={t('backup.restore_dialog.password_helper')}
+                                    error={!!errorMessage}
+                                    helperText={errorMessage || t('backup.restore_dialog.password_helper')}
                                 />
                                 {backupData.passwordHint && (
                                     <Alert severity="info">
@@ -396,16 +336,16 @@ export default function RestoreDialog({
             </Dialog>
 
             <Snackbar
-                open={toast.open}
+                open={successToast}
                 autoHideDuration={4000}
-                onClose={() => setToast({ ...toast, open: false })}
+                onClose={() => setSuccessToast(false)}
             >
                 <Alert
-                    onClose={() => setToast({ ...toast, open: false })}
-                    severity={toast.severity}
+                    onClose={() => setSuccessToast(false)}
+                    severity="success"
                     sx={{ width: '100%' }}
                 >
-                    {toast.message}
+                    {t('backup.restore_dialog.success')}
                 </Alert>
             </Snackbar>
         </>
