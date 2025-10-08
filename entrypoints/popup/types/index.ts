@@ -70,7 +70,8 @@ export interface AppSettings {
     speedModeCountdown?: number; // 极速模式倒计时时间(ms)
     enableFaviconIcon?: boolean; // 是否启用 favicon 作为 icon
     faviconApiUrl?: string; // favicon 接口 URL 模板
-    enableSystemNotifications?: boolean; // 是否仅发送必要的系统通知提醒
+    enableSystemNotifications?: boolean; // 是否启用系统通知
+    keepEssentialNotifications?: boolean; // 是否保留必要通知（仅显示错误通知）
     enableFileCache?: boolean; // 是否启用文件缓存
 }
 // 平台类型

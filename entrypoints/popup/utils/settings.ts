@@ -43,7 +43,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     speedModeCountdown: 3000, // 极速模式倒计时，默认3秒
     enableFaviconIcon: false, // 启用 favicon 作为 icon，默认关闭
     faviconApiUrl: '', // favicon 接口 URL 模板
-    enableSystemNotifications: false, // 发送所有通知提醒，默认关闭
+    enableSystemNotifications: true, // 启用系统通知，默认true
+    keepEssentialNotifications: true, // 保有必要通知，默认true
     enableFileCache: true, // 文件缓存，默认开启
 };
 

@@ -3,6 +3,7 @@ import { sendPush, getRequestParameters, generateID, PushParams, EncryptionConfi
 import { Device } from './popup/types';
 import { DEFAULT_ADVANCED_PARAMS } from './popup/utils/settings';
 import { fileCacheManager, dbManager } from './popup/utils/database';
+import { showSYSNotification } from './popup/utils/notification';
 
 export default defineBackground(() => {
   // 初始化 i18n
@@ -194,12 +195,8 @@ export default defineBackground(() => {
 
         if (!defaultDevice) {
           console.error(getMessage('device_not_found'));
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: '/icon/128.png',
-            title: getMessage('bark_sender_title'),
-            message: getMessage('device_not_found')
-          });
+          // 未找到默认设备
+          showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
           sendResponse({ success: false, error: getMessage('device_not_found') });
           return;
         }
@@ -348,13 +345,11 @@ export default defineBackground(() => {
             saveHistoryRecord(historyRecord);
 
             // 只在非 text-large 类型或是最后一段时显示通知
-            if ((message.contentType !== 'text-large' || message.isLastChunk) && (settings.enableSystemNotifications !== false)) {
-              browser.notifications.create({
-                type: 'basic',
-                iconUrl: '/icon/128.png',
-                title: getMessage('bark_sender_title') + (message.contentType === 'text-large' ? ' (Large Content)' : ''),
-                message: getMessage('sent_to_device', [defaultDevice.alias])
-              });
+            if (message.contentType !== 'text-large' || message.isLastChunk) {
+              const title = message.contentType === 'text-large'
+                ? getMessage('bark_sender_title') + ' (Large Content)'
+                : getMessage('bark_sender_title');
+              showSYSNotification(title, getMessage('sent_to_device', [defaultDevice.alias]));
             }
 
             // 如果是图片类型且启用了文件缓存，通知 content script 缓存图片
@@ -417,12 +412,8 @@ export default defineBackground(() => {
 
             saveHistoryRecord(historyRecord);
 
-            browser.notifications.create({
-              type: 'basic',
-              iconUrl: '/icon/128.png',
-              title: getMessage('bark_sender_title'),
-              message: getMessage('send_failed_check_network')
-            });
+            // 发送失败，请检查网络连接
+            showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
 
             // 返回错误响应给 content script
             sendResponse({ success: false, data: errorResponse });
@@ -672,15 +663,8 @@ export default defineBackground(() => {
           top: 0,
           focused: true
         });
-
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          // title: 'Bark Sender',
-          // message: '未找到默认设备，请先添加设备'
-          title: getMessage('bark_sender_title'),
-          message: getMessage('device_not_found')
-        });
+        // 默认设备未找到
+        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
         return;
       }
 
@@ -706,29 +690,15 @@ export default defineBackground(() => {
         }).catch(error => {
           // console.debug('发送消息到窗口失败:', error);
           console.debug(getMessage('send_message_to_window_failed', [error.toString()]));
-          // 如果发送消息失败，显示通知
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: '/icon/128.png',
-            // title: 'Bark Sender',
-            // message: `已打开推送窗口，点击"发送剪切板内容"按钮 (默认设备: ${defaultDevice.alias})`
-            title: getMessage('bark_sender_title'),
-            message: getMessage('notification_shortcut_with_device', [defaultDevice.alias])
-          });
+          showSYSNotification(getMessage('bark_sender_title'), getMessage('notification_shortcut_with_device', [defaultDevice.alias]), true);
         });
       }, 300); // 给窗口足够时间加载
 
     } catch (error) {
       // console.error('快捷键处理失败:', error);
       console.error(getMessage('shortcut_processing_failed'), error);
-      browser.notifications.create({
-        type: 'basic',
-        iconUrl: '/icon/128.png',
-        // title: 'Bark Sender',
-        // message: '快捷键触发失败，请手动打开扩展'
-        title: getMessage('bark_sender_title'),
-        message: getMessage('shortcut_processing_failed')
-      });
+      // 快捷键处理失败
+      showSYSNotification(getMessage('bark_sender_title'), getMessage('shortcut_processing_failed'), true);
     }
   }
 
@@ -865,13 +835,8 @@ export default defineBackground(() => {
       if (!defaultDevice) { // 没有默认设备，则打开 添加设备 窗口
         // 将用户输入的文字保存到 storage，供 popup 使用
         await browser.storage.local.set({ bark_omnibox_message: message });
-
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          title: getMessage('bark_sender_title'),
-          message: getMessage('device_not_found')
-        });
+        // 未找到默认设备
+        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
         // 打开设置窗口让用户添加设备
         await browser.windows.create({
           url: browser.runtime.getURL('/popup.html?mode=window&autoAddDevice=true'),
@@ -954,24 +919,13 @@ export default defineBackground(() => {
 
       await saveHistoryRecord(historyRecord);
 
-      // 显示成功通知
-      if (settings.enableSystemNotifications !== false) {
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          title: getMessage('bark_sender_title'),
-          message: getMessage('sent_to_device', [defaultDevice.alias])
-        });
-      }
+      // 已发送至**设备
+      showSYSNotification(getMessage('bark_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
 
     } catch (error) {
       console.error('地址栏推送发送失败:', error);
-      browser.notifications.create({
-        type: 'basic',
-        iconUrl: '/icon/128.png',
-        title: getMessage('bark_sender_title'),
-        message: getMessage('send_failed_check_network')
-      });
+      // 发送失败，请检查网络连接
+      showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
     }
   }
 
@@ -1101,15 +1055,8 @@ export default defineBackground(() => {
         const updatedSettings = { ...settings, enableSpeedMode: newSpeedMode };
         await browser.storage.local.set({ bark_app_settings: updatedSettings });
 
-        // 显示通知
-        if (settings.enableSystemNotifications !== false) {
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: '/icon/128.png',
-            title: getMessage('bark_sender_title'),
-            message: getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode')
-          });
-        }
+        // 极速模式已启用/禁用 如果是启用，则提醒
+        showSYSNotification(getMessage('bark_sender_title'), getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode'), newSpeedMode === true);
 
         // 更新右键菜单
         updateContextMenus();
@@ -1119,15 +1066,8 @@ export default defineBackground(() => {
       if (!defaultDevice) {
         // console.error('未找到默认设备');
         console.error(getMessage('device_not_found'));
-        // 显示通知
-        browser.notifications.create({
-          type: 'basic',
-          iconUrl: '/icon/128.png',
-          // title: 'Bark Sender',
-          // message: '未找到默认设备，请先添加设备'
-          title: getMessage('bark_sender_title'),
-          message: getMessage('device_not_found')
-        });
+        // 未找到默认设备
+        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
         return;
       }
       console.debug('info', info);
@@ -1307,15 +1247,8 @@ export default defineBackground(() => {
         // 保存历史记录
         await saveHistoryRecord(historyRecord);
 
-        // 显示通知
-        if (settings.enableSystemNotifications !== false) {
-          browser.notifications.create({
-            type: 'basic',
-            iconUrl: '/icon/128.png',
-            title: getMessage('bark_sender_title'),
-            message: getMessage('sent_to_device', [defaultDevice.alias])
-          });
-        }
+        // 已发送至**
+        showSYSNotification(getMessage('bark_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
       }
 
     } catch (error) {
@@ -1364,14 +1297,8 @@ export default defineBackground(() => {
         await saveHistoryRecord(historyRecord);
       }
 
-      browser.notifications.create({
-        type: 'basic',
-        iconUrl: '/icon/128.png',
-        // title: 'Bark Sender',
-        // message: '发送失败，请检查网络连接'
-        title: getMessage('bark_sender_title'),
-        message: getMessage('send_failed_check_network')
-      });
+      // 发送失败，请检查网络连接
+      showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
     }
   });
 });

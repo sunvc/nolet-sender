@@ -10,7 +10,9 @@ import {
     IconButton,
     Popover
 } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
+import ReadMoreIcon from '@mui/icons-material/ReadMore';
+import WysiwygIcon from '@mui/icons-material/Wysiwyg';
+import NotificationsNoneIcon from '@mui/icons-material/NotificationsNone';
 import InfoIcon from '@mui/icons-material/Info';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -52,6 +54,18 @@ export default function OtherSettings({ themeMode, onThemeChange, onError, onToa
         try {
             await updateAppSetting('enableSystemNotifications', enabled);
             if (!enabled) {
+                handleKeepEssentialNotificationsToggle(false);
+            }
+        } catch (error) {
+            onError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
+        }
+    };
+
+    // 保留必要通知开关切换
+    const handleKeepEssentialNotificationsToggle = async (enabled: boolean) => {
+        try {
+            await updateAppSetting('keepEssentialNotifications', enabled);
+            if (enabled) {
                 onToast(t('settings.system_notifications.enable_success'));
             }
         } catch (error) {
@@ -60,147 +74,180 @@ export default function OtherSettings({ themeMode, onThemeChange, onError, onToa
     };
 
     return (
-        <Paper elevation={2} sx={{ p: 3 }}>
-            <Stack spacing={3}>
-                <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <SettingsIcon />
-                    {/* 其他设置 */}
-                    {t('settings.title')}
-                </Typography>
+        <>
+            <Paper elevation={2} sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <WysiwygIcon />
+                        {/* 界面相关 */}
+                        {t('settings.other.interface')}
+                    </Typography>
 
-                <Box>
-                    <Typography variant="subtitle1" gutterBottom>
-                        {/* 主题设置 */}
-                        {t('settings.theme.title')}
-                    </Typography>
-                    <ThemeSelector themeMode={themeMode} onThemeChange={onThemeChange} />
-                </Box>
-
-                <Box>
-                    <Typography variant="subtitle1" gutterBottom>
-                        {/* 语言设置 */}
-                        {t('settings.language.title')}
-                    </Typography>
-                    <LanguageSelector />
-                </Box>
-                <Box>
-                    <Typography variant="subtitle1" gutterBottom>
-                        {/* 系统通知设置 */}
-                        {t('settings.system_notifications.title')}
-                    </Typography>
-                    <Stack gap={1}>
-                        {/* 系统通知开关 */}
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={appSettings?.enableSystemNotifications ?? false}
-                                    onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
-                                />
-                            }
-                            label={t('settings.system_notifications.enable')}
-                            sx={{ userSelect: 'none' }}
-                        />
-                    </Stack>
-                </Box>
-                {/* 启用文件缓存 */}
-                {appSettings?.enableInspectSend &&
                     <Box>
                         <Typography variant="subtitle1" gutterBottom>
-                            {/* 文件缓存设置 */}
-                            {t('settings.cache.title')}
+                            {/* 主题设置 */}
+                            {t('settings.theme.title')}
                         </Typography>
-                        <CacheSetting />
+                        <ThemeSelector themeMode={themeMode} onThemeChange={onThemeChange} />
                     </Box>
-                }
-                <Box>
-                    <Stack direction="row" alignItems="center" justifyContent="space-between">
+
+                    <Box>
                         <Typography variant="subtitle1" gutterBottom>
-                            {/* 快捷键 */}
-                            {t('settings.shortcuts.title')}
+                            {/* 语言设置 */}
+                            {t('settings.language.title')}
                         </Typography>
-                        <IconButton
-                            onClick={(event) => setShortcutGuideAnchor(event.currentTarget)}
-                            size="small"
-                            sx={{
-                                mb: 1
-                            }}
-                            color='inherit'
-                        >
-                            <KeyboardIcon />
-                        </IconButton>
-                    </Stack>
-                    <Popover
-                        open={Boolean(shortcutGuideAnchor)}
-                        anchorEl={shortcutGuideAnchor}
-                        onClose={() => setShortcutGuideAnchor(null)}
-                        anchorOrigin={{
-                            vertical: 'bottom',
-                            horizontal: 'left',
-                        }}
-                        transformOrigin={{
-                            vertical: 'top',
-                            horizontal: 'left',
-                        }}
-                    >
-                        <Box sx={{ p: 2, maxWidth: 320 }}>
-                            <Typography variant="body2" gutterBottom>
-                                {t('settings.shortcuts.guide')}
+                        <LanguageSelector />
+                    </Box>
+                </Stack>
+            </Paper>
+            <Paper elevation={2} sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <NotificationsNoneIcon />
+                        {/* 杂项设置 */}
+                        {t('settings.system_notifications.title')}
+                    </Typography>
+
+                    <Box>
+                        <Stack gap={1}>
+                            {/* 系统通知开关 */}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={appSettings?.enableSystemNotifications ?? false}
+                                        onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
+                                    />
+                                }
+                                label={t('settings.system_notifications.enable')}
+                                sx={{ userSelect: 'none' }}
+                            />
+                            {/* 保留必要通知开关 */}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={appSettings?.keepEssentialNotifications ?? false}
+                                        onChange={(e) => handleKeepEssentialNotificationsToggle(e.target.checked)}
+                                    />
+                                }
+                                label={t('settings.system_notifications.keep_essential')}
+                                sx={{
+                                    userSelect: 'none',
+                                    pointerEvents: (appSettings?.enableSystemNotifications ?? false) ? 'auto' : 'none',
+                                    opacity: (appSettings?.enableSystemNotifications ?? false) ? 1 : 0.5
+                                }}
+                            />
+                        </Stack>
+                    </Box>
+                </Stack>
+            </Paper>
+            <Paper elevation={2} sx={{ p: 3 }}>
+                <Stack spacing={3}>
+                    <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <ReadMoreIcon />
+                        {/* 杂项设置 */}
+                        {t('settings.other.misc')}
+                    </Typography>
+
+                    {/* 启用文件缓存 */}
+                    {appSettings?.enableInspectSend &&
+                        <Box>
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 文件缓存设置 */}
+                                {t('settings.cache.title')}
                             </Typography>
-
-                            {browserType === 'firefox' && (
-                                <Typography variant="body2" gutterBottom>
-                                    {t('settings.shortcuts.guide_firefox')}
-                                </Typography>
-                            )}
-
-                            <Box sx={{
-                                mt: 2,
-                                p: 1,
-                                backgroundColor: 'text.secondary',
-                                color: 'background.paper',
-                                borderRadius: 1,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                gap: 1
-                            }}>
-                                <Typography
-                                    variant="body2"
-                                    sx={{
-                                        fontFamily: 'monospace',
-                                        fontSize: '0.8rem',
-                                        wordBreak: 'break-all'
-                                    }}
-                                >
-                                    {browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`}
-                                </Typography>
-                                <IconButton
-                                    size="small"
-                                    onClick={handleCopyShortcutUrl}
-                                    sx={{ flexShrink: 0 }}
-                                    color='inherit'
-                                >
-                                    <ContentCopyIcon fontSize="small" />
-                                </IconButton>
-                            </Box>
+                            <CacheSetting />
                         </Box>
-                    </Popover>
-                    <Alert
-                        icon={<InfoIcon />}
-                        severity="info"
-                        sx={{
-                            '& .MuiAlert-message': {
-                                width: '100%'
-                            }
-                        }}
-                    >
-                        <Typography variant="body2" component="div" gutterBottom>
-                            {/* 打开推送窗口: {{key}} */}
-                            {t('settings.shortcuts.open_window', { key: shortcutKeys.openExtension })}
-                        </Typography>
-                    </Alert>
-                </Box>
-            </Stack>
-        </Paper>
+                    }
+                    <Box>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between">
+                            <Typography variant="subtitle1" gutterBottom>
+                                {/* 快捷键 */}
+                                {t('settings.shortcuts.title')}
+                            </Typography>
+                            <IconButton
+                                onClick={(event) => setShortcutGuideAnchor(event.currentTarget)}
+                                size="small"
+                                sx={{
+                                    mb: 1
+                                }}
+                                color='inherit'
+                            >
+                                <KeyboardIcon />
+                            </IconButton>
+                        </Stack>
+                        <Popover
+                            open={Boolean(shortcutGuideAnchor)}
+                            anchorEl={shortcutGuideAnchor}
+                            onClose={() => setShortcutGuideAnchor(null)}
+                            anchorOrigin={{
+                                vertical: 'bottom',
+                                horizontal: 'left',
+                            }}
+                            transformOrigin={{
+                                vertical: 'top',
+                                horizontal: 'left',
+                            }}
+                        >
+                            <Box sx={{ p: 2, maxWidth: 320 }}>
+                                <Typography variant="body2" gutterBottom>
+                                    {t('settings.shortcuts.guide')}
+                                </Typography>
+
+                                {browserType === 'firefox' && (
+                                    <Typography variant="body2" gutterBottom>
+                                        {t('settings.shortcuts.guide_firefox')}
+                                    </Typography>
+                                )}
+
+                                <Box sx={{
+                                    mt: 2,
+                                    p: 1,
+                                    backgroundColor: 'text.secondary',
+                                    color: 'background.paper',
+                                    borderRadius: 1,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    gap: 1
+                                }}>
+                                    <Typography
+                                        variant="body2"
+                                        sx={{
+                                            fontFamily: 'monospace',
+                                            fontSize: '0.8rem',
+                                            wordBreak: 'break-all'
+                                        }}
+                                    >
+                                        {browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`}
+                                    </Typography>
+                                    <IconButton
+                                        size="small"
+                                        onClick={handleCopyShortcutUrl}
+                                        sx={{ flexShrink: 0 }}
+                                        color='inherit'
+                                    >
+                                        <ContentCopyIcon fontSize="small" />
+                                    </IconButton>
+                                </Box>
+                            </Box>
+                        </Popover>
+                        <Alert
+                            icon={<InfoIcon />}
+                            severity="info"
+                            sx={{
+                                '& .MuiAlert-message': {
+                                    width: '100%'
+                                }
+                            }}
+                        >
+                            <Typography variant="body2" component="div" gutterBottom>
+                                {/* 打开推送窗口: {{key}} */}
+                                {t('settings.shortcuts.open_window', { key: shortcutKeys.openExtension })}
+                            </Typography>
+                        </Alert>
+                    </Box>
+                </Stack>
+            </Paper>
+        </>
     );
 }

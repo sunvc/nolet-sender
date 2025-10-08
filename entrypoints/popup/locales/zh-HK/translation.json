@@ -215,8 +215,13 @@
         },
         "system_notifications": {
             "title": "系統通知設定",
-            "enable": "發送所有通知提醒",
-            "enable_success": "從現在起，只會出現與錯誤相關的系統通知"
+            "enable": "啟用系統通知功能",
+            "enable_success": "從現在起，只會出現與錯誤相關的系統通知",
+            "keep_essential": "僅顯示必要通知"
+        },
+        "other": {
+            "interface": "界面相關",
+            "misc": "雜項設定"
         }
     },
     "speed_mode_page": {

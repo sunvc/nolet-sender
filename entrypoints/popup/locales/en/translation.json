@@ -215,8 +215,13 @@
         },
         "system_notifications": {
             "title": "System Notifications",
-            "enable": "Send all notifications",
-            "enable_success": "Only error notifications will appear"
+            "enable": "Enable system notification feature",
+            "enable_success": "Only error notifications will appear",
+            "keep_essential": "Only show essential notifications"
+        },
+        "other": {
+            "interface": "Interface",
+            "misc": "Misc"
         }
     },
     "speed_mode_page": {
