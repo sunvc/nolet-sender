@@ -71,40 +71,6 @@ class FaviconManager {
         this.blobUrls.clear();
         console.debug('已清理所有 blob URLs');
     }
-
-    // 批量预缓存 favicons
-    async batchCacheFavicons(urls: string[]): Promise<void> {
-        const settings = await getAppSettings();
-        if (!settings.enableFileCache) {
-            return;
-        }
-
-        const promises = urls.map(url => this.cacheFavicon(url));
-        await Promise.allSettled(promises);
-    }
-
-    // 获取缓存统计信息
-    async getCacheStats(): Promise<{ count: number; totalSize: number }> {
-        try {
-            await fileCacheManager.init();
-            // 这里可以添加获取缓存统计的逻辑
-            // 由于 IndexedDB 的限制，我们暂时返回基本信息
-            return { count: 0, totalSize: 0 };
-        } catch (error) {
-            console.error('获取缓存统计失败:', error);
-            return { count: 0, totalSize: 0 };
-        }
-    }
-
-    // 删除指定时间前的缓存
-    async deleteCacheBefore(timestamp: number): Promise<void> {
-        try {
-            await fileCacheManager.deleteFaviconsBefore(timestamp);
-            console.debug('已删除指定时间前的 favicon 缓存');
-        } catch (error) {
-            console.error('删除 favicon 缓存失败:', error);
-        }
-    }
 }
 
 export const faviconManager = new FaviconManager();

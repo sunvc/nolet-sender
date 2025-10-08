@@ -15,26 +15,17 @@ import {
     Switch,
     Link,
     Tooltip,
-    Popover,
     LinearProgress,
-    Divider,
     Snackbar,
-
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
 import DevicesIcon from '@mui/icons-material/Devices';
-import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
-import KeyboardIcon from '@mui/icons-material/Keyboard';
 import GitHubIcon from '@mui/icons-material/GitHub';
-// import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
-// import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline';
-// import BugReportIcon from '@mui/icons-material/BugReport';
 import EmailIcon from '@mui/icons-material/Email';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-// import TelegramIcon from '@mui/icons-material/Telegram';
 import SecurityIcon from '@mui/icons-material/Security';
 import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
@@ -44,7 +35,6 @@ import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
-import { detectBrowser } from '../utils/platform';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
@@ -53,8 +43,7 @@ import FeatureSettings from '../components/FeatureSettings';
 import OtherSettingsCard from '../components/OtherSettingsCard';
 import BackupRestoreCard from '../components/BackupRestoreCard';
 import { openGitHub, openBarkWebsite, openBarkApp, openStoreRating, } from '../utils/extension';
-import { saveDevices } from '../utils/storage';
-import { DEFAULT_ADVANCED_PARAMS } from '../utils/settings';
+
 
 interface SettingsProps {
     devices: Device[];
@@ -80,7 +69,7 @@ export default function Settings({
     onSettingsChange
 }: SettingsProps) {
     const { t } = useTranslation();
-    const { shortcutKeys, appSettings, updateAppSetting, updateEncryptionConfig } = useAppContext();
+    const { appSettings, updateAppSetting, updateEncryptionConfig } = useAppContext();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [deviceDialogOpen, setDeviceDialogOpen] = useState(false);
@@ -90,49 +79,6 @@ export default function Settings({
     // const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
     const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
     const [version, setVersion] = useState<string | null>(null);
-
-    // 检测浏览器类型
-    const browserType = detectBrowser();
-
-    // 复制快捷键设置地址
-    const handleCopyShortcutUrl = async () => {
-        const url = browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`;
-        try {
-            await navigator.clipboard.writeText(url);
-            // 可以添加一个成功提示，但这里暂时省略
-        } catch (error) {
-            // 复制失败的处理，这里暂时省略
-            console.error('复制失败:', error);
-        }
-    };
-
-    // 复制系统通知设置地址
-    const handleCopyNotificationUrl = async () => {
-        const url = browserType === 'firefox' ? 'about:debugging#/runtime/this-firefox' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://settings/content/siteDetails?site=${browserType === 'chrome' ? 'chrome' : 'edge'}-extension://${browser.runtime.id}`;
-        try {
-            await navigator.clipboard.writeText(url);
-        } catch (error) {
-            console.error('复制失败:', error);
-        }
-    };
-
-    const handleContextMenuToggle = async (enabled: boolean) => {
-        try {
-            await updateAppSetting('enableContextMenu', enabled);
-        } catch (error) {
-            // 更新设置失败: {{message}}
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
-
-    // 处理右键解析网页内容开关切换
-    const handleInspectSendToggle = async (enabled: boolean) => {
-        try {
-            await updateAppSetting('enableInspectSend', enabled);
-        } catch (error) {
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
 
     // 处理加密开关切换
     const handleEncryptionToggle = async (enabled: boolean) => {
@@ -167,110 +113,6 @@ export default function Settings({
             await updateAppSetting('sound', sound || undefined);
         } catch (error) {
             // 保存铃声设置失败: {{message}}
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
-
-    // 处理 API v2 开关切换
-    const handleApiV2Toggle = async (enabled: boolean) => {
-        try {
-            setLoading(true);
-            await updateAppSetting('enableApiV2', enabled);
-
-            // 如果开启API v2，更新现有设备数据
-            if (enabled && devices.length > 0) {
-                try {
-                    // 解析 apiURL 为 server 和 deviceKey
-                    const updatedDevices = devices.map(device => {
-                        // 如果设备已经有 server 和 deviceKey 不需要更新
-                        if (device.server && device.deviceKey) {
-                            return device;
-                        }
-
-                        try {
-                            const url = new URL(device.apiURL);
-                            const server = `${url.protocol}//${url.host}`;
-
-                            // 移除开头和结尾的斜杠，获取 deviceKey
-                            const pathParts = url.pathname.split('/').filter(part => part);
-                            let deviceKey: string | undefined;
-                            if (pathParts.length > 0) {
-                                deviceKey = pathParts[pathParts.length - 1];
-                            }
-
-                            if (server && deviceKey) {
-                                return {
-                                    ...device,
-                                    server,
-                                    deviceKey
-                                };
-                            }
-                        } catch (error) {
-                            console.error('解析API URL失败:', error, device.apiURL);
-                        }
-
-                        return device;
-                    });
-
-                    await saveDevices(updatedDevices); // 保存更新后的设备列表
-
-                    // 显示Toast提示
-                    setToast({
-                        open: true,
-                        message: t('settings.api_v2.update_success')
-                    });
-                } catch (error) {
-                    console.error('更新设备数据失败:', error);
-                    setToast({
-                        open: true,
-                        message: t('settings.api_v2.update_failed', { message: error instanceof Error ? error.message : t('common.error_unknown') })
-                    });
-                }
-            }
-        } catch (error) {
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        } finally {
-            setLoading(false); // 顶部进度条
-        }
-    };
-
-    // 处理完整参数配置开关切换
-    const handleAdvancedParamsToggle = async (enabled: boolean) => {
-        try {
-            await updateAppSetting('enableAdvancedParams', enabled);
-
-            if (enabled) {
-                setToast({
-                    open: true,
-                    // 已启用自定义参数，可在发送页面设置更多参数
-                    message: t('settings.advanced_params.success_message')
-                });
-            } else {
-                // 关闭时，重置参数配置为默认值
-                const defaultParamsJson = JSON.stringify(DEFAULT_ADVANCED_PARAMS, null, 2);
-                await updateAppSetting('advancedParamsJson', defaultParamsJson);
-
-                setToast({
-                    open: true,
-                    message: t('settings.advanced_params.reset_message')
-                });
-            }
-        } catch (error) {
-            setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
-
-    // 处理系统通知开关切换
-    const handleSystemNotificationsToggle = async (enabled: boolean) => {
-        try {
-            await updateAppSetting('enableSystemNotifications', enabled);
-            if (!enabled) {
-                setToast({
-                    open: true,
-                    message: t('settings.system_notifications.enable_success')
-                });
-            }
-        } catch (error) {
             setError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
         }
     };
