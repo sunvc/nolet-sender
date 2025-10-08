@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -14,28 +14,18 @@ import {
     Radio,
     FormControlLabel,
     Typography,
-    Slide,
     Grid,
     IconButton,
     Tooltip,
     Snackbar
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { useTranslation } from 'react-i18next';
 import { Sound } from '../types';
 import { sendPushMessage } from '../utils/api';
 import { generateID } from '../../shared/push-service';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 const sounds: Sound[] = [
     {
@@ -248,7 +238,7 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
                 maxWidth="md"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
                 keepMounted
             >

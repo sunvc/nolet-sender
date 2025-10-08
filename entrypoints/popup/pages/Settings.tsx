@@ -39,21 +39,18 @@ import SecurityIcon from '@mui/icons-material/Security';
 import TuneIcon from '@mui/icons-material/Tune';
 import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import AutoStoriesIcon from '@mui/icons-material/AutoStories';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
 import { useAppContext } from '../contexts/AppContext';
 import { detectBrowser } from '../utils/platform';
-import ThemeSelector from '../components/ThemeSelector';
-import LanguageSelector from '../components/LanguageSelector';
 import DeviceDialog from '../components/DeviceDialog';
 import EncryptionDialog from '../components/EncryptionDialog';
 import SoundDialog from '../components/SoundDialog';
-import AvatarSetting from '../components/AvatarSetting';
-import FaviconSetting from '../components/FaviconSetting';
-import SpeedModeSetting from '../components/SpeedModeSetting';
-import CacheSetting from '../components/CacheSetting';
+import FeatureSettings from '../components/FeatureSettings';
+// import OtherSettings from '../components/OtherSettings';
+import OtherSettingsCard from '../components/OtherSettingsCard';
 import BackupRestoreCard from '../components/BackupRestoreCard';
 import { openGitHub, openBarkWebsite, openBarkApp, openStoreRating, } from '../utils/extension';
 import { saveDevices } from '../utils/storage';
@@ -90,7 +87,7 @@ export default function Settings({
     const [editingDevice, setEditingDevice] = useState<Device | undefined>();
     const [encryptionDialogOpen, setEncryptionDialogOpen] = useState(false);
     const [soundDialogOpen, setSoundDialogOpen] = useState(false);
-    const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
+    // const [shortcutGuideAnchor, setShortcutGuideAnchor] = useState<HTMLElement | null>(null);
     const [toast, setToast] = useState<{ open: boolean, message: string }>({ open: false, message: '' });
     const [version, setVersion] = useState<string | null>(null);
 
@@ -561,234 +558,19 @@ export default function Settings({
                     </Stack>
                 </Paper>
                 {/* 功能设置卡片 */}
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Stack spacing={3}>
-                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <TuneIcon fontSize="small" />
-                            {/* 功能设置 */}
-                            {t('settings.features.title')}
-                        </Typography>
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 右键菜单 */}
-                                {t('settings.context_menu.title')}
-                            </Typography>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        disabled={devices.length === 0}
-                                        checked={appSettings?.enableContextMenu || false}
-                                        onChange={(e) => handleContextMenuToggle(e.target.checked)}
-                                        color='primary'
-                                    />
-                                }
-                                label={t('settings.context_menu.enable')}
-                                sx={{ userSelect: 'none' }}
-                            />
-                            {appSettings?.enableContextMenu && (
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            disabled={devices.length === 0}
-                                            checked={appSettings?.enableInspectSend || false}
-                                            onChange={(e) => handleInspectSendToggle(e.target.checked)}
-                                            color='warning'
-                                        />
-                                    }
-                                    label={t('settings.context_menu.enable_inspect_send')}
-                                    sx={{ userSelect: 'none' }}
-                                />
-                            )}
-                        </Box>
-                        <Divider />
-                        <Box>
-                            <Stack direction="column" alignItems="flex-start" gap={1}>
-
-                                {/* 自定义头像 */}
-                                <AvatarSetting />
-
-                                {/* 网站图标设置 */}
-                                {appSettings?.enableInspectSend &&
-                                    <FaviconSetting />}
-
-                                {/* 启用极速模式 */}
-                                <SpeedModeSetting disabled={devices.length === 0} />
-
-                                {/* 启用完整的参数配置 */}
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={appSettings?.enableAdvancedParams || false}
-                                            onChange={(e) => handleAdvancedParamsToggle(e.target.checked)}
-                                        />
-                                    }
-                                    // label="启用完整的参数配置"
-                                    label={t('settings.advanced_params.enable')}
-                                    sx={{ userSelect: 'none' }}
-                                />
-                                <Divider sx={{ pt: 1 }} />
-
-                                {/* API v2 开关 */}
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={appSettings?.enableApiV2 || false}
-                                            onChange={(e) => handleApiV2Toggle(e.target.checked)}
-                                        />
-                                    }
-                                    label={<Stack direction="row" alignItems="center" gap={1}>
-                                        <Typography variant="body1">{t('settings.api_v2.title')}</Typography>
-                                        {/* <Chip label="Beta" size="small" color="default" variant="outlined" /> */}
-                                    </Stack>}
-                                    sx={{ userSelect: 'none' }}
-                                />
-                            </Stack>
-                        </Box>
-                    </Stack>
-                </Paper>
+                <FeatureSettings
+                    devices={devices}
+                    onError={setError}
+                    onToast={(message) => setToast({ open: true, message })}
+                />
                 {/* 其他设置卡片 */}
-                <Paper elevation={2} sx={{ p: 3 }}>
-                    <Stack spacing={3}>
-                        <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <SettingsIcon />
-                            {/* 其他设置 */}
-                            {t('settings.title')}
-                        </Typography>
-
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 主题设置 */}
-                                {t('settings.theme.title')}
-                            </Typography>
-                            <ThemeSelector themeMode={themeMode} onThemeChange={onThemeChange} />
-                        </Box>
-
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 语言设置 */}
-                                {t('settings.language.title')}
-                            </Typography>
-                            <LanguageSelector />
-                        </Box>
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom>
-                                {/* 系统通知设置 */}
-                                {t('settings.system_notifications.title')}
-                            </Typography>
-                            <Stack gap={1}>
-                                {/* 系统通知开关 */}
-                                <FormControlLabel
-                                    control={
-                                        <Switch
-                                            checked={appSettings?.enableSystemNotifications ?? true}
-                                            onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
-                                        />
-                                    }
-                                    label={t('settings.system_notifications.enable')}
-                                    sx={{ userSelect: 'none' }}
-                                />
-                            </Stack>
-                        </Box>
-                        {/* 启用文件缓存 */}
-                        {appSettings?.enableInspectSend &&
-                            <Box>
-                                <Typography variant="subtitle1" gutterBottom>
-                                    {/* 文件缓存设置 */}
-                                    {t('settings.cache.title')}
-                                </Typography>
-                                <CacheSetting />
-                            </Box>
-                        }
-                        <Box>
-                            <Stack direction="row" alignItems="center" justifyContent="space-between">
-                                <Typography variant="subtitle1" gutterBottom>
-                                    {/* 快捷键 */}
-                                    {t('settings.shortcuts.title')}
-                                </Typography>
-                                <IconButton
-                                    onClick={(event) => setShortcutGuideAnchor(event.currentTarget)}
-                                    size="small"
-                                    sx={{
-                                        mb: 1
-                                    }}
-                                    color='inherit'
-                                >
-                                    <KeyboardIcon />
-                                </IconButton>
-                            </Stack>
-                            <Popover
-                                open={Boolean(shortcutGuideAnchor)}
-                                anchorEl={shortcutGuideAnchor}
-                                onClose={() => setShortcutGuideAnchor(null)}
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left',
-                                }}
-                                transformOrigin={{
-                                    vertical: 'top',
-                                    horizontal: 'left',
-                                }}
-                            >
-                                <Box sx={{ p: 2, maxWidth: 320 }}>
-                                    <Typography variant="body2" gutterBottom>
-                                        {t('settings.shortcuts.guide')}
-                                    </Typography>
-
-                                    {browserType === 'firefox' && (
-                                        <Typography variant="body2" gutterBottom>
-                                            {t('settings.shortcuts.guide_firefox')}
-                                        </Typography>
-                                    )}
-
-                                    <Box sx={{
-                                        mt: 2,
-                                        p: 1,
-                                        backgroundColor: 'text.secondary',
-                                        color: 'background.paper',
-                                        borderRadius: 1,
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'space-between',
-                                        gap: 1
-                                    }}>
-                                        <Typography
-                                            variant="body2"
-                                            sx={{
-                                                fontFamily: 'monospace',
-                                                fontSize: '0.8rem',
-                                                wordBreak: 'break-all'
-                                            }}
-                                        >
-                                            {browserType === 'firefox' ? 'about:addons' : `${browserType === 'chrome' ? 'chrome' : 'edge'}://extensions/shortcuts`}
-                                        </Typography>
-                                        <IconButton
-                                            size="small"
-                                            onClick={handleCopyShortcutUrl}
-                                            sx={{ flexShrink: 0 }}
-                                            color='inherit'
-                                        >
-                                            <ContentCopyIcon fontSize="small" />
-                                        </IconButton>
-                                    </Box>
-                                </Box>
-                            </Popover>
-                            <Alert
-                                icon={<InfoIcon />}
-                                severity="info"
-                                sx={{
-                                    '& .MuiAlert-message': {
-                                        width: '100%'
-                                    }
-                                }}
-                            >
-                                <Typography variant="body2" component="div" gutterBottom>
-                                    {/* 打开推送窗口: {{key}} */}
-                                    {t('settings.shortcuts.open_window', { key: shortcutKeys.openExtension })}
-                                </Typography>
-                            </Alert>
-                        </Box>
-                    </Stack>
-                </Paper>
+                {/* <OtherSettings */}
+                <OtherSettingsCard // 
+                    themeMode={themeMode}
+                    onThemeChange={onThemeChange}
+                    onError={setError}
+                    onToast={(message) => setToast({ open: true, message })}
+                />
 
                 {/* 备份/还原配置卡片 */}
                 <BackupRestoreCard

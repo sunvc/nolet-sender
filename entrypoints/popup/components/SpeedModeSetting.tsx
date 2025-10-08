@@ -10,7 +10,6 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Slide,
     Alert,
     Box,
     Slider,
@@ -19,20 +18,11 @@ import {
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../contexts/AppContext';
-import { TransitionProps } from '@mui/material/transitions';
 import SpeedIcon from '@mui/icons-material/Speed';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import TimerIcon from '@mui/icons-material/Timer';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 export default function SpeedModeSetting({ disabled }: { disabled: boolean }) {
     const { t } = useTranslation();
@@ -111,7 +101,7 @@ export default function SpeedModeSetting({ disabled }: { disabled: boolean }) {
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
                 keepMounted
             >

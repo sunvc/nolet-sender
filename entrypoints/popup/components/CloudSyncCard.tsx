@@ -19,7 +19,7 @@ import CloudBackupDialog from './CloudBackupDialog';
 import CloudRestoreDialog from './CloudRestoreDialog';
 import { useTranslation } from 'react-i18next';
 import { BackupData } from './BackupRestoreCard';
-import { Fade, Tooltip, Collapse } from '@mui/material';
+import { Tooltip, Collapse, Divider, Stack } from '@mui/material';
 
 interface CloudSyncCardProps {
     onBackupDataReady?: (backupData: BackupData) => void;
@@ -197,6 +197,24 @@ export default function CloudSyncCard({ onBackupDataReady }: CloudSyncCardProps)
                     </Alert>
                 </Collapse>
             </Paper>
+
+            <Stack sx={{
+                px: 1.2,
+                opacity: 0.8
+            }}>
+                <Typography variant="caption" color="text.secondary" fontSize={'0.625rem'}>
+                    {t(`backup.gd_sync_tips`)}
+                </Typography>
+                <Divider />
+                {/* 授权后会在 Google Drive 根目录创建一个名为 "Bark Sender Backups" 的文件夹, 所有操作均在此文件夹内进行。 */}
+                <Typography variant="caption" color="text.secondary" fontSize={'0.625rem'}>
+                    - {t(`backup.gd_sync_tips_1`)}
+                </Typography>
+                {/* 你也可以随时从 Google Drive 中下载备份文件, 然后在 本地同步 中还原。 */}
+                <Typography variant="caption" color="text.secondary" fontSize={'0.625rem'}>
+                    - {t(`backup.gd_sync_tips_2`)}
+                </Typography>
+            </Stack>
 
             {/* 云备份对话框 */}
             <CloudBackupDialog

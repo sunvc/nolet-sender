@@ -8,10 +8,9 @@ import {
     DialogContent,
     DialogActions,
     Button,
-    Slide,
     LinearProgress,
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
+import { SlideUpTransition } from './DialogTransitions';
 import LinkIcon from '@mui/icons-material/Link';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import { useTranslation } from 'react-i18next';
@@ -20,14 +19,6 @@ import DeviceSelectV2 from './DeviceSelectV2';
 import { sendPushMessage } from '../utils/api';
 import { generateID } from '../../shared/push-service';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface UrlDialogV2Props {
     open: boolean;
@@ -290,7 +281,7 @@ export default function UrlDialogV2({
             maxWidth="sm"
             fullWidth
             slots={{
-                transition: Transition,
+                transition: SlideUpTransition,
             }}
             keepMounted
         >

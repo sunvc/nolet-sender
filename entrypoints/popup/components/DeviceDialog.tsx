@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -10,7 +10,6 @@ import {
     Typography,
     Chip,
     Box,
-    Slide,
     Collapse,
     Card,
     Divider,
@@ -19,7 +18,6 @@ import {
     Tooltip,
     InputAdornment
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
 import { validateApiURL } from '../utils/api';
@@ -32,15 +30,7 @@ import { blue } from '@mui/material/colors';
 import { useSnackbar, SnackbarKey } from "notistack";
 import { Alert } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 const COMMON_DEVICE_NAMES = ['iphone', 'ipad', 'mac'];
 
@@ -268,7 +258,7 @@ export default function DeviceDialog({
             maxWidth="sm"
             fullWidth
             slots={{
-                transition: Transition,
+                transition: SlideUpTransition,
             }}
             keepMounted
         >

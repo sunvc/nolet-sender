@@ -684,17 +684,25 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged,
             try {
                 let textToCopy = '';
 
-                // 根据字段类型处理复制内容 (后面再改 switch)
-                if (typeof contextMenuData.value === 'string') {
-                    textToCopy = contextMenuData.value;
-                } else if (typeof contextMenuData.value === 'number') {
-                    textToCopy = contextMenuData.value.toString();
-                } else if (contextMenuData.value instanceof Date) {
-                    textToCopy = contextMenuData.value.toLocaleString();
-                } else if (typeof contextMenuData.value === 'object') {
-                    textToCopy = JSON.stringify(contextMenuData.value, null, 2);
-                } else {
-                    textToCopy = String(contextMenuData.value);
+                switch (typeof contextMenuData.value) {
+                    case 'string':
+                        textToCopy = contextMenuData.value;
+                        break;
+                    case 'number':
+                        textToCopy = contextMenuData.value.toString();
+                        break;
+                    case 'object':
+                        if (contextMenuData.value instanceof Date) {
+                            textToCopy = contextMenuData.value.toLocaleString();
+                        } else if (contextMenuData.value !== null) {
+                            textToCopy = JSON.stringify(contextMenuData.value, null, 2);
+                        } else {
+                            textToCopy = 'null';
+                        }
+                        break;
+                    default:
+                        textToCopy = String(contextMenuData.value);
+                        break;
                 }
 
                 await writeToClipboard(textToCopy);
@@ -818,7 +826,7 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged,
         }
     }, [getFilteredData, onFilteredDataChanged]);
 
-    const [focusRecordId, setFocusRecordId] = useState<number | undefined>(undefined);
+    // const [focusRecordId, setFocusRecordId] = useState<number | undefined>(undefined);
     // 滚动到指定记录
     useEffect(() => {
         if (scrollToRecordId && gridApi.current) {
@@ -828,7 +836,7 @@ export default function HistoryTable({ records, selectedIds, onSelectionChanged,
                 gridApi.current.ensureIndexVisible(rowNode.rowIndex!, 'top');
                 // 聚焦到行
                 // console.log('scrollToRecordId', scrollToRecordId);
-                setFocusRecordId(scrollToRecordId);
+                // setFocusRecordId(scrollToRecordId);
                 gridApi.current.setFocusedCell(rowNode.rowIndex!, 'body'); // 聚焦到内容单元格
             }
         }

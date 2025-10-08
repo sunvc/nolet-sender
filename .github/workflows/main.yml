@@ -77,7 +77,7 @@ jobs:
             - **Chrome**: `bark-sender-*-chrome.zip`
             - **Edge**: `bark-sender-*-edge.zip`
 
-            ### 📋 Installation Guide | 安装说明
+            ### 📖 Installation Guide | 安装说明
             1. Download the appropriate extension zip | 下载对应浏览器的扩展包  
             2. Extract to a local folder | 解压缩到本地文件夹  
             3. Go to your browser's extension page, enable "Load unpacked" | 在浏览器扩展管理页面选择"加载已解压的扩展程序"  
@@ -85,7 +85,7 @@ jobs:
 
             ---
 
-            ### 📋 Changes Since ${{ steps.gitinfo.outputs.previous_tag }} | 更新内容
+            ### 📝 Changes Since ${{ steps.gitinfo.outputs.previous_tag }} | 更新内容
             ${{ steps.gitinfo.outputs.commits }}
 
             ---

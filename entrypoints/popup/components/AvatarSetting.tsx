@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     Button,
     Stack,
@@ -12,23 +12,13 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Slide,
     Skeleton,
     useTheme,
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../contexts/AppContext';
-import { TransitionProps } from '@mui/material/transitions';
 import gsap from 'gsap';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 export default function AvatarSetting() {
     const { t } = useTranslation();
@@ -209,7 +199,7 @@ export default function AvatarSetting() {
                 maxWidth="md"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
                 keepMounted
             >

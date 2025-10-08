@@ -10,8 +10,7 @@ import Typography from '@mui/material/Typography';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
-import Grow from '@mui/material/Grow';
-import { TransitionProps } from '@mui/material/transitions';
+import { GrowTransition } from './DialogTransitions';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../contexts/AppContext';
@@ -22,15 +21,6 @@ import { BackupData } from './BackupRestoreCard';
 import CloseIcon from '@mui/icons-material/Close';
 import IconButton from '@mui/material/IconButton';
 
-// 滑动过渡组件
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Grow ref={ref} {...props} />;
-});
 
 interface CloudBackupDialogProps {
     open: boolean;
@@ -187,7 +177,7 @@ export default function CloudBackupDialog({
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: GrowTransition,
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

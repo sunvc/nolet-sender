@@ -93,7 +93,7 @@ export default function OtherSettings({ themeMode, onThemeChange, onError, onToa
                         <FormControlLabel
                             control={
                                 <Switch
-                                    checked={appSettings?.enableSystemNotifications ?? true}
+                                    checked={appSettings?.enableSystemNotifications ?? false}
                                     onChange={(e) => handleSystemNotificationsToggle(e.target.checked)}
                                 />
                             }

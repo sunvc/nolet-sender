@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import {
     Button,
     Stack,
@@ -12,27 +12,15 @@ import {
     DialogTitle,
     DialogContent,
     DialogActions,
-    Slide,
     useTheme,
-    Divider,
     IconButton,
     Tooltip,
-    Chip,
 } from '@mui/material';
 import PublicIcon from '@mui/icons-material/Public';
 import InfoOutlineIcon from '@mui/icons-material/InfoOutline';
 import { useTranslation } from 'react-i18next';
 import { useAppContext } from '../contexts/AppContext';
-import { TransitionProps } from '@mui/material/transitions';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 export default function FaviconSetting() {
     const { t } = useTranslation();
@@ -136,7 +124,7 @@ export default function FaviconSetting() {
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
                 keepMounted
             >

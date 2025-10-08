@@ -10,8 +10,7 @@ import Toolbar from '@mui/material/Toolbar';
 
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
+import { SlideLeftTransition } from './DialogTransitions';
 import { Device, AppSettings, ThemeMode } from '../types';
 import LocalSyncCard from './LocalSyncCard';
 import CloudSyncCard from './CloudSyncCard';
@@ -19,16 +18,8 @@ import RestoreDialog from './RestoreDialog';
 import { useTranslation } from 'react-i18next';
 import SyncIcon from '@mui/icons-material/Sync';
 import Button from '@mui/material/Button';
-import { Chip } from '@mui/material';
+// import { Chip } from '@mui/material';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<unknown>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="left" ref={ref} {...props} />;
-});
 
 interface BackupRestoreCardProps {
     devices: Device[];
@@ -92,7 +83,7 @@ export default function BackupRestoreCard({
                         <Typography variant="h6" color="textPrimary" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <SyncIcon />
                             {t('backup.title')}
-                            <Chip label="Beta" size="small" variant="outlined" color="warning" />
+                            {/* <Chip label="Beta" size="small" variant="outlined" color="warning" /> */}
                         </Typography>
                         <NavigateNextIcon />
                     </Stack>
@@ -103,7 +94,7 @@ export default function BackupRestoreCard({
             < Dialog
                 open={dialogOpen}
                 slots={{
-                    transition: Transition,
+                    transition: SlideLeftTransition,
                 }
                 }
                 onClose={handleClose}

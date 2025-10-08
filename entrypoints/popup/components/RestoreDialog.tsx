@@ -10,8 +10,7 @@ import Typography from '@mui/material/Typography';
 import Alert from '@mui/material/Alert';
 import Snackbar from '@mui/material/Snackbar';
 import CircularProgress from '@mui/material/CircularProgress';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
+import { SlideUpTransition } from './DialogTransitions';
 import SecurityIcon from '@mui/icons-material/Security';
 import { useTranslation } from 'react-i18next';
 import { Device, ThemeMode } from '../types';
@@ -21,14 +20,6 @@ import { saveAppSettings } from '../utils/settings';
 import { BackupCrypto } from '../utils/backup-crypto';
 import { BackupData } from './BackupRestoreCard';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface RestoreDialogProps {
     open: boolean;
@@ -252,7 +243,7 @@ export default function RestoreDialog({
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

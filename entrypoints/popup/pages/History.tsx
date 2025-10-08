@@ -22,6 +22,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { HistoryRecord, dbManager } from '../utils/database';
 import HistoryTableSkeleton from '../components/HistoryTableSkeleton';
+import { GrowTransition } from '../components/DialogTransitions';
 
 const HistoryTable = React.lazy(() => // 懒加载HistoryTable组件
     import(
@@ -463,7 +464,10 @@ export default function History() {
             }
 
             {/* 删除确认对话框 */}
-            <Dialog open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
+            <Dialog slots={{
+                transition: GrowTransition,
+            }}
+                open={showDeleteDialog} onClose={() => setShowDeleteDialog(false)}>
                 {/* 确认删除 */}
                 <DialogTitle>{t('history.confirm_delete')}</DialogTitle>
                 {/* 确定要删除选中的 {{count}} 条记录吗？此操作不可撤销。 */}

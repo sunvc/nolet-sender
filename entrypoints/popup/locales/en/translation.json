@@ -505,7 +505,7 @@
             "refresh": "Refresh",
             "clear_all": "Clear All",
             "confirm_clear_all_title": "Confirm Clear All Backups",
-            "confirm_clear_all_message": "Are you sure you want to delete all backup files? Total {{count}} files, this action cannot be undone.",
+            "confirm_clear_all_message": "Are you sure you want to delete all files in the backup folder? There are currently {{count}} backup files. This action cannot be undone.",
             "clear_all_success": "Successfully cleared {{count}} backup files",
             "clear_all_failed": "Failed to clear backup files: {{message}}",
             "file_size": "Size: {{size}}",
@@ -548,6 +548,9 @@
             "failed": "Backup failed: {{message}}",
             "language_fetch_failed": "Failed to get language settings",
             "collect_data_failed": "Failed to collect backup data"
-        }
+        },
+        "gd_sync_tips": "Tips:",
+        "gd_sync_tips_1": "After authorization, a folder named \"Bark Sender Backups\" will be created in the root directory of your Google Drive. All operations will be performed inside this folder.",
+        "gd_sync_tips_2": "You can also download backup files from Google Drive at any time and restore them in Local Sync."
     }
 }

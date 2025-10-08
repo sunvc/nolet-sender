@@ -17,7 +17,7 @@ import {
     IconButton,
     Tooltip
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
+
 import SendIcon from '@mui/icons-material/Send';
 import ContentPasteIcon from '@mui/icons-material/ContentPaste';
 import KeyboardIcon from '@mui/icons-material/Keyboard';
@@ -38,15 +38,7 @@ import UrlDialog from '../components/UrlDialog';
 import UrlDialogV2 from '../components/UrlDialogV2';
 import AdvancedParamsEditor from '../components/AdvancedParamsEditor';
 import { getAppSettings } from '../utils/settings';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from '../components/DialogTransitions';
 
 interface SendPushProps {
     devices: Device[];
@@ -795,7 +787,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
                 keepMounted
             >

@@ -15,8 +15,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import Box from '@mui/material/Box';
 import Chip from '@mui/material/Chip';
 import IconButton from '@mui/material/IconButton';
-import Slide from '@mui/material/Slide';
-import { TransitionProps } from '@mui/material/transitions';
+import { SlideUpTransition } from './DialogTransitions';
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload';
 import DeleteIcon from '@mui/icons-material/Delete';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -28,14 +27,6 @@ import { BackupData } from './BackupRestoreCard';
 import dayjs from 'dayjs';
 import CloseIcon from '@mui/icons-material/Close';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
 
 interface CloudRestoreDialogProps {
     open: boolean;
@@ -217,7 +208,7 @@ export default function CloudRestoreDialog({
                 maxWidth="md"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
             >
                 <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -357,7 +348,7 @@ export default function CloudRestoreDialog({
                 open={clearAllConfirm}
                 onClose={() => setClearAllConfirm(false)}
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
             >
                 <DialogTitle>
@@ -395,7 +386,7 @@ export default function CloudRestoreDialog({
                 open={deleteConfirm.open}
                 onClose={() => setDeleteConfirm({ open: false, file: null })}
                 slots={{
-                    transition: Transition,
+                    transition: SlideUpTransition,
                 }}
             >
                 <DialogTitle>

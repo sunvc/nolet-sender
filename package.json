@@ -2,7 +2,7 @@
   "name": "Bark Sender",
   "description": "__MSG_ext_desc__",
   "private": true,
-  "version": "1.5.0",
+  "version": "1.5.1",
   "type": "module",
   "scripts": {
     "dev": "wxt",

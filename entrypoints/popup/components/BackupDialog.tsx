@@ -10,8 +10,7 @@ import Typography from '@mui/material/Typography';
 import Snackbar from '@mui/material/Snackbar';
 import Alert from '@mui/material/Alert';
 import CircularProgress from '@mui/material/CircularProgress';
-import Grow from '@mui/material/Grow';
-import { TransitionProps } from '@mui/material/transitions';
+import { GrowTransition } from './DialogTransitions';
 import { useTranslation } from 'react-i18next';
 import { Device, AppSettings } from '../types';
 import { useAppContext } from '../contexts/AppContext';
@@ -21,14 +20,6 @@ import { BackupData } from './BackupRestoreCard';
 import CloseIcon from '@mui/icons-material/Close';
 import { IconButton } from '@mui/material';
 
-const Transition = React.forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Grow ref={ref} {...props} />;
-});
 
 interface BackupDialogProps {
     open: boolean;
@@ -193,7 +184,7 @@ export default function BackupDialog({
                 maxWidth="sm"
                 fullWidth
                 slots={{
-                    transition: Transition,
+                    transition: GrowTransition,
                 }}
             >
                 <DialogTitle>{t('backup.backup_dialog.title')}</DialogTitle>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, } from 'react';
 import {
     Dialog,
     DialogTitle,
@@ -15,22 +15,12 @@ import {
     Typography,
     Input,
     InputAdornment,
-    Slide
 } from '@mui/material';
-import { TransitionProps } from '@mui/material/transitions';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
 import { EncryptionConfig, EncryptionAlgorithm, EncryptionMode, PaddingMode } from '../types';
 import { generateKey, generateIV } from '../../shared/push-service';
-
-const Transition = forwardRef(function Transition(
-    props: TransitionProps & {
-        children: React.ReactElement<any, any>;
-    },
-    ref: React.Ref<unknown>,
-) {
-    return <Slide direction="up" ref={ref} {...props} />;
-});
+import { SlideUpTransition } from './DialogTransitions';
 
 interface EncryptionDialogProps {
     open: boolean;
@@ -99,7 +89,7 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
             maxWidth="sm"
             fullWidth
             slots={{
-                transition: Transition,
+                transition: SlideUpTransition,
             }}
             keepMounted
         >
