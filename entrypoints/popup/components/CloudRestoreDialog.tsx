@@ -118,7 +118,9 @@ export default function CloudRestoreDialog({
 
             // 验证备份文件格式
             if (!backupData.version || !backupData.runId || typeof backupData.encrypted !== 'boolean') {
-                throw new Error('无效的备份文件格式');
+                // 无效的备份文件格式 这里不共用 父组件的 toast
+                showToast('error', t('backup.restore_dialog.invalid_format'));
+                return;
             }
 
             // 关闭当前对话框

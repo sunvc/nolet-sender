@@ -35,6 +35,7 @@ interface RestoreDialogProps {
     onThemeChange?: (mode: ThemeMode) => void;
     // 云端备份数据（可选）
     cloudBackupData?: BackupData | null;
+    showToast?: (severity: 'error' | 'warning' | 'info' | 'success', message: string) => void;
 }
 
 export default function RestoreDialog({
@@ -47,7 +48,8 @@ export default function RestoreDialog({
     onEditDevice,
     onSetDefaultDevice,
     onThemeChange,
-    cloudBackupData
+    cloudBackupData,
+    showToast
 }: RestoreDialogProps) {
     const { t } = useTranslation();
     const { reloadSettings } = useAppContext();
@@ -202,7 +204,8 @@ export default function RestoreDialog({
                 // 明文数据
                 restoredData = backupData.data;
             } else {
-                throw new Error('无效的备份文件格式');
+                showToast?.('error', t('backup.restore_dialog.invalid_format'));
+                return;
             }
 
             // 执行还原

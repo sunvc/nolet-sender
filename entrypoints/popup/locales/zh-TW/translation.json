@@ -532,7 +532,10 @@
             "restoring": "還原中...",
             "success": "還原成功！",
             "failed": "還原失敗: {{message}}",
-            "decrypt_failed": "無法解密，請檢查密碼是否正確"
+            "decrypt_failed": "無法解密，請檢查密碼是否正確",
+            "invalid_format": "無效的備份文件格式",
+            "file_parse_failed": "文件解析失敗",
+            "drag_json_file": "請拖拽JSON格式的備份文件"
         },
         "backup_dialog": {
             "title": "是否需要加密？",

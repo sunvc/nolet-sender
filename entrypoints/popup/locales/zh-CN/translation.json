@@ -531,7 +531,10 @@
             "restoring": "还原中...",
             "success": "还原成功！",
             "failed": "还原失败: {{message}}",
-            "decrypt_failed": "无法解密，请检查密码是否正确"
+            "decrypt_failed": "无法解密，请检查密码是否正确",
+            "invalid_format": "无效的备份文件格式",
+            "file_parse_failed": "文件解析失败",
+            "drag_json_file": "请拖拽JSON格式的备份文件"
         },
         "backup_dialog": {
             "title": "是否需要加密？",

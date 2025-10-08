@@ -531,7 +531,10 @@
             "restoring": "Restoring...",
             "success": "Restore successful!",
             "failed": "Restore failed: {{message}}",
-            "decrypt_failed": "Unable to decrypt, please check if the password is correct"
+            "decrypt_failed": "Unable to decrypt, please check if the password is correct",
+            "invalid_format": "Invalid backup file format",
+            "file_parse_failed": "File parsing failed",
+            "drag_json_file": "Please drag a JSON format backup file"
         },
         "backup_dialog": {
             "title": "Encryption Required?",

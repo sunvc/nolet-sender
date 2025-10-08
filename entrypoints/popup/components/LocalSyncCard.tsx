@@ -25,6 +25,8 @@ interface LocalSyncCardProps {
     onSetDefaultDevice?: (deviceId: string) => Promise<void>;
     // 主题操作函数
     onThemeChange?: (mode: ThemeMode) => void;
+    isDragging?: boolean;
+    showToast?: (severity: 'error' | 'warning' | 'info' | 'success', message: string) => void;
 }
 
 export default function LocalSyncCard({
@@ -34,7 +36,9 @@ export default function LocalSyncCard({
     onAddDevice,
     onEditDevice,
     onSetDefaultDevice,
-    onThemeChange
+    onThemeChange,
+    isDragging,
+    showToast
 }: LocalSyncCardProps) {
     const [backupDialogOpen, setBackupDialogOpen] = useState(false);
     const [restoreDialogOpen, setRestoreDialogOpen] = useState(false);
@@ -55,14 +59,15 @@ export default function LocalSyncCard({
 
             // 验证备份文件格式
             if (!parsedBackupData.version || !parsedBackupData.runId || typeof parsedBackupData.encrypted !== 'boolean') {
-                throw new Error('无效的备份文件格式');
+                showToast?.('error', t('backup.restore_dialog.invalid_format'));
+                return;
             }
 
             setBackupData(parsedBackupData);
             setRestoreDialogOpen(true);
         } catch (error) {
             console.error('文件解析失败:', error);
-            // 可以在这里添加错误提示
+            showToast?.('error', t('backup.restore_dialog.file_parse_failed'));
         }
     };
     return (
@@ -88,7 +93,7 @@ export default function LocalSyncCard({
                     </ListItem>
 
                     <ListItem disablePadding>
-                        <ListItemButton onClick={() => fileInputRef.current?.click()}>
+                        <ListItemButton onClick={() => fileInputRef.current?.click()} disabled={isDragging}>
                             <ListItemIcon>
                                 <RestoreIcon color="warning" />
                             </ListItemIcon>
