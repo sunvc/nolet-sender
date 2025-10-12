@@ -45,6 +45,7 @@ interface DeviceSelectV2Props {
     label?: string;
     placeholder?: string;
     showLabel?: boolean;
+    defaultDevice?: Device | null;
 }
 
 export default function DeviceSelectV2({
@@ -54,7 +55,8 @@ export default function DeviceSelectV2({
     onAddClick,
     label = '选择设备',
     placeholder = '请选择设备',
-    showLabel = true
+    showLabel = true,
+    defaultDevice = null
 }: DeviceSelectV2Props) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
@@ -126,30 +128,46 @@ export default function DeviceSelectV2({
                         {/* 选择要发送推送的设备 */}
                         {t('push.select_device')}
                     </Typography>}
-                {devices.map((device) => (
-                    <MenuItem key={device.id} value={device.id}>
-                        <Checkbox checked={selectedDeviceIds.includes(device.id)} />
-                        <Stack sx={{ width: '100%' }}>
-                            <Typography variant="body1">{device.alias}</Typography>
-                            <Typography
-                                variant="caption"
-                                color="text.secondary"
-                                sx={{
-                                    fontSize: '0.75rem',
-                                    display: '-webkit-box',
-                                    WebkitLineClamp: 1,
-                                    WebkitBoxOrient: 'vertical',
-                                    overflow: 'hidden',
-                                    textOverflow: 'ellipsis',
-                                    wordBreak: 'break-all',
-                                    whiteSpace: 'nowrap',
-                                }}
-                            >
-                                {device.deviceKey}
-                            </Typography>
-                        </Stack>
-                    </MenuItem>
-                ))}
+                {devices.map((device) => {
+                    const isDefault = defaultDevice?.id === device.id;
+                    return (
+                        <MenuItem key={device.id} value={device.id}>
+                            <Checkbox checked={selectedDeviceIds.includes(device.id)} sx={{ mr: 0.5 }} />
+                            <Stack sx={{ width: '100%' }}>
+                                <Stack direction="row" alignItems="center" justifyContent="space-between" gap={1}>
+                                    <Typography
+                                        variant="body1"
+                                    // sx={{
+                                    //     color: isDefault ? 'primary.main' : 'text.primary'
+                                    // }}
+                                    >
+                                        {device.alias}
+                                    </Typography>
+                                    {isDefault &&
+                                        <Typography variant="caption" sx={{ fontSize: '0.625rem' }}
+                                            color="text.secondary">{t('common.default')}</Typography>}
+                                </Stack>
+                                <Typography
+                                    variant="caption"
+                                    color="text.secondary"
+                                    sx={{
+                                        fontSize: '0.75rem',
+                                        display: '-webkit-box',
+                                        WebkitLineClamp: 1,
+                                        WebkitBoxOrient: 'vertical',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        wordBreak: 'break-all',
+                                        whiteSpace: 'nowrap',
+                                        fontWeight: 'normal'
+                                    }}
+                                >
+                                    {device.deviceKey}
+                                </Typography>
+                            </Stack>
+                        </MenuItem>
+                    );
+                })}
                 <Box sx={{ position: 'sticky', bottom: 0, bgcolor: 'background.paper', zIndex: 1 }}>
                     <Divider />
                     <MenuItem

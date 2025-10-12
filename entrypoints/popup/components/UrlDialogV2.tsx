@@ -36,6 +36,7 @@ interface UrlDialogV2Props {
     onDeviceAdd: () => void;
     onSuccess: (message: string, uuid: string) => void;
     onError: (error: string) => void;
+    defaultDevice?: Device | null;
 }
 
 interface SendOptionProps {
@@ -123,7 +124,8 @@ export default function UrlDialogV2({
     onDevicesChange,
     onDeviceAdd,
     onSuccess,
-    onError
+    onError,
+    defaultDevice = null
 }: UrlDialogV2Props) {
     const { t } = useTranslation();
     const [loading, setLoading] = React.useState(false);
@@ -296,6 +298,7 @@ export default function UrlDialogV2({
                             selectedDevices={selectedDevices}
                             onDevicesChange={onDevicesChange}
                             onAddClick={onDeviceAdd}
+                            defaultDevice={defaultDevice}
                         />
                     </Box>
 

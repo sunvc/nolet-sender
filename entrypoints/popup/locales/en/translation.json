@@ -23,6 +23,7 @@
         "edit_device_failed": "Failed to edit device: {{message}}",
         "delete_device_failed": "Failed to delete device: {{message}}",
         "set_default_device_failed": "Failed to set default device: {{message}}",
+        "default": "Default",
         "delay": "Delay",
         "error_network": "Network Error",
         "close": "Close",

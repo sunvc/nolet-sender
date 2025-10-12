@@ -309,9 +309,9 @@ export async function sendAPIv2Push(msgPayload: MessagePayloadv2, apiURL: string
     const url = new URL(apiURL);
     const defaultEndpoint = `${url.origin}/push`;
 
-    // 如果没有设备信息，直接使用默认端点发送
     if (!devices || devices.length === 0) {
-        return sendGroupAPIv2Push(msgPayload, defaultEndpoint, authorization, encryptionConfig);
+        const { device_keys, ...cleanPayload } = msgPayload as any;
+        return sendGroupAPIv2Push(cleanPayload, defaultEndpoint, authorization, encryptionConfig);
     }
 
     // 按服务器分组设备
@@ -331,11 +331,15 @@ export async function sendAPIv2Push(msgPayload: MessagePayloadv2, apiURL: string
         // 获取该组的授权信息（使用第一个设备的授权信息）
         const groupAuth = groupDevices[0].authorization || authorization;
 
-        // 创建该组的请求负载（移除devices字段）
-        const { devices: _, ...payloadWithoutDevices } = msgPayload as any;
+        // 创建该组的请求负载（移除devices字段和原有的device_key、device_keys）
+        const { devices: _, device_key, device_keys, ...payloadWithoutDevices } = msgPayload as any;
         const groupPayload = {
             ...payloadWithoutDevices,
-            device_keys: deviceKeys
+            // 对于API v2，如果是多个设备，只使用device_keys；如果是单个设备，使用device_key
+            ...(deviceKeys.length > 1
+                ? { device_keys: deviceKeys }
+                : { device_key: deviceKeys[0] }
+            )
         };
 
         try {

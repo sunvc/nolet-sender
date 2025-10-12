@@ -23,6 +23,7 @@
         "edit_device_failed": "編輯裝置失敗：{{message}}",
         "delete_device_failed": "刪除裝置失敗：{{message}}",
         "set_default_device_failed": "設定預設裝置失敗：{{message}}",
+        "default": "預設",
         "delay": "延遲",
         "error_network": "網路錯誤",
         "close": "關閉",

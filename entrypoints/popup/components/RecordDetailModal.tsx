@@ -386,15 +386,31 @@ export default function RecordDetailModal({ record, open, onClose, onExited, cur
                     value !== ""
             )
         );
-        // 如果 autoCopy = 1, 则移除coppy字段
+
+        // 如果 autoCopy = 1, 则移除copy字段
         if (displayParameters?.autoCopy === 1) {
             delete displayParameters.copy;
         }
-        if (typeof displayParameters.deviceKeys === "string") {
-            displayParameters.deviceKeys = displayParameters.deviceKeys
-                .split(",")
-                .map((k: string) => k.trim())
-                .filter(Boolean);
+
+        // 处理 device_keys 和 device_key 字段的逻辑
+        if (displayParameters.device_keys) {
+            const deviceKeysArray = (Array.isArray(displayParameters.device_keys)
+                ? displayParameters.device_keys
+                : String(displayParameters.device_keys).split(",").map((k: string) => k.trim())
+            ).filter(Boolean);
+
+            if (deviceKeysArray.length > 1) {
+                // 多个设备：只保留 device_keys
+                displayParameters.device_keys = deviceKeysArray;
+                delete displayParameters.device_key;
+            } else if (deviceKeysArray.length === 1) {
+                // 单个设备：只保留 device_key
+                displayParameters.device_key = deviceKeysArray[0];
+                delete displayParameters.device_keys;
+            } else {
+                // 空数组：清理 device_keys
+                delete displayParameters.device_keys;
+            }
         }
 
         setDisplayParameters(displayParameters);

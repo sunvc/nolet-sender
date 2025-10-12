@@ -23,6 +23,7 @@
         "edit_device_failed": "编辑设备失败: {{message}}",
         "delete_device_failed": "删除设备失败: {{message}}",
         "set_default_device_failed": "设置默认设备失败: {{message}}",
+        "default": "默认",
         "delay": "延迟",
         "error_network": "网络错误",
         "close": "关闭",

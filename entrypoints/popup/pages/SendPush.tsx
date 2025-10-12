@@ -603,6 +603,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             selectedDevices={selectedDevices}
                             onDevicesChange={setSelectedDevices}
                             onAddClick={() => setDeviceDialogOpen(true)}
+                            defaultDevice={defaultDevice}
                         />
                     ) : (
                         <DeviceSelect
@@ -736,7 +737,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                             size="large"
                             startIcon={clipboardLoading ? <CircularProgress size={20} /> : <ContentPasteIcon />}
                             onClick={handleSendClipboard}
-                            disabled={loading || clipboardLoading || !selectedDevice}
+                            disabled={loading || clipboardLoading}
                             fullWidth
                         >
                             {/* 读取剪切板中... / 发送剪切板内容 */}
@@ -812,6 +813,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                                         setShortcutDialogOpen(false);
                                         setDeviceDialogOpen(true);
                                     }}
+                                    defaultDevice={defaultDevice}
                                 />
                             ) : (
                                 <DeviceSelect
@@ -888,6 +890,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     }}
                     onSuccess={handleUrlDialogSuccess}
                     onError={handleUrlDialogError}
+                    defaultDevice={defaultDevice}
                 />
             ) : (
                 <UrlDialog
