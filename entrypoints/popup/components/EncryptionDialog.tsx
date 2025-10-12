@@ -153,6 +153,8 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                             id="key-value"
                             type={showPassword ? 'text' : 'password'}
                             value={key}
+                            spellCheck={false}
+                            autoComplete="off"
                             onChange={(e) => setKey(e.target.value)}
                             fullWidth
                             multiline
@@ -177,6 +179,8 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                         <Input
                             id="iv-value"
                             value={iv}
+                            spellCheck={false}
+                            autoComplete="off"
                             onChange={(e) => setIv(e.target.value)}
                             fullWidth
                             endAdornment={
