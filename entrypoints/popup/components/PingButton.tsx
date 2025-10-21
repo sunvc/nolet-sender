@@ -93,7 +93,7 @@ const PingButton: React.FC<PingButtonProps> = ({ apiURL, showAlert }) => {
     };
 
     return (
-        <Tooltip title="PING" placement="top">
+        <Tooltip title={t('device.ping')} placement="bottom-start" arrow>
             <span>
                 <IconButton
                     color="info"

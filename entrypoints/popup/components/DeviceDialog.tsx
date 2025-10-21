@@ -16,7 +16,8 @@ import {
     IconButton,
     Badge,
     Tooltip,
-    InputAdornment
+    InputAdornment,
+    Snackbar
 } from '@mui/material';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
@@ -445,9 +446,11 @@ export default function DeviceDialog({
                 {/* 取消 */}
                 <Stack direction="row" gap={1} sx={{ mr: "auto", px: 1.5 }}>
                     <Badge color="info" variant="dot" invisible={!selfHosted} overlap="circular" anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
-                        <IconButton onClick={() => setSelfHosted(!selfHosted)} color={selfHosted ? 'info' : 'default'} size="small">
-                            <GiteIcon />
-                        </IconButton>
+                        <Tooltip title={selfHosted ? t('device.official_switch') : t('device.self_hosted_switch')} placement="bottom-start" arrow>
+                            <IconButton onClick={() => setSelfHosted(!selfHosted)} color={selfHosted ? 'info' : 'default'} size="small">
+                                <GiteIcon />
+                            </IconButton>
+                        </Tooltip>
                     </Badge>
                     <PingButton apiURL={deviceApiURL} showAlert={showAlert} />
                 </Stack>
@@ -461,6 +464,23 @@ export default function DeviceDialog({
                     {loading ? t('common.processing') : editDevice ? t('common.save') : t('common.add')}
                 </Button>
             </DialogActions>
+            {/* 自建服务器提醒 */}
+            {!selfHosted && deviceApiURL.length > 25 && !deviceApiURL.includes('api.day.app/') && (
+                <Snackbar open
+                    anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+                    sx={{ cursor: 'pointer' }}
+                    onClick={() => setSelfHosted(!selfHosted)}
+                >
+                    <Alert
+                        icon={<GiteIcon fontSize="inherit" />}
+                        severity="warning"
+                        variant="standard"
+                        sx={{ width: '100%' }}
+                    >
+                        {t(editDevice ? 'device.self_hosted_tip_edit' : 'device.self_hosted_tip')}
+                    </Alert>
+                </Snackbar>
+            )}
         </Dialog >
     );
 } 

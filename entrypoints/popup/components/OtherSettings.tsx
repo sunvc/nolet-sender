@@ -22,6 +22,7 @@ import { detectBrowser } from '../utils/platform';
 import ThemeSelector from './ThemeSelector';
 import LanguageSelector from './LanguageSelector';
 import CacheSetting from './CacheSetting';
+import DnsQueryCard from './DnsQueryCard';
 import { ThemeMode } from '../types';
 
 interface OtherSettingsProps {
@@ -248,6 +249,9 @@ export default function OtherSettings({ themeMode, onThemeChange, onError, onToa
                     </Box>
                 </Stack>
             </Paper>
+
+            {/* DNS查询 */}
+            <DnsQueryCard onToast={onToast} onError={onError} />
         </>
     );
 }
