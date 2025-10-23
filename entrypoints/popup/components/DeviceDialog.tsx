@@ -150,6 +150,7 @@ export default function DeviceDialog({
             const shortUuidRegex = /^[A-HJ-NP-Za-km-z2-9]{22}$/; // deviceKey 是标准的 22 位的 shortuuid
 
             let deviceKey: string | null = null;
+            let origin = 'https://api.day.app'; // 默认官方服务器
 
             switch (finalApiURL.length) {
                 case 22: // {22位uuid}
@@ -172,6 +173,21 @@ export default function DeviceDialog({
                     const match = finalApiURL.match(containUuidRegex);
                     if (match) {
                         deviceKey = match[1];
+
+                        // 提取用户输入的网址里的 origin 部分
+                        try {
+                            const url = new URL(finalApiURL.startsWith('http') ? finalApiURL : `https://${finalApiURL}`);
+                            origin = url.origin;
+                        } catch {
+                            // 如果无法解析为URL，尝试提取域名部分
+                            const domainMatch = finalApiURL.match(/^(?:https?:\/\/)?([^\/]+)/);
+                            if (domainMatch) {
+                                const domain = domainMatch[1];
+                                origin = finalApiURL.startsWith('https://') ? `https://${domain}` :
+                                    finalApiURL.startsWith('http://') ? `http://${domain}` :
+                                        `https://${domain}`;
+                            }
+                        }
                     }
             }
 
@@ -179,7 +195,7 @@ export default function DeviceDialog({
                 setError(t('device.device_key_invalid'));
                 return;
             }
-            finalApiURL = `https://api.day.app/${deviceKey}/`;
+            finalApiURL = `${origin}/${deviceKey}/`;
         }
 
         // 判断是否关闭地址处理, 如果是自建服务器, 则不要截取
