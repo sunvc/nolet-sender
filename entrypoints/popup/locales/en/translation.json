@@ -43,8 +43,8 @@
         "name_placeholder": "e.g., My iPhone",
         "name_helper": "Used to identify the device, customizable",
         "api_url": "API URL",
-        "api_url_placeholder": "e.g., https://api.day.app/your-key/ or your Device Key",
-        "api_url_helper": "Open Bark App and copy the URL here",
+        "api_url_placeholder": "e.g., https://wzs.app/your-key/ or your Device Key",
+        "api_url_helper": "Open NoLet App and copy the URL here",
         "preview_url": "Preview URL: {{url}}",
         "test_message": "Test Message",
         "no_devices": "No devices yet. Click the \"Add Device\" button to add one.",
@@ -159,7 +159,7 @@
             "enable": "Enable Custom Avatar",
             "url": "Avatar URL",
             "url_invalid": "Invalid avatar URL, please check and try again",
-            "url_help": "Please enter a valid and stable image URL, leave blank to use Bark's app icon, supporting PNG / JPG formats",
+            "url_help": "Please enter a valid and stable image URL, leave blank to use NoLet's app icon, supporting PNG / JPG formats",
             "preview": "Preview",
             "save_failed": "Failed to save avatar settings",
             "dialog_title": "Set Custom Avatar"
@@ -186,7 +186,7 @@
             "options": "Encryption Options",
             "key_invalid": "Invalid, please check options",
             "key_valid": "Valid key",
-            "tips_on": "Please note that the encryption settings (Algorithm, KEY) are same as Bark App",
+            "tips_on": "Please note that it is consistent with the first item of the NoLet app algorithm configuration list",
             "tooltips": {
                 "encryption_on": "Turn off encryption",
                 "encryption_off": "Turn on encryption"
@@ -227,7 +227,7 @@
         },
         "dns_query": {
             "title": "DNS Query",
-            "help": "This feature helps you diagnose network issues. You can query Bark’s official DNS records here and compare them with your local ping test results. If they don’t match, it may indicate DNS poisoning. To fix this, you can add the correct IP address to your device’s hosts file, or configure DoH service in your browser.",
+            "help": "This feature helps you diagnose network issues. You can query NoLet’s official DNS records here and compare them with your local ping test results. If they don’t match, it may indicate DNS poisoning. To fix this, you can add the correct IP address to your device’s hosts file, or configure DoH service in your browser.",
             "domain_label": "Domain",
             "domain_placeholder": "Enter domain to query",
             "query_button": "Query",
@@ -338,12 +338,12 @@
             "email": "feedback@uuphy.com"
         },
         "bark_app": {
-            "title": "Download Bark App",
-            "description": "Go to App Store to download Bark App"
+            "title": "Download NoLet App",
+            "description": "Go to App Store to download NoLet App"
         },
         "bark_website": {
-            "title": "About Bark",
-            "description": "Visit Bark website to learn more",
+            "title": "About NoLet",
+            "description": "Visit NoLet website to learn more",
             "documentation": "View documentation"
         }
     },
@@ -372,7 +372,7 @@
         "tips_omnibox": "Type 'bb <content>' in the address bar to push",
         "recall": {
             "button": "Try Recall",
-            "button2": "Due to the limited support for batch message recall by Bark, this function cannot guarantee successful recall. Please pay attention to future updates.",
+            "button2": "Due to the limited support for batch message recall by NoLet, this function cannot guarantee successful recall. Please pay attention to future updates.",
             "loading": "Recalling...",
             "success": "Requested to recall",
             "no_record": "No message to recall",
@@ -440,10 +440,13 @@
             "aes128": "AES-128"
         },
         "modes": {
-            "cbc": "CBC"
+            "cbc": "CBC",
+            "ecb": "ECB",
+            "gcm": "GCM"
         },
         "paddings": {
-            "pkcs7": "PKCS7"
+            "pkcs7": "PKCS7",
+            "space": "Space"
         }
     },
     "history": {
@@ -637,7 +640,7 @@
             "collect_data_failed": "Failed to collect backup data"
         },
         "gd_sync_tips": "Tips:",
-        "gd_sync_tips_1": "After authorization, a folder named \"Bark Sender Backups\" will be created in the root directory of your Google Drive. All operations will be performed inside this folder.",
+        "gd_sync_tips_1": "After authorization, a folder named \"NoLet Sender Backups\" will be created in the root directory of your Google Drive. All operations will be performed inside this folder.",
         "gd_sync_tips_2": "You can also download backup files from Google Drive at any time and restore them in Local Sync."
     }
 }

@@ -29,135 +29,88 @@ import { SlideUpTransition } from './DialogTransitions';
 
 const sounds: Sound[] = [
     {
-        name: "silence",
-        duration: 500
+        "name": "alarm",
+        "duration": 1452
     },
     {
-        name: "alarm",
-        duration: 2000,
+        "name": "aurora",
+        "duration": 1200
     },
     {
-        name: "anticipate",
-        duration: 4500
+        "name": "call",
+        "duration": 2630
     },
     {
-        name: "bell",
-        duration: 1400
+        "name": "com",
+        "duration": 529
     },
     {
-        name: "birdsong",
-        duration: 670
+        "name": "craft",
+        "duration": 602
     },
     {
-        name: "bloom",
-        duration: 1600
+        "name": "frog",
+        "duration": 578
     },
     {
-        name: "calypso",
-        duration: 900
+        "name": "glass",
+        "duration": 644
     },
     {
-        name: "chime",
-        duration: 4500
+        "name": "gold",
+        "duration": 1176
     },
     {
-        name: "choo",
-        duration: 2200
+        "name": "health",
+        "duration": 1792
     },
     {
-        name: "descent",
-        duration: 1900
+        "name": "hello",
+        "duration": 614
     },
     {
-        name: "electronic",
-        duration: 1500
+        "name": "multiway",
+        "duration": 2188
     },
     {
-        name: "fanfare",
-        duration: 1500
+        "name": "popcorn",
+        "duration": 904
     },
     {
-        name: "glass",
-        duration: 1700
+        "name": "run",
+        "duration": 813
     },
     {
-        name: "gotosleep",
-        duration: 3000
+        "name": "shake",
+        "duration": 600
     },
     {
-        name: "healthnotification",
-        duration: 1800
+        "name": "silence",
+        "duration": 200
     },
     {
-        name: "horn",
-        duration: 1500,
-        old: true
+        "name": "snap",
+        "duration": 150
     },
     {
-        name: "ladder",
-        duration: 1300
+        "name": "success",
+        "duration": 929
     },
     {
-        name: "mailsent",
-        duration: 1500
+        "name": "trill",
+        "duration": 1509
     },
     {
-        name: "minuet",
-        duration: 7000
+        "name": "tritone",
+        "duration": 788
     },
     {
-        name: "multiwayinvitation",
-        duration: 2200,
-        old: true
+        "name": "typewriter",
+        "duration": 1020
     },
     {
-        name: "newmail",
-        duration: 1500
-    },
-    {
-        name: "newsflash",
-        duration: 2900
-    },
-    {
-        name: "noir",
-        duration: 1900
-    },
-    {
-        name: "paymentsuccess",
-        duration: 1400
-    },
-    {
-        name: "shake",
-        duration: 600,
-        old: true
-    },
-    {
-        name: "sherwoodforest",
-        duration: 4700
-    },
-    {
-        name: "spell",
-        duration: 2900
-    },
-    {
-        name: "suspense",
-        duration: 4200
-    },
-    {
-        name: "telegraph",
-        duration: 1200
-    },
-    {
-        name: "tiptoes",
-        duration: 1500
-    },
-    {
-        name: "typewriters",
-        duration: 2600
-    },
-    {
-        name: "update",
-        duration: 4500
+        "name": "xiu",
+        "duration": 395
     }
 ];
 

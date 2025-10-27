@@ -71,7 +71,7 @@ jobs:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
           body: |
-            ## 🍻 Bark Sender New Release | 新版发布
+            ## 🍻 NoLet Sender New Release | 新版发布
 
             - **Firefox**: `bark-sender-*-firefox.zip`  
             - **Chrome**: `bark-sender-*-chrome.zip`

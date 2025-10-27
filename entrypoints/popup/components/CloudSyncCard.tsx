@@ -206,7 +206,7 @@ export default function CloudSyncCard({ onBackupDataReady }: CloudSyncCardProps)
                     {t(`backup.gd_sync_tips`)}
                 </Typography>
                 <Divider />
-                {/* 授权后会在 Google Drive 根目录创建一个名为 "Bark Sender Backups" 的文件夹, 所有操作均在此文件夹内进行。 */}
+                {/* 授权后会在 Google Drive 根目录创建一个名为 "NoLet Sender Backups" 的文件夹, 所有操作均在此文件夹内进行。 */}
                 <Typography variant="caption" color="text.secondary" fontSize={'0.625rem'}>
                     - {t(`backup.gd_sync_tips_1`)}
                 </Typography>

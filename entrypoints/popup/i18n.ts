@@ -5,8 +5,10 @@ import { detectBrowserLanguage, isSupportedLanguage } from './utils/languages';
 
 import translationEN from './locales/en/translation.json';
 import translationZH from './locales/zh-CN/translation.json';
-import translationZHHK from './locales/zh-HK/translation.json';
-import translationZHTW from './locales/zh-TW/translation.json';
+import translationJA from './locales/ja/translation.json';
+import translationKO from './locales/ko/translation.json';
+
+
 
 const resources = {
     en: {
@@ -15,11 +17,11 @@ const resources = {
     'zh-CN': {
         translation: translationZH
     },
-    'zh-HK': {
-        translation: translationZHHK
+    ja: {
+        translation: translationJA
     },
-    'zh-TW': {
-        translation: translationZHTW
+    ko: {
+        translation: translationKO
     }
 };
 
@@ -59,9 +61,9 @@ i18n
         resources,
         lng: 'en', // 临时默认语言，会被异步更新
         fallbackLng: {
-            'zh-HK': ['zh-TW', 'zh-CN', 'en'],
-            'zh-TW': ['zh-HK', 'zh-CN', 'en'],
             'zh-CN': ['en'],
+            ja: ['en'],
+            ko: ['en'],
             default: ['en']
         },
         interpolation: {

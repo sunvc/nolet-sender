@@ -110,7 +110,7 @@ export default function Layout({
                             sx={{ flexGrow: 1, fontSize: '1.1rem', userSelect: 'none' }}
                             onDoubleClick={handleOpenWindow}
                         >
-                            Bark Sender
+                            NoLet Sender
                         </Typography>
                         {/* Appbar 的加密切换按钮 */}
                         {showEncryptionToggle && (

@@ -52,7 +52,7 @@ export interface ImageRecord {
 }
 
 // 数据库结构定义
-interface BarkDB extends DBSchema {
+interface NoLetDB extends DBSchema {
     history: {
         key: number;
         value: HistoryRecord;
@@ -64,7 +64,7 @@ interface BarkDB extends DBSchema {
 }
 
 // 文件缓存数据库结构定义
-interface BarkFileDB extends DBSchema {
+interface NoLetFileDB extends DBSchema {
     fav: {
         key: number;
         value: FaviconRecord;
@@ -85,15 +85,15 @@ interface BarkFileDB extends DBSchema {
 }
 
 class DatabaseManager {
-    private db: IDBPDatabase<BarkDB> | null = null;
-    private readonly DB_NAME = 'BarkSenderDB';
+    private db: IDBPDatabase<NoLetDB> | null = null;
+    private readonly DB_NAME = 'NoLetSenderDB';
     private readonly DB_VERSION = 1;
 
     // 初始化数据库
     async init(): Promise<void> {
         if (this.db) return;
 
-        this.db = await openDB<BarkDB>(this.DB_NAME, this.DB_VERSION, {
+        this.db = await openDB<NoLetDB>(this.DB_NAME, this.DB_VERSION, {
             upgrade(db) {
                 // 创建历史记录表
                 const historyStore = db.createObjectStore('history', {
@@ -353,8 +353,8 @@ export async function recordPushHistory(
 
 // 文件缓存管理器类
 class FileCacheManager {
-    private fileDb: IDBPDatabase<BarkFileDB> | null = null;
-    private readonly FILE_DB_NAME = 'BarkSenderFileDB';
+    private fileDb: IDBPDatabase<NoLetFileDB> | null = null;
+    private readonly FILE_DB_NAME = 'NoLetSenderFileDB';
     private readonly FILE_DB_VERSION = 1;
 
     // 关闭数据库连接
@@ -400,7 +400,7 @@ class FileCacheManager {
     async init(): Promise<void> {
         if (this.fileDb) return;
 
-        this.fileDb = await openDB<BarkFileDB>(this.FILE_DB_NAME, this.FILE_DB_VERSION, {
+        this.fileDb = await openDB<NoLetFileDB>(this.FILE_DB_NAME, this.FILE_DB_VERSION, {
             upgrade(db) {
                 // 创建 favicon 缓存表
                 const favStore = db.createObjectStore('fav', {

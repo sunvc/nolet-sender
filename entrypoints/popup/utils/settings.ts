@@ -30,8 +30,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
     enableEncryption: false,
     encryptionConfig: {
         algorithm: 'AES256',
-        mode: 'CBC',
-        padding: 'pkcs7',
+        mode: 'GCM',
+        padding: 'space',
         key: ''
     },
     sound: undefined, // 推送铃声，默认不设置

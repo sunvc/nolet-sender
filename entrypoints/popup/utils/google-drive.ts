@@ -12,7 +12,7 @@ export interface GoogleDriveFile {
 }
 
 export class GoogleDriveAPI {
-    private static readonly FOLDER_NAME = 'Bark Sender Backups';
+    private static readonly FOLDER_NAME = 'NoLet Sender Backups';
     private static lastAuthCheck: { result: boolean; timestamp: number } | null = null;
 
     /**

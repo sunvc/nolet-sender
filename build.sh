@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Bark Sender - Multi-Browser Extension Build Script
+# NoLet Sender - Multi-Browser Extension Build Script
 
 set -e
 
-echo "🚀 开始构建 Bark Sender 多浏览器扩展..."
-echo "🚀 Starting Bark Sender Multi-Browser Extension Build..."
+echo "🚀 开始构建 NoLet Sender 多浏览器扩展..."
+echo "🚀 Starting NoLet Sender Multi-Browser Extension Build..."
 echo "📦 目标浏览器 / Target Browsers: Chrome, Firefox, Edge"
 echo ""
 

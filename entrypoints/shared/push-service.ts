@@ -3,7 +3,7 @@ import { PushResponse, EncryptionAlgorithm, Device } from '../popup/types';
 /**
  * 消息体（最终发送给服务器的数据）
  * 注意: 后续出现新的参数，需要在这里添加
- * i18n 参考 https://github.com/Finb/Bark/blob/master/Bark/Localizable.xcstrings
+ * i18n 参考 https://github.com/Finb/NoLet/blob/master/NoLet/Localizable.xcstrings
  */
 export interface MessagePayload {
     body: string; // 推送内容（必需）
@@ -30,7 +30,7 @@ export interface MessagePayload {
     autoCopy?: '1'; // 传"1"时，iOS14.5以下自动复制推送内容，iOS14.5以上需手动长按推送或下拉推送
     copy?: string; // 复制推送时，指定复制的内容，不传此参数将复制整个推送内容
     sound?: string; // 可以为推送设置不同的铃声
-    icon?: string; // 为推送设置自定义图标，设置的图标将替换默认Bark图标
+    icon?: string; // 为推送设置自定义图标，设置的图标将替换默认NoLet图标
     group?: string; // 对消息进行分组，推送将按group分组显示在通知中心中
     ciphertext?: string; // 加密推送的密文，API v2 使用
     isArchive?: '1'; // 传1保存推送，传其他的不保存推送，不传按APP内设置来决定是否保存

@@ -1,4 +1,4 @@
-# Bark Sender - Build Instructions
+# NoLet Sender - Build Instructions
 
 ## English Version
 
@@ -80,7 +80,7 @@ After successful build, you will find the extension packages at:
 
 ### Source Code Repository
 
-👉 https://github.com/ij369/bark-sender
+👉 https://github.com/sunvc/nolet-sender
 
 This repository contains all source files, build scripts, and dependency declarations required to reproduce the extension package.
 

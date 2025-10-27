@@ -93,7 +93,7 @@ export default function DeviceDialog({
     const [selfHosted, setSelfHosted] = useState(false);
 
     // 第二种模式 自建服务器 采用 server + deviceKey 作为 API URL
-    const [server, setServer] = useState('https://api.day.app'); // 自建服务器地址 (使用 bark 官方服务器回落)
+    const [server, setServer] = useState('https://wzs.app'); // 自建服务器地址 (使用 bark 官方服务器回落)
     const [deviceKey, setDeviceKey] = useState('');              // 设备密钥
 
     const [basicAuthUsername, setBasicAuthUsername] = useState('');
@@ -111,13 +111,13 @@ export default function DeviceDialog({
         if (editDevice) {
             setDeviceAlias(editDevice.alias);
             setDeviceApiURL(editDevice.apiURL);
-            setServer(editDevice.server || 'https://api.day.app');
+            setServer(editDevice.server || 'https://wzs.app');
             setDeviceKey(editDevice.deviceKey || '');
             setBasicAuthUsername(editDevice.authorization?.user || '');
             setBasicAuthPassword(editDevice.authorization?.pwd || '');
 
             // 如果 server 不等于 bark 官方服务器地址，则切换到自建模式
-            const isCustomServer = editDevice.server && editDevice.server !== 'https://api.day.app';
+            const isCustomServer = editDevice.server && editDevice.server !== 'https://wzs.app';
             setSelfHosted(isCustomServer || false);
 
             // 如果有认证信息，自动展开基本认证区域
@@ -129,7 +129,7 @@ export default function DeviceDialog({
             setBasicAuthPassword('');
             setIsBasicAuthCollapsed(true);
             setSelfHosted(false);
-            setServer('https://api.day.app');
+            setServer('https://wzs.app');
             setDeviceKey('');
         }
         setError('');
@@ -150,7 +150,7 @@ export default function DeviceDialog({
             const shortUuidRegex = /^[A-HJ-NP-Za-km-z2-9]{22}$/; // deviceKey 是标准的 22 位的 shortuuid
 
             let deviceKey: string | null = null;
-            let origin = 'https://api.day.app'; // 默认官方服务器
+            let origin = 'https://wzs.app'; // 默认官方服务器
 
             switch (finalApiURL.length) {
                 case 22: // {22位uuid}
@@ -221,7 +221,7 @@ export default function DeviceDialog({
                     value: `Basic ${credentials}`
                 };
             }
-            // truncatedURL 是截取后的URL, 格式为 `https://api.day.app/<device_key>/`
+            // truncatedURL 是截取后的URL, 格式为 `https://wzs.app/<device_key>/`
             await onSubmit(deviceAlias.trim(), truncatedURL, authorization);
             // 如果是自建服务器，开启 API v2 的开关, 如果自建服务器使用额外的代理路径, API v1 模式下容易将内容截断
             if (selfHosted && !appSettings?.enableApiV2) {
@@ -481,7 +481,7 @@ export default function DeviceDialog({
                 </Button>
             </DialogActions>
             {/* 自建服务器提醒 */}
-            {!selfHosted && deviceApiURL.length > 25 && !deviceApiURL.includes('api.day.app/') && (
+            {!selfHosted && deviceApiURL.length > 25 && !deviceApiURL.includes('wzs.app/') && (
                 <Snackbar open
                     anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
                     sx={{ cursor: 'pointer' }}

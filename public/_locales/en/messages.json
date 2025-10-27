@@ -1,9 +1,9 @@
 {
     "ext_desc": {
-        "message": "Bark Sender is an open-source extension that sends webpage or clipboard text to iOS device with encryption and custom parameters."
+        "message": "NoLet Sender is an open-source extension that sends webpage or clipboard text to iOS device with encryption and custom parameters."
     },
     "extension_installed": {
-        "message": "Bark Sender installed"
+        "message": "NoLet Sender installed"
     },
     "shortcut_triggered": {
         "message": "Global shortcut triggered"
@@ -54,7 +54,7 @@
         "message": "Inspect and send to $1"
     },
     "bark_sender_title": {
-        "message": "Bark Sender"
+        "message": "NoLet Sender"
     },
     "sent_to_device": {
         "message": "Sent to $1"

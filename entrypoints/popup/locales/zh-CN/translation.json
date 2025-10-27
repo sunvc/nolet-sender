@@ -43,8 +43,8 @@
         "name_placeholder": "例如: 我的iPhone",
         "name_helper": "用于识别设备，可自定义",
         "api_url": "API URL",
-        "api_url_placeholder": "例如: https://api.day.app/你的key/ 或 你的Key",
-        "api_url_helper": "打开 Bark App 拷贝地址到此处",
+        "api_url_placeholder": "例如: https://wzs.app/你的key/ 或 你的Key",
+        "api_url_helper": "打开 NoLet App 拷贝地址到此处",
         "preview_url": "预览地址: {{url}}",
         "test_message": "测试消息",
         "no_devices": "暂无设备，请点击 \"添加设备\" 按钮添加一个设备。",
@@ -159,7 +159,7 @@
             "enable": "启用自定义头像",
             "url": "头像 URL",
             "url_invalid": "头像 URL 无效，请检查后重试",
-            "url_help": "请输入有效且稳定的图片 URL 地址, 关闭则使用 Bark 的应用图标, 支持 PNG / JPG 格式",
+            "url_help": "请输入有效且稳定的图片 URL 地址, 关闭则使用 NoLet 的应用图标, 支持 PNG / JPG 格式",
             "preview": "效果预览",
             "save_failed": "保存头像设置失败",
             "dialog_title": "设置自定义头像"
@@ -186,7 +186,7 @@
             "options": "加密选项",
             "key_invalid": "密钥无效, 请修改加密选项",
             "key_valid": "密钥有效",
-            "tips_on": "请注意和 Bark App 的加密设置（算法，KEY）一致",
+            "tips_on": "请注意和 NoLet App 算法配置列表第一项保持一致",
             "tooltips": {
                 "encryption_on": "关闭加密",
                 "encryption_off": "开启加密"
@@ -227,7 +227,7 @@
         },
         "dns_query": {
             "title": "DNS 查询",
-            "help": "这是一个用于排查网络问题的功能。你可以在这里查询到 Bark 官方的 DNS 记录，并与本地的 ping 测试结果进行对比。如果两者不一致，可能是由于 DNS 污染导致的。你可以将正确的 IP 地址添加到设备的 hosts 文件中来解决；也可以只针对浏览器配置 DoH 服务来解决。",
+            "help": "这是一个用于排查网络问题的功能。你可以在这里查询到 NoLet 官方的 DNS 记录，并与本地的 ping 测试结果进行对比。如果两者不一致，可能是由于 DNS 污染导致的。你可以将正确的 IP 地址添加到设备的 hosts 文件中来解决；也可以只针对浏览器配置 DoH 服务来解决。",
             "domain_label": "域名",
             "domain_placeholder": "请输入要查询的域名",
             "query_button": "查询",
@@ -332,12 +332,12 @@
             "email": "feedback@uuphy.com"
         },
         "bark_app": {
-            "title": "下载 Bark App",
-            "description": "前往 App Store 下载 Bark App"
+            "title": "下载 NoLet App",
+            "description": "前往 App Store 下载 NoLet App"
         },
         "bark_website": {
-            "title": "了解 Bark",
-            "description": "访问 Bark 官网了解更多",
+            "title": "了解 NoLet",
+            "description": "访问 NoLet 官网了解更多",
             "documentation": "查看官方文档"
         }
     },
@@ -366,7 +366,7 @@
         "tips_omnibox": "在地址栏输入 bb <内容> 即可快速推送",
         "recall": {
             "button": "尝试撤回",
-            "button2": "由于 Bark 暂时对批量消息撤回的支持有限, 故此处不保证撤回成功, 请留意后续更新。",
+            "button2": "由于 NoLet 暂时对批量消息撤回的支持有限, 故此处不保证撤回成功, 请留意后续更新。",
             "loading": "撤回中...",
             "success": "已请求撤回",
             "no_record": "没有可撤回的推送记录",
@@ -434,10 +434,13 @@
             "aes128": "AES-128"
         },
         "modes": {
-            "cbc": "CBC"
+            "cbc": "CBC",
+            "ecb": "ECB",
+            "gcm": "GCM"
         },
         "paddings": {
-            "pkcs7": "PKCS7"
+            "pkcs7": "PKCS7",
+            "space": "Space"
         }
     },
     "history": {
@@ -631,7 +634,7 @@
             "collect_data_failed": "收集备份数据失败"
         },
         "gd_sync_tips": "Tips:",
-        "gd_sync_tips_1": "授权后会在 Google Drive 根目录创建一个名为 \"Bark Sender Backups\" 的文件夹, 所有操作均在此文件夹内进行。",
+        "gd_sync_tips_1": "授权后会在 Google Drive 根目录创建一个名为 \"NoLet Sender Backups\" 的文件夹, 所有操作均在此文件夹内进行。",
         "gd_sync_tips_2": "你也可以随时从 Google Drive 中下载备份文件, 然后在 本地同步 中还原。"
     }
 }

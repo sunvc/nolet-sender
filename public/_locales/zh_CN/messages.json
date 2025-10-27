@@ -1,9 +1,9 @@
 {
     "ext_desc": {
-        "message": "Bark Sender 是款桌面浏览器扩展，可快速将网页选中文字或剪贴板内容发送到已安装 Bark App 的 iOS 设备，并支持加密传输及自定义推送参数。"
+        "message": "NoLet Sender 是款桌面浏览器扩展，可快速将网页选中文字或剪贴板内容发送到已安装 NoLet App 的 iOS 设备，并支持加密传输及自定义推送参数。"
     },
     "extension_installed": {
-        "message": "Bark Sender 已安装"
+        "message": "NoLet Sender 已安装"
     },
     "shortcut_triggered": {
         "message": "收到全局快捷键触发"
@@ -54,7 +54,7 @@
         "message": "解析并发送给 $1"
     },
     "bark_sender_title": {
-        "message": "Bark Sender"
+        "message": "NoLet Sender"
     },
     "sent_to_device": {
         "message": "已发送到 $1"

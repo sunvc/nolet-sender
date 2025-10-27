@@ -119,8 +119,8 @@ export function useAppSettings() {
         enableEncryption: false,
         encryptionConfig: {
             algorithm: 'AES256',
-            mode: 'CBC',
-            padding: 'pkcs7',
+            mode: 'GCM',
+            padding: 'space',
             key: ''
         },
         enableBasicAuth: false

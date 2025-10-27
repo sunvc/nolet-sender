@@ -2,7 +2,7 @@ import { detectBrowser } from './platform';
 
 // 打开GitHub页面
 export function openGitHub() {
-    const url = 'https://github.com/ij369/bark-sender';
+    const url = 'https://github.com/sunvc/nolet-sender';
     window.open(url, '_blank');
 }
 
@@ -22,7 +22,7 @@ export function openStoreRating() {
             url = `https://microsoftedge.microsoft.com/addons/detail/bark-sender/${browser.runtime.id}`;
             break;
         default:
-            url = `https://github.com/ij369/bark-sender`;
+            url = `https://github.com/sunvc/nolet-sender`;
             break;
     }
     window.open(url, '_blank');
@@ -30,12 +30,12 @@ export function openStoreRating() {
 
 // 打开反馈页面
 export function openFeedback() {
-    const url = 'https://github.com/ij369/bark-sender/issues';
+    const url = 'https://github.com/sunvc/nolet-sender/issues';
     window.open(url, '_blank');
 }
 
 export function openTelegramChannel() {
-    const url = 'https://t.me/s/bark_sender';
+    const url = 'https://t.me/PushToMe';
     window.open(url, '_blank');
 }
 
@@ -44,12 +44,12 @@ export function openOfficialWebsite() {
     window.open(url, '_blank');
 }
 
-export function openBarkApp() {
-    const url = 'https://apps.apple.com/app/bark-custom-notifications/id1403753865';
+export function openNoLetApp() {
+    const url = 'https://apps.apple.com/app/id6615073345';
     window.open(url, '_blank');
 }
 
-export function openBarkWebsite() {
-    const url = 'https://bark.day.app';
+export function openNoLetWebsite() {
+    const url = 'https://wiki.wzs.app';
     window.open(url, '_blank');
 }

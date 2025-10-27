@@ -4,9 +4,9 @@
 // 支持的语言代码映射（React i18next -> Chrome i18n）
 const LANGUAGE_MAP: Record<string, string> = {
     'zh-CN': 'zh_CN',
-    'zh-TW': 'zh_TW',
-    'zh-HK': 'zh_HK',
-    'en': 'en'
+    'en': 'en',
+    'ja': 'ja',
+    'ko': 'ko'
 };
 
 // 默认语言（与manifest的default_locale保持一致）

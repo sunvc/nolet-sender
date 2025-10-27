@@ -34,7 +34,7 @@ export default function CacheSetting() {
                     message: t('settings.cache.cache_enabled')
                 });
             } else {
-                // 关闭缓存：直接销毁整个 BarkSenderFileDB 数据库
+                // 关闭缓存：直接销毁整个 NoLetSenderFileDB 数据库
                 await fileCacheManager.destroy();
 
                 await updateAppSetting('enableFileCache', false);

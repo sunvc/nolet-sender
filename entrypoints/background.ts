@@ -215,7 +215,7 @@ export default defineBackground(() => {
             content = content;
             autoCopy = '1';
             /* note:
-               Bark App 在 1.5.3 的时候修复了推送内容过长无法正常复制的问题
+               NoLet App 在 1.5.3 的时候修复了推送内容过长无法正常复制的问题
                bark servet 还是会限制请求体 4kB
                常见 3Byte 一个汉字，不常见 4Byte 一个汉字
                加上其他自符标点符号通常文本分段大小为 1500 个字符 (TEXT_CHUNK_SIZE = 1500)
@@ -931,7 +931,7 @@ export default defineBackground(() => {
 
   // 监听扩展安装和启动
   browser.runtime.onInstalled.addListener(() => {
-    // console.debug('Bark Sender 已安装');
+    // console.debug('NoLet Sender 已安装');
     console.debug(getMessage('extension_installed'));
     updateContextMenus();
   });

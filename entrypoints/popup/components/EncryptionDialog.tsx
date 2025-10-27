@@ -131,6 +131,8 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                             onChange={(e) => setMode(e.target.value as EncryptionMode)}
                         >
                             <MenuItem value="CBC">{t('encryption.modes.cbc')}</MenuItem>
+                            <MenuItem value="ECB">{t('encryption.modes.ecb')}</MenuItem>
+                            <MenuItem value="GCM">{t('encryption.modes.gcm')}</MenuItem>
                         </Select>
                     </FormControl>
 
@@ -143,6 +145,7 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                             onChange={(e) => setPadding(e.target.value as PaddingMode)}
                         >
                             <MenuItem value="pkcs7">{t('encryption.paddings.pkcs7')}</MenuItem>
+                            <MenuItem value="space">{t('encryption.paddings.space')}</MenuItem>
                         </Select>
                     </FormControl>
 

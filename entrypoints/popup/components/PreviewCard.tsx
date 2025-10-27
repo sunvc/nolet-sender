@@ -146,7 +146,7 @@ export default function PreviewCard({ parameters, }: PreviewCardProps) {
                     </Stack>
                     <Stack direction="column" alignItems="flex-start" justifyContent="center" sx={{ p: 1 }} >
                         <Typography variant="subtitle2" fontWeight={600}>
-                            {parameters.title || 'Bark'}
+                            {parameters.title || 'NoLet'}
                         </Typography>
                         <Typography variant="body2" fontWeight={400} sx={{
                             wordBreak: "break-word",

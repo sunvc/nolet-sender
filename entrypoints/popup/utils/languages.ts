@@ -7,9 +7,9 @@ export interface LanguageOption {
 // 支持的语言列表
 export const SUPPORTED_LANGUAGES: LanguageOption[] = [
     { code: 'zh-CN', label: '简体中文' },
-    { code: 'zh-HK', label: '繁體中文（HK）' },
-    { code: 'zh-TW', label: '繁體中文（TW）' },
-    { code: 'en', label: 'English' }
+    { code: 'en', label: 'English' },
+    { code: 'ja', label: '日本語' },
+    { code: 'ko', label: '한국어' },
 ];
 
 // 获取支持的语言列表

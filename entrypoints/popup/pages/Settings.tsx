@@ -42,7 +42,7 @@ import FeatureSettings from '../components/FeatureSettings';
 // import OtherSettings from '../components/OtherSettings';
 import OtherSettingsCard from '../components/OtherSettingsCard';
 import BackupRestoreCard from '../components/BackupRestoreCard';
-import { openGitHub, openBarkWebsite, openBarkApp, openStoreRating, } from '../utils/extension';
+import { openGitHub, openNoLetWebsite, openNoLetApp, openStoreRating, } from '../utils/extension';
 
 
 interface SettingsProps {
@@ -424,12 +424,12 @@ export default function Settings({
                     onSetDefaultDevice={onSetDefaultDevice}
                     onThemeChange={onThemeChange}
                 />
-                {/* 了解 Bark 卡片 */}
+                {/* 了解 NoLet 卡片 */}
                 <Paper elevation={2} sx={{ p: 3 }}>
                     <Stack spacing={3}>
                         <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <AutoStoriesIcon />
-                            {/* 了解 Bark */}
+                            {/* 了解 NoLet */}
                             {t('about.bark_website.title')}
                         </Typography>
 
@@ -441,7 +441,7 @@ export default function Settings({
                                         variant="outlined"
                                         size='small'
                                         color='success'
-                                        onClick={openBarkWebsite}
+                                        onClick={openNoLetWebsite}
                                         sx={{
                                             px: 1.2,
                                         }}
@@ -450,12 +450,12 @@ export default function Settings({
                                     </Button>
                                 </Tooltip>
                                 <Tooltip title={t('about.bark_app.description')}>
-                                    {/* 下载 Bark App */}
+                                    {/* 下载 NoLet App */}
                                     <Button
                                         variant="outlined"
                                         color='secondary'
                                         size='small'
-                                        onClick={openBarkApp}
+                                        onClick={openNoLetApp}
                                         sx={{
                                             px: 1.2,
                                         }}
@@ -589,8 +589,8 @@ export default function Settings({
                 open={encryptionDialogOpen}
                 config={appSettings?.encryptionConfig || {
                     algorithm: 'AES256',
-                    mode: 'CBC',
-                    padding: 'pkcs7',
+                    mode: 'GCM',
+                    padding: 'space',
                     key: ''
                 }}
                 onClose={() => setEncryptionDialogOpen(false)}

@@ -1291,7 +1291,7 @@ export default defineContentScript({
                     fallbackDialog.className = 'fallback-dialog';
 
                     const fallbackTitle = document.createElement('h3');
-                    fallbackTitle.textContent = 'Bark Sender';
+                    fallbackTitle.textContent = 'NoLet Sender';
                     fallbackTitle.className = 'fallback-title';
 
                     const fallbackMessage = document.createElement('p');

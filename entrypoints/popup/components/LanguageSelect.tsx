@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { getSupportedLanguages } from '../utils/languages';
 
 export default function LanguageSelect() {
-    const { i18n } = useTranslation();
+    const { i18n, t } = useTranslation();
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const open = Boolean(anchorEl);
 
@@ -34,7 +34,7 @@ export default function LanguageSelect() {
 
     return (
         <>
-            <Tooltip title="Language" placement="left">
+            <Tooltip title={t('settings.language.title')} placement="left">
                 <IconButton
                     style={{ outline: 'none' }}
                     onClick={handleClick}

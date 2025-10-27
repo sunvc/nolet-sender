@@ -288,7 +288,7 @@ export default function AvatarSetting() {
                                                 </Stack>
                                                 {avatarUrl.length === 0 ? (
                                                     <Stack sx={{ p: 1 }}>
-                                                        <img src="https://bark.day.app/_media/Icon.png" alt="Icon" style={{
+                                                        <img src="https://wiki.wzs.app/_media/Icon.png" alt="Icon" style={{
                                                             width: '2.625rem',
                                                             height: '2.625rem',
                                                             objectFit: 'contain',
@@ -297,7 +297,7 @@ export default function AvatarSetting() {
                                                     </Stack>
                                                 ) :
                                                     (
-                                                        <img src="https://bark.day.app/_media/Icon.png" alt="Icon" style={{
+                                                        <img src="https://wiki.wzs.app/_media/Icon.png" alt="Icon" style={{
                                                             width: '1.25rem',
                                                             height: '1.25rem',
                                                             objectFit: 'contain',

@@ -71,7 +71,7 @@ interface DnsQueryCardProps {
 export default function DnsQueryCard({ onToast, onError }: DnsQueryCardProps) {
     const { t } = useTranslation();
     const DOH_PROVIDERS = getDohProviders(t);
-    const [domain, setDomain] = useState('api.day.app');
+    const [domain, setDomain] = useState('wzs.app');
     const [isQuerying, setIsQuerying] = useState(false);
     const [results, setResults] = useState<DnsResult[]>([]);
     const [showGuide, setShowGuide] = useState(false);
