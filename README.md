@@ -8,10 +8,10 @@ Just click the badge/ link below to install it from your browser's extension sto
 <table>
   <tr>
     <td align="left">
-      <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/nolet-sender/">
         <img src="./docs/assets/badge-fx.png" alt="Firefox" height="66">
       </a><br>
-      <a href="https://addons.mozilla.org/en-US/firefox/addon/bark-sender/">For Mozilla Firefox</a>
+      <a href="https://addons.mozilla.org/en-US/firefox/addon/nolet-sender/">For Mozilla Firefox</a>
     </td>
     <td align="left">
       <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">
@@ -77,12 +77,12 @@ To build this extension from source code, please refer to the detailed build ins
 ```
 
 The final extension packages will be generated at:
-- Firefox: `.output/bark-sender-<Version>-firefox.zip`
-- Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
+- Firefox: `.output/nolet-sender-<Version>-firefox.zip`
+- Chrome/Edge: `.output/nolet-sender-<Version>-chrome.zip`
 
 ## Acknowledgements
 
-The icons in this project are adapted from [NoLet](https://github.com/Finb/bark), designed by [Finb](https://github.com/Finb), and were modified and used with the author’s permission granted before the public release on the browser store.
+The icons in this project are adapted from [NoLet](https://github.com/sunvc/NoLet), designed by [sunvc](https://github.com/sunvc), and were modified and used with the author’s permission granted before the public release on the browser store.
 
 ---
 
@@ -125,9 +125,9 @@ NoLet Sender 是一个浏览器扩展，允许你将网页中的文字内容或 
 ```
 
 最终的扩展包将在以下位置生成：
-- Firefox: `.output/bark-sender-<Version>-firefox.zip`
-- Chrome/Edge: `.output/bark-sender-<Version>-chrome.zip`
+- Firefox: `.output/nolet-sender-<Version>-firefox.zip`
+- Chrome/Edge: `.output/nolet-sender-<Version>-chrome.zip`
 
 ## 致谢
 
-本项目的图标基于 [Finb](https://github.com/Finb) 设计的 [NoLet](https://github.com/Finb/bark) 二次创作，在浏览器商店公开前已获得原作者修改许可与使用。
+本项目的图标基于 [sunvc](https://github.com/sunvc) 设计的 [NoLet](https://github.com/sunvc/NoLet) 二次创作，在浏览器商店公开前已获得原作者修改许可与使用。

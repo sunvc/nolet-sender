@@ -66,14 +66,14 @@ This script will:
 - Build extensions for Firefox and Chrome/Edge
 - Create ZIP packages for all browsers
 - Output the following files in the `.output` folder:
-  - `bark-sender-<Version>-firefox.zip` (Firefox)
-  - `bark-sender-<Version>-chrome.zip` (Chrome/ Edge)
+  - `nolet-sender-<Version>-firefox.zip` (Firefox)
+  - `nolet-sender-<Version>-chrome.zip` (Chrome/ Edge)
 
 #### Final Output
 
 After successful build, you will find the extension packages at:
-- **Firefox**: `.output/bark-sender-<Version>-firefox.zip`
-- **Chrome/Edge**: `.output/bark-sender-<Version>-chrome.zip`
+- **Firefox**: `.output/nolet-sender-<Version>-firefox.zip`
+- **Chrome/Edge**: `.output/nolet-sender-<Version>-chrome.zip`
 - **Location**: Project root `.output` directory
 
 ✅ System Compatibility: Passed testing on macOS 12.7.6

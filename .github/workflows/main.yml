@@ -73,9 +73,9 @@ jobs:
           body: |
             ## 🍻 NoLet Sender New Release | 新版发布
 
-            - **Firefox**: `bark-sender-*-firefox.zip`  
-            - **Chrome**: `bark-sender-*-chrome.zip`
-            - **Edge**: `bark-sender-*-edge.zip`
+            - **Firefox**: `nolet-sender-*-firefox.zip`  
+            - **Chrome**: `nolet-sender-*-chrome.zip`
+            - **Edge**: `nolet-sender-*-edge.zip`
 
             ### 📖 Installation Guide | 安装说明
             1. Download the appropriate extension zip | 下载对应浏览器的扩展包  
@@ -100,7 +100,7 @@ jobs:
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: bark-sender-extensions-${{ steps.gitinfo.outputs.sha_short }}
+          name: nolet-sender-extensions-${{ steps.gitinfo.outputs.sha_short }}
           path: .output/*.zip
           retention-days: 30
           include-hidden-files: true

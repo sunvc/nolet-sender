@@ -169,12 +169,24 @@ pnpm run zip:edge
 echo "✅ Edge 扩展打包完成"
 echo ""
 
+# 构建 Safari 扩展
+echo "🔨 构建 Safari 扩展 / Building Safari extension..."
+pnpm run build:safari
+echo "✅ Safari 扩展构建完成"
+echo ""
+
+# 打包 Safari 扩展
+echo "📦 打包 Safari 扩展 / Packaging Safari extension..."
+pnpm run zip:safari
+echo "✅ Safari 扩展打包完成"
+echo ""
+
 # 检查输出文件
 echo "📋 检查构建输出 / Checking build output..."
 
 # 检查 Chrome 扩展
 CHROME_SUCCESS=false
-if [ -f ".output/bark-sender-$PACKAGE_VERSION-chrome.zip" ]; then
+if [ -f ".output/nolet-sender-$PACKAGE_VERSION-chrome.zip" ]; then
     echo "✅ Chrome 扩展构建成功"
     echo "✅ Chrome extension build successful"
     CHROME_SUCCESS=true
@@ -185,7 +197,7 @@ fi
 
 # 检查 Firefox 扩展
 FIREFOX_SUCCESS=false
-if [ -f ".output/bark-sender-$PACKAGE_VERSION-firefox.zip" ]; then
+if [ -f ".output/nolet-sender-$PACKAGE_VERSION-firefox.zip" ]; then
     echo "✅ Firefox 扩展构建成功"
     echo "✅ Firefox extension build successful"
     FIREFOX_SUCCESS=true
@@ -196,7 +208,7 @@ fi
 
 # 检查 Edge 扩展
 EDGE_SUCCESS=false
-if [ -f ".output/bark-sender-$PACKAGE_VERSION-edge.zip" ]; then
+if [ -f ".output/nolet-sender-$PACKAGE_VERSION-edge.zip" ]; then
     echo "✅ Edge 扩展构建成功"
     echo "✅ Edge extension build successful"
     EDGE_SUCCESS=true
@@ -211,21 +223,21 @@ if [ "$CHROME_SUCCESS" = true ] || [ "$FIREFOX_SUCCESS" = true ] || [ "$EDGE_SUC
     echo "📁 输出文件位置 / Output file locations:"
     
     if [ "$CHROME_SUCCESS" = true ]; then
-        echo "   📦 Chrome: .output/bark-sender-$PACKAGE_VERSION-chrome.zip"
+        echo "   📦 Chrome: .output/nolet-sender-$PACKAGE_VERSION-chrome.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-$PACKAGE_VERSION-chrome.zip
+        ls -lh .output/nolet-sender-$PACKAGE_VERSION-chrome.zip
     fi
     
     if [ "$FIREFOX_SUCCESS" = true ]; then
-        echo "   📦 Firefox: .output/bark-sender-$PACKAGE_VERSION-firefox.zip"
+        echo "   📦 Firefox: .output/nolet-sender-$PACKAGE_VERSION-firefox.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-$PACKAGE_VERSION-firefox.zip
+        ls -lh .output/nolet-sender-$PACKAGE_VERSION-firefox.zip
     fi
     
     if [ "$EDGE_SUCCESS" = true ]; then
-        echo "   📦 Edge: .output/bark-sender-$PACKAGE_VERSION-edge.zip"
+        echo "   📦 Edge: .output/nolet-sender-$PACKAGE_VERSION-edge.zip"
         echo "   📏 文件大小 / File size:"
-        ls -lh .output/bark-sender-$PACKAGE_VERSION-edge.zip
+        ls -lh .output/nolet-sender-$PACKAGE_VERSION-edge.zip
     fi
     
     echo ""
@@ -258,3 +270,4 @@ fi
 echo ""
 echo "🍻 构建流程已完成！"
 echo "🍻 Build process completed!" 
+

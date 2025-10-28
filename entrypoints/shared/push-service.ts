@@ -3,7 +3,7 @@ import { PushResponse, EncryptionAlgorithm, Device } from '../popup/types';
 /**
  * 消息体（最终发送给服务器的数据）
  * 注意: 后续出现新的参数，需要在这里添加
- * i18n 参考 https://github.com/Finb/NoLet/blob/master/NoLet/Localizable.xcstrings
+ * i18n 参考 https://github.com/sunvc/NoLet/blob/master/NoLet/Localizable.xcstrings
  */
 export interface MessagePayload {
     body: string; // 推送内容（必需）
@@ -276,7 +276,7 @@ export async function sendEncryptedPush(msgPayload: MessagePayload, apiURL: stri
     formData.append('id', msgPayload.id || ''); // 不确定撤回是不是在这里读取的id, 也有可能在ciphertext中, 待以后验证
 
     const headers: Record<string, string> = {
-        'Content-Type': 'application/x-www-form-urlencoded' // 表单数据 API v1 的(加密时)请求头, v2使用的是 application/json, bark-server 区别 API v1 和 v2 是根据 application/json
+        'Content-Type': 'application/x-www-form-urlencoded' // 表单数据 API v1 的(加密时)请求头, v2使用的是 application/json, nolet-server 区别 API v1 和 v2 是根据 application/json
     };
     if (authorization && authorization.value) {
         headers['Authorization'] = authorization.value;

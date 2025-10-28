@@ -144,11 +144,11 @@ export default function SoundDialog({ open, currentSound, onClose, onSave }: Sou
         try {
             setTestingSound(soundName);
 
-            const devicesResult = await browser.storage.local.get('bark_devices');
-            const defaultDeviceResult = await browser.storage.local.get('bark_default_device');
+            const devicesResult = await browser.storage.local.get('nolet_devices');
+            const defaultDeviceResult = await browser.storage.local.get('nolet_default_device');
 
-            const devices = devicesResult.bark_devices || [];
-            const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+            const devices = devicesResult.nolet_devices || [];
+            const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
             const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
 
             if (!defaultDevice) {

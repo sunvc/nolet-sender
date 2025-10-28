@@ -430,12 +430,12 @@ export default function Settings({
                         <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <AutoStoriesIcon />
                             {/* 了解 NoLet */}
-                            {t('about.bark_website.title')}
+                            {t('about.nolet_website.title')}
                         </Typography>
 
                         <Stack direction="column" alignItems="flex-start" gap={1}>
                             <Stack direction="row" alignItems="center" gap={1.5}>
-                                <Tooltip title={t('about.bark_website.description')}>
+                                <Tooltip title={t('about.nolet_website.description')}>
                                     {/* 查看文档 */}
                                     <Button
                                         variant="outlined"
@@ -446,10 +446,10 @@ export default function Settings({
                                             px: 1.2,
                                         }}
                                     >
-                                        {t('about.bark_website.documentation')}
+                                        {t('about.nolet_website.documentation')}
                                     </Button>
                                 </Tooltip>
-                                <Tooltip title={t('about.bark_app.description')}>
+                                <Tooltip title={t('about.nolet_app.description')}>
                                     {/* 下载 NoLet App */}
                                     <Button
                                         variant="outlined"
@@ -460,7 +460,7 @@ export default function Settings({
                                             px: 1.2,
                                         }}
                                     >
-                                        {t('about.bark_app.title')}
+                                        {t('about.nolet_app.title')}
                                     </Button>
                                 </Tooltip>
                             </Stack>
@@ -549,7 +549,7 @@ export default function Settings({
 
                                 <Typography variant="caption" color="text.secondary">
                                     <Link
-                                        onClick={() => window.open('https://bark-sender.uuphy.com/', '_blank')}
+                                        onClick={() => window.open('https://nolet-sender.uuphy.com/', '_blank')}
                                         color="inherit"
                                         sx={{ fontSize: '0.8rem', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                                     >

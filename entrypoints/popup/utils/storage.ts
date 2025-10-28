@@ -3,8 +3,8 @@ import { formatApiURL } from './api';
 
 // 存储键名常量
 const STORAGE_KEYS = {
-    DEVICES: 'bark_devices',
-    DEFAULT_DEVICE: 'bark_default_device'
+    DEVICES: 'nolet_devices',
+    DEFAULT_DEVICE: 'nolet_default_device'
 };
 
 // 获取浏览器存储API - 使用Promise包装以兼容不同API

@@ -143,8 +143,8 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
 
             // 确定最终使用的图标
             let finalIcon: string | undefined;
-            if (appSettings?.enableCustomAvatar && appSettings.barkAvatarUrl) {
-                finalIcon = appSettings.barkAvatarUrl;
+            if (appSettings?.enableCustomAvatar && appSettings.noletAvatarUrl) {
+                finalIcon = appSettings.noletAvatarUrl;
             }
 
             const response = await sendPush(

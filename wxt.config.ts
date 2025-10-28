@@ -135,7 +135,7 @@ export default defineConfig({
         2. clipboardRead 也不支持, 实际测试会被忽略所以没必要移除
         3. 需要增加 "browser_specific_settings": {
               "gecko": {
-                "id": "bark-sender@uuphy.com",
+                "id": "nolet-sender@uuphy.com",
                 "strict_min_version": "109.0"
               }
             };
@@ -157,7 +157,7 @@ export default defineConfig({
 
         manifest.browser_specific_settings = {
           gecko: {
-            id: 'bark_sender@uuphy.com',
+            id: 'nolet_sender@uuphy.com',
             strict_min_version: '109.0'
           }
         };

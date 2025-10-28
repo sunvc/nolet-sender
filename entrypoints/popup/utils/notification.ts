@@ -10,8 +10,8 @@ export async function showSYSNotification(
     isEssential: boolean = false
 ): Promise<void> {
     try {
-        const settingsResult = await browser.storage.local.get('bark_app_settings');
-        const settings = settingsResult.bark_app_settings || {};
+        const settingsResult = await browser.storage.local.get('nolet_app_settings');
+        const settings = settingsResult.nolet_app_settings || {};
 
         // 检查系统通知设置
         if (settings.enableSystemNotifications === false) {

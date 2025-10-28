@@ -72,8 +72,8 @@ export default function History() {
             console.debug('开始导入 storage.local 中的暂存历史记录');
 
             // 1. 从 storage.local读取暂存历史记录
-            const result = await browser.storage.local.get('bark_history');
-            const storageHistory = result.bark_history || [];
+            const result = await browser.storage.local.get('nolet_history');
+            const storageHistory = result.nolet_history || [];
 
             if (storageHistory.length === 0) {
                 console.debug('没有需要导入的暂存历史记录');
@@ -86,7 +86,7 @@ export default function History() {
             const historyToImport = JSON.parse(JSON.stringify(storageHistory));
 
             // 3. 删除 storage.local中的暂存数据
-            await browser.storage.local.remove('bark_history');
+            await browser.storage.local.remove('nolet_history');
             console.debug('已清除 storage.local 中的暂存历史记录');
 
             // 4. 将深拷贝的数据导入到IndexedDB
@@ -132,8 +132,8 @@ export default function History() {
             }
 
             // 从 storage.local 读取历史记录
-            const result = await browser.storage.local.get('bark_history');
-            const storageHistory = result.bark_history || [];
+            const result = await browser.storage.local.get('nolet_history');
+            const storageHistory = result.nolet_history || [];
 
             console.debug('从 storage.local读取的历史记录:', storageHistory);
             console.debug('历史记录数量:', storageHistory.length);
@@ -182,7 +182,7 @@ export default function History() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `bark-sender-history-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `nolet-sender-history-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -201,7 +201,7 @@ export default function History() {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `bark-sender-history-selected-${new Date().toISOString().split('T')[0]}.json`;
+            a.download = `nolet-sender-history-selected-${new Date().toISOString().split('T')[0]}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);

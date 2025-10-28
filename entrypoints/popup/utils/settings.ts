@@ -3,7 +3,7 @@ declare const chrome: typeof browser;
 import { AppSettings } from '../types';
 
 // 设置存储键名
-const SETTINGS_KEY = 'bark_app_settings';
+const SETTINGS_KEY = 'nolet_app_settings';
 
 // 默认自定义参数配置
 export const DEFAULT_ADVANCED_PARAMS = {

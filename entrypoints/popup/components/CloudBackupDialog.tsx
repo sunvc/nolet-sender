@@ -131,8 +131,8 @@ export default function CloudBackupDialog({
             const now = new Date();
             const timestamp_str = now.toISOString().replace(/[:.]/g, '-').slice(0, 19);
             const fileName = encrypted
-                ? `bark-sender-backup-${timestamp_str}-[encrypted].json`
-                : `bark-sender-backup-${timestamp_str}.json`;
+                ? `nolet-sender-backup-${timestamp_str}-[encrypted].json`
+                : `nolet-sender-backup-${timestamp_str}.json`;
 
             // 上传到Google Drive
             const backupJson = JSON.stringify(finalBackupData, null, 2);

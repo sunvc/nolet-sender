@@ -53,7 +53,7 @@
     "inspect_send": {
         "message": "Inspect and send to $1"
     },
-    "bark_sender_title": {
+    "nolet_sender_title": {
         "message": "NoLet Sender"
     },
     "sent_to_device": {

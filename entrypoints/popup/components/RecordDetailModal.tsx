@@ -113,7 +113,7 @@ const StatusChip: React.FC<{ record: HistoryRecord }> = ({ record }) => {
     }
 
     /*  note:
-        因为 bark server 返回的HTTP 错误, 会提供 JSON 或者 HTML 不统一
+        因为 nolet server 返回的HTTP 错误, 会提供 JSON 或者 HTML 不统一
         HTTP 错误会记录为状态码到 message 里: HTTP error! status: <状态码>
         所以 如果是网络错误、超时、还是其他异常都记录为 code: -1 
      */

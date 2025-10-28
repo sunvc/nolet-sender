@@ -82,8 +82,8 @@ export default defineBackground(() => {
   async function prefetchFavicon(url: string): Promise<string | null> {
     try {
       // 获取应用设置
-      const settingsResult = await browser.storage.local.get('bark_app_settings');
-      const settings = settingsResult.bark_app_settings || {};
+      const settingsResult = await browser.storage.local.get('nolet_app_settings');
+      const settings = settingsResult.nolet_app_settings || {};
 
       // 检查是否启用 favicon
       if (!settings.enableFaviconIcon) {
@@ -181,14 +181,14 @@ export default defineBackground(() => {
 
       // 获取默认设备和设置
       Promise.all([
-        browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device'),
-        browser.storage.local.get('bark_app_settings')
+        browser.storage.local.get('nolet_devices'),
+        browser.storage.local.get('nolet_default_device'),
+        browser.storage.local.get('nolet_app_settings')
       ]).then(([devicesResult, defaultDeviceResult, settingsResult]) => {
-        const devices = devicesResult.bark_devices || [];
-        const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+        const devices = devicesResult.nolet_devices || [];
+        const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
         const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
-        const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+        const settings = settingsResult.nolet_app_settings || { enableEncryption: false };
 
         // console.debug('获取到的设置:', settings);
         // console.debug('文件缓存设置:', settings.enableFileCache);
@@ -196,7 +196,7 @@ export default defineBackground(() => {
         if (!defaultDevice) {
           console.error(getMessage('device_not_found'));
           // 未找到默认设备
-          showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
+          showSYSNotification(getMessage('nolet_sender_title'), getMessage('device_not_found'), true);
           sendResponse({ success: false, error: getMessage('device_not_found') });
           return;
         }
@@ -216,7 +216,7 @@ export default defineBackground(() => {
             autoCopy = '1';
             /* note:
                NoLet App 在 1.5.3 的时候修复了推送内容过长无法正常复制的问题
-               bark servet 还是会限制请求体 4kB
+               nolet servet 还是会限制请求体 4kB
                常见 3Byte 一个汉字，不常见 4Byte 一个汉字
                加上其他自符标点符号通常文本分段大小为 1500 个字符 (TEXT_CHUNK_SIZE = 1500)
                所以用 autoCopy = '1' 配合 copyContent 可以不写来节省请求体大小
@@ -261,8 +261,8 @@ export default defineBackground(() => {
           finalIcon = message.icon;
         }
         // 2. 如果没有 favicon 但启用了自定义头像，使用自定义头像
-        else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
-          finalIcon = settings.barkAvatarUrl;
+        else if (settings.enableCustomAvatar && settings.noletAvatarUrl) {
+          finalIcon = settings.noletAvatarUrl;
         }
 
         // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
@@ -347,8 +347,8 @@ export default defineBackground(() => {
             // 只在非 text-large 类型或是最后一段时显示通知
             if (message.contentType !== 'text-large' || message.isLastChunk) {
               const title = message.contentType === 'text-large'
-                ? getMessage('bark_sender_title') + ' (Large Content)'
-                : getMessage('bark_sender_title');
+                ? getMessage('nolet_sender_title') + ' (Large Content)'
+                : getMessage('nolet_sender_title');
               showSYSNotification(title, getMessage('sent_to_device', [defaultDevice.alias]));
             }
 
@@ -413,7 +413,7 @@ export default defineBackground(() => {
             saveHistoryRecord(historyRecord);
 
             // 发送失败，请检查网络连接
-            showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
+            showSYSNotification(getMessage('nolet_sender_title'), getMessage('send_failed_check_network'), true);
 
             // 返回错误响应给 content script
             sendResponse({ success: false, data: errorResponse });
@@ -593,8 +593,8 @@ export default defineBackground(() => {
 
       try {
         // 兜底：暂存到 chrome.storage.local
-        const result = await browser.storage.local.get('bark_history');
-        const existingHistory = result.bark_history || [];
+        const result = await browser.storage.local.get('nolet_history');
+        const existingHistory = result.nolet_history || [];
 
         // 添加新记录到数组开头（最新的在前面）
         existingHistory.unshift(record);
@@ -604,7 +604,7 @@ export default defineBackground(() => {
           existingHistory.splice(1000);
         }
 
-        await browser.storage.local.set({ bark_history: existingHistory });
+        await browser.storage.local.set({ nolet_history: existingHistory });
         console.debug(getMessage('save_history_record'), record, '(暂存兜底)');
         console.debug(getMessage('current_history_total', [existingHistory.length.toString()]));
       } catch (tempError) {
@@ -642,12 +642,12 @@ export default defineBackground(() => {
 
       // 获取默认设备
       const [devicesResult, defaultDeviceResult] = await Promise.all([
-        browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device')
+        browser.storage.local.get('nolet_devices'),
+        browser.storage.local.get('nolet_default_device')
       ]);
 
-      const devices = devicesResult.bark_devices || [];
-      const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+      const devices = devicesResult.nolet_devices || [];
+      const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
 
       if (!defaultDevice) {
@@ -664,7 +664,7 @@ export default defineBackground(() => {
           focused: true
         });
         // 默认设备未找到
-        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
+        showSYSNotification(getMessage('nolet_sender_title'), getMessage('device_not_found'), true);
         return;
       }
 
@@ -690,7 +690,7 @@ export default defineBackground(() => {
         }).catch(error => {
           // console.debug('发送消息到窗口失败:', error);
           console.debug(getMessage('send_message_to_window_failed', [error.toString()]));
-          showSYSNotification(getMessage('bark_sender_title'), getMessage('notification_shortcut_with_device', [defaultDevice.alias]), true);
+          showSYSNotification(getMessage('nolet_sender_title'), getMessage('notification_shortcut_with_device', [defaultDevice.alias]), true);
         });
       }, 300); // 给窗口足够时间加载
 
@@ -698,7 +698,7 @@ export default defineBackground(() => {
       // console.error('快捷键处理失败:', error);
       console.error(getMessage('shortcut_processing_failed'), error);
       // 快捷键处理失败
-      showSYSNotification(getMessage('bark_sender_title'), getMessage('shortcut_processing_failed'), true);
+      showSYSNotification(getMessage('nolet_sender_title'), getMessage('shortcut_processing_failed'), true);
     }
   }
 
@@ -706,8 +706,8 @@ export default defineBackground(() => {
   async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
-      const settingsResult = await browser.storage.local.get('bark_app_settings');
-      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+      const settingsResult = await browser.storage.local.get('nolet_app_settings');
+      const settings = settingsResult.nolet_app_settings || { enableEncryption: false };
 
       // 如果没有传入 devices，则创建一个单设备对象
       const singleDevice = authorization ? {
@@ -725,8 +725,8 @@ export default defineBackground(() => {
       let finalIcon: string | undefined;
       if (icon) {
         finalIcon = icon; // 优先使用传入的icon
-      } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
-        finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+      } else if (settings.enableCustomAvatar && settings.noletAvatarUrl) {
+        finalIcon = settings.noletAvatarUrl; // 回退到自定义头像
       }
 
       const pushParams: PushParams = {
@@ -757,8 +757,8 @@ export default defineBackground(() => {
   async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
-      const settingsResult = await browser.storage.local.get('bark_app_settings');
-      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+      const settingsResult = await browser.storage.local.get('nolet_app_settings');
+      const settings = settingsResult.nolet_app_settings || { enableEncryption: false };
 
       // 如果没有传入 devices，则创建一个单设备对象
       const singleDevice = authorization ? {
@@ -776,8 +776,8 @@ export default defineBackground(() => {
       let finalIcon: string | undefined;
       if (icon) {
         finalIcon = icon; // 优先使用传入的icon
-      } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
-        finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+      } else if (settings.enableCustomAvatar && settings.noletAvatarUrl) {
+        finalIcon = settings.noletAvatarUrl; // 回退到自定义头像
       }
 
       const pushParams: PushParams = {
@@ -822,21 +822,21 @@ export default defineBackground(() => {
     try {
       // 获取默认设备和设置
       const [devicesResult, defaultDeviceResult, settingsResult] = await Promise.all([
-        browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device'),
-        browser.storage.local.get('bark_app_settings')
+        browser.storage.local.get('nolet_devices'),
+        browser.storage.local.get('nolet_default_device'),
+        browser.storage.local.get('nolet_app_settings')
       ]);
 
-      const devices = devicesResult.bark_devices || [];
-      const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+      const devices = devicesResult.nolet_devices || [];
+      const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
       const defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
-      const settings = settingsResult.bark_app_settings || { enableEncryption: false };
+      const settings = settingsResult.nolet_app_settings || { enableEncryption: false };
 
       if (!defaultDevice) { // 没有默认设备，则打开 添加设备 窗口
         // 将用户输入的文字保存到 storage，供 popup 使用
-        await browser.storage.local.set({ bark_omnibox_message: message });
+        await browser.storage.local.set({ nolet_omnibox_message: message });
         // 未找到默认设备
-        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
+        showSYSNotification(getMessage('nolet_sender_title'), getMessage('device_not_found'), true);
         // 打开设置窗口让用户添加设备
         await browser.windows.create({
           url: browser.runtime.getURL('/popup.html?mode=window&autoAddDevice=true'),
@@ -868,7 +868,7 @@ export default defineBackground(() => {
         useAPIv2: settings.enableApiV2,
         devices: [defaultDevice],
         ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
-        ...(settings.enableCustomAvatar && settings.barkAvatarUrl && { icon: settings.barkAvatarUrl }),
+        ...(settings.enableCustomAvatar && settings.noletAvatarUrl && { icon: settings.noletAvatarUrl }),
         ...filteredCustomParams
       };
 
@@ -920,12 +920,12 @@ export default defineBackground(() => {
       await saveHistoryRecord(historyRecord);
 
       // 已发送至**设备
-      showSYSNotification(getMessage('bark_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
+      showSYSNotification(getMessage('nolet_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
 
     } catch (error) {
       console.error('地址栏推送发送失败:', error);
       // 发送失败，请检查网络连接
-      showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
+      showSYSNotification(getMessage('nolet_sender_title'), getMessage('send_failed_check_network'), true);
     }
   }
 
@@ -942,7 +942,7 @@ export default defineBackground(() => {
 
   // 监听存储变化，动态更新右键菜单
   browser.storage.onChanged.addListener((changes: any) => {
-    if (changes.bark_devices || changes.bark_app_settings) {
+    if (changes.nolet_devices || changes.nolet_app_settings) {
       updateContextMenus();
     }
   });
@@ -954,8 +954,8 @@ export default defineBackground(() => {
       browser.contextMenus.removeAll();
 
       // 获取设置
-      const settingsResult = await browser.storage.local.get('bark_app_settings');
-      const settings = settingsResult.bark_app_settings || { enableContextMenu: true, enableInspectSend: true };
+      const settingsResult = await browser.storage.local.get('nolet_app_settings');
+      const settings = settingsResult.nolet_app_settings || { enableContextMenu: true, enableInspectSend: true };
 
       // 老用户没有这项，这里默认启用
       const enableInspectSend = settings.enableInspectSend ?? true; // 是否启用 inspect-send 菜单项
@@ -966,12 +966,12 @@ export default defineBackground(() => {
 
       // 获取设备列表和默认设备
       const [devicesResult, defaultDeviceResult] = await Promise.all([
-        browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device')
+        browser.storage.local.get('nolet_devices'),
+        browser.storage.local.get('nolet_default_device')
       ]);
 
-      const devices = devicesResult.bark_devices || [];
-      const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+      const devices = devicesResult.nolet_devices || [];
+      const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
 
       if (devices.length === 0) {
         return;
@@ -1036,15 +1036,15 @@ export default defineBackground(() => {
     try {
       // 获取默认设备和设置
       const [devicesResult, defaultDeviceResult, settingsResult] = await Promise.all([
-        browser.storage.local.get('bark_devices'),
-        browser.storage.local.get('bark_default_device'),
-        browser.storage.local.get('bark_app_settings')
+        browser.storage.local.get('nolet_devices'),
+        browser.storage.local.get('nolet_default_device'),
+        browser.storage.local.get('nolet_app_settings')
       ]);
 
-      const devices = devicesResult.bark_devices || [];
-      const defaultDeviceId = defaultDeviceResult.bark_default_device || '';
+      const devices = devicesResult.nolet_devices || [];
+      const defaultDeviceId = defaultDeviceResult.nolet_default_device || '';
       defaultDevice = devices.find((device: any) => device.id === defaultDeviceId) || devices[0];
-      settings = settingsResult.bark_app_settings || { enableEncryption: false };
+      settings = settingsResult.nolet_app_settings || { enableEncryption: false };
 
       // 对于切换极速模式，不需要检查默认设备
       if (info.menuItemId === 'toggle-speed-mode') {
@@ -1053,10 +1053,10 @@ export default defineBackground(() => {
 
         // 更新设置
         const updatedSettings = { ...settings, enableSpeedMode: newSpeedMode };
-        await browser.storage.local.set({ bark_app_settings: updatedSettings });
+        await browser.storage.local.set({ nolet_app_settings: updatedSettings });
 
         // 极速模式已启用/禁用 如果是启用，则提醒
-        showSYSNotification(getMessage('bark_sender_title'), getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode'), newSpeedMode === true);
+        showSYSNotification(getMessage('nolet_sender_title'), getMessage(newSpeedMode ? 'enable_speed_mode' : 'disable_speed_mode'), newSpeedMode === true);
 
         // 更新右键菜单
         updateContextMenus();
@@ -1067,7 +1067,7 @@ export default defineBackground(() => {
         // console.error('未找到默认设备');
         console.error(getMessage('device_not_found'));
         // 未找到默认设备
-        showSYSNotification(getMessage('bark_sender_title'), getMessage('device_not_found'), true);
+        showSYSNotification(getMessage('nolet_sender_title'), getMessage('device_not_found'), true);
         return;
       }
       console.debug('info', info);
@@ -1126,7 +1126,7 @@ export default defineBackground(() => {
               linkUrl: info.linkUrl
             };
 
-            browser.storage.local.set({ bark_url_data: urlData }).then(() => {
+            browser.storage.local.set({ nolet_url_data: urlData }).then(() => {
               browser.windows.create({
                 url: browser.runtime.getURL('/popup.html?mode=window&useUrlDialog=true'),
                 type: 'popup',
@@ -1170,8 +1170,8 @@ export default defineBackground(() => {
         let finalIcon: string | undefined;
         if (settings.enableFaviconIcon && faviconUrl) {
           finalIcon = faviconUrl; // 优先使用favicon
-        } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
-          finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+        } else if (settings.enableCustomAvatar && settings.noletAvatarUrl) {
+          finalIcon = settings.noletAvatarUrl; // 回退到自定义头像
         }
 
         // 获取自定义参数差异，并过滤掉与解析内容冲突的参数
@@ -1248,7 +1248,7 @@ export default defineBackground(() => {
         await saveHistoryRecord(historyRecord);
 
         // 已发送至**
-        showSYSNotification(getMessage('bark_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
+        showSYSNotification(getMessage('nolet_sender_title'), getMessage('sent_to_device', [defaultDevice.alias]));
       }
 
     } catch (error) {
@@ -1298,7 +1298,7 @@ export default defineBackground(() => {
       }
 
       // 发送失败，请检查网络连接
-      showSYSNotification(getMessage('bark_sender_title'), getMessage('send_failed_check_network'), true);
+      showSYSNotification(getMessage('nolet_sender_title'), getMessage('send_failed_check_network'), true);
     }
   });
 });

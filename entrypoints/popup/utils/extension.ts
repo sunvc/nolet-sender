@@ -16,10 +16,10 @@ export function openStoreRating() {
             url = `https://chrome.google.com/webstore/detail/${browser.runtime.id}`;
             break;
         case 'firefox':
-            url = `https://addons.mozilla.org/firefox/addon/bark-sender/`;
+            url = `https://addons.mozilla.org/firefox/addon/nolet-sender/`;
             break;
         case 'edge':
-            url = `https://microsoftedge.microsoft.com/addons/detail/bark-sender/${browser.runtime.id}`;
+            url = `https://microsoftedge.microsoft.com/addons/detail/nolet-sender/${browser.runtime.id}`;
             break;
         default:
             url = `https://github.com/sunvc/nolet-sender`;
@@ -40,7 +40,7 @@ export function openTelegramChannel() {
 }
 
 export function openOfficialWebsite() {
-    const url = 'https://bark-sender.uuphy.com';
+    const url = 'https://nolet-sender.uuphy.com';
     window.open(url, '_blank');
 }
 

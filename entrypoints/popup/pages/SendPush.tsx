@@ -75,7 +75,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
     // 从本地存储恢复消息内容
     useEffect(() => {
-        const savedMessage = localStorage.getItem('bark-sender-draft-message');
+        const savedMessage = localStorage.getItem('nolet-sender-draft-message');
         if (savedMessage) {
             setMessage(savedMessage);
         }
@@ -88,15 +88,15 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
         // 暂存消息内容
         if (newMessage.trim()) {
-            localStorage.setItem('bark-sender-draft-message', newMessage);
+            localStorage.setItem('nolet-sender-draft-message', newMessage);
         } else {
-            localStorage.removeItem('bark-sender-draft-message');
+            localStorage.removeItem('nolet-sender-draft-message');
         }
     };
 
     // 清除暂存
     const clearDraftMessage = () => {
-        localStorage.removeItem('bark-sender-draft-message');
+        localStorage.removeItem('nolet-sender-draft-message');
     };
 
     // 检查API版本并设置默认选中设备
@@ -429,7 +429,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                 /* 推送发送成功！ */
                 setResult({ type: 'success', message: t('push.success') });
                 setMessage(clipboardText.trim());
-                localStorage.setItem('bark-sender-draft-message', clipboardText.trim()); // 更新暂存内容为剪切板内容
+                localStorage.setItem('nolet-sender-draft-message', clipboardText.trim()); // 更新暂存内容为剪切板内容
             } else {
                 /* 发送失败: {{message}} */
                 const errorMessage = response.message || t('common.error_unknown');
@@ -498,12 +498,12 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
             const loadContentToInput = async () => {
                 try {
                     // 先检查是否有 omnibox 缓存的文字
-                    const omniboxResult = await browser.storage.local.get('bark_omnibox_message');
-                    if (omniboxResult.bark_omnibox_message && omniboxResult.bark_omnibox_message.trim()) {
-                        setMessage(omniboxResult.bark_omnibox_message.trim());
-                        localStorage.setItem('bark-sender-draft-message', omniboxResult.bark_omnibox_message.trim());
+                    const omniboxResult = await browser.storage.local.get('nolet_omnibox_message');
+                    if (omniboxResult.nolet_omnibox_message && omniboxResult.nolet_omnibox_message.trim()) {
+                        setMessage(omniboxResult.nolet_omnibox_message.trim());
+                        localStorage.setItem('nolet-sender-draft-message', omniboxResult.nolet_omnibox_message.trim());
                         // 用完后清除缓存
-                        await browser.storage.local.remove('bark_omnibox_message');
+                        await browser.storage.local.remove('nolet_omnibox_message');
                         return;
                     }
 
@@ -512,7 +512,7 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
                     if (clipboardText && clipboardText.trim()) {
                         setMessage(clipboardText.trim());
                         // 更新本地存储
-                        localStorage.setItem('bark-sender-draft-message', clipboardText.trim());
+                        localStorage.setItem('nolet-sender-draft-message', clipboardText.trim());
                     }
                 } catch (error) {
                     console.debug('读取内容失败:', error);
@@ -532,12 +532,12 @@ export default function SendPush({ devices, defaultDevice, onAddDevice }: SendPu
 
         if (useUrlDialog) {
             // 从 storage.local 读取 URL 数据
-            browser.storage.local.get('bark_url_data').then((result) => {
-                if (result.bark_url_data) {
-                    setUrlParams(result.bark_url_data);
+            browser.storage.local.get('nolet_url_data').then((result) => {
+                if (result.nolet_url_data) {
+                    setUrlParams(result.nolet_url_data);
                     setUrlDialogOpen(true);
                     // 使用完后清除数据
-                    browser.storage.local.remove('bark_url_data');
+                    browser.storage.local.remove('nolet_url_data');
                 }
             });
             // 清除 URL 参数

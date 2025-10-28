@@ -730,7 +730,7 @@ export default defineContentScript({
 
                 // 构建完整 HTML  对话框
                 const dialogHTML = `
-                    <div class="bark-sender-root">
+                    <div class="nolet-sender-root">
                         <div class="dialog-container">
                             <div class="dialog">
                                 <div class="dialog-title-container">
@@ -783,7 +783,7 @@ export default defineContentScript({
     scrollbar-color: #c1c1c1 #f1f1f1;
 }
   
-.bark-sender-root {
+.nolet-sender-root {
     all: initial;
     font-family: inherit;
     font-size: 1em;

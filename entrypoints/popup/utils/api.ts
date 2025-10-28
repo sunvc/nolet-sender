@@ -53,8 +53,8 @@ export async function sendPushMessage(
         let finalIcon: string | undefined;
         if (icon) {
             finalIcon = icon; // 优先使用传入的favicon
-        } else if (settings.enableCustomAvatar && settings.barkAvatarUrl) {
-            finalIcon = settings.barkAvatarUrl; // 回退到自定义头像
+        } else if (settings.enableCustomAvatar && settings.noletAvatarUrl) {
+            finalIcon = settings.noletAvatarUrl; // 回退到自定义头像
         }
 
         const pushParams: PushParams = {

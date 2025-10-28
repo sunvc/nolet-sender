@@ -93,7 +93,7 @@ export default function DeviceDialog({
     const [selfHosted, setSelfHosted] = useState(false);
 
     // 第二种模式 自建服务器 采用 server + deviceKey 作为 API URL
-    const [server, setServer] = useState('https://wzs.app'); // 自建服务器地址 (使用 bark 官方服务器回落)
+    const [server, setServer] = useState('https://wzs.app'); // 自建服务器地址 (使用 nolet 官方服务器回落)
     const [deviceKey, setDeviceKey] = useState('');              // 设备密钥
 
     const [basicAuthUsername, setBasicAuthUsername] = useState('');
@@ -116,7 +116,7 @@ export default function DeviceDialog({
             setBasicAuthUsername(editDevice.authorization?.user || '');
             setBasicAuthPassword(editDevice.authorization?.pwd || '');
 
-            // 如果 server 不等于 bark 官方服务器地址，则切换到自建模式
+            // 如果 server 不等于 nolet 官方服务器地址，则切换到自建模式
             const isCustomServer = editDevice.server && editDevice.server !== 'https://wzs.app';
             setSelfHosted(isCustomServer || false);
 
