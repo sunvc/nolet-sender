@@ -152,14 +152,12 @@ export default function SpeedMode({ defaultDevice, onExitSpeedMode }: SpeedModeP
                     apiURL: defaultDevice.apiURL,
                     message: clipboardContent,
                     authorization: defaultDevice.authorization,
-                    useAPIv2: appSettings?.enableApiV2,
                     devices: [defaultDevice],
                     sound: appSettings?.sound,
                     ...(finalIcon && { icon: finalIcon }),
                     ...filteredCustomParams // 过滤后的自定义参数差异
                 },
                 appSettings?.enableEncryption ? appSettings.encryptionConfig : undefined,
-                appSettings?.enableApiV2 ? 'v2' : 'v1'
             );
 
             setSendResult(response);

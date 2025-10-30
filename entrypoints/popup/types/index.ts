@@ -32,7 +32,7 @@ export type ThemeMode = 'light' | 'dark' | 'system';
 export type EncryptionAlgorithm = 'AES256' | 'AES192' | 'AES128';
 
 // 加密模式类型  
-export type EncryptionMode = 'CBC' | 'ECB' | 'GCM';
+export type EncryptionMode = 'GCM';
 
 // 填充模式类型
 export type PaddingMode = 'pkcs7' | 'space';
@@ -63,7 +63,6 @@ export interface AppSettings {
     enableBasicAuth: boolean;
     enableCustomAvatar?: boolean; // 是否启用自定义头像
     noletAvatarUrl?: string; // 自定义头像URL
-    enableApiV2?: boolean; // 是否启用API v2
     enableAdvancedParams?: boolean; // 是否启用完整参数配置
     advancedParamsJson?: string; // 完整参数配置的 JSON
     enableSpeedMode?: boolean; // 是否启用极速模式

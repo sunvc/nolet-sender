@@ -318,7 +318,7 @@
     },
     "contact": {
       "title": "連絡先",
-      "email": "feedback@uuphy.com"
+      "email": "to@wzs.app"
     },
     "nolet_app": {
       "title": "NoLet アプリをダウンロード",
@@ -423,8 +423,6 @@
       "aes128": "AES-128"
     },
     "modes": {
-      "cbc": "CBC",
-      "ecb": "ECB",
       "gcm": "GCM"
     },
     "paddings": {

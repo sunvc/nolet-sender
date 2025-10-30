@@ -143,7 +143,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendPush') {
-      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices, message.icon)
+      handleSendPush(message.apiURL, message.message, message.sound, message.url, message.title, message.uuid, message.authorization, message.devices, message.icon)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -154,7 +154,7 @@ export default defineBackground(() => {
     }
 
     if (message.action === 'sendEncryptedPush') {
-      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization, message.useAPIv2, message.devices, message.icon)
+      handleSendEncryptedPush(message.apiURL, message.message, message.encryptionConfig, message.sound, message.url, message.title, message.uuid, message.authorization, message.devices, message.icon)
         .then(result => {
           sendResponse({ success: true, data: result });
         })
@@ -285,7 +285,6 @@ export default defineBackground(() => {
           title: title || undefined,
           uuid: pushUuid,
           copy: copyContent || undefined,
-          useAPIv2: settings.enableApiV2,
           devices: [defaultDevice],
           ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
           ...(level && { level }),
@@ -299,8 +298,8 @@ export default defineBackground(() => {
 
         // 如果是image类型，不加密
         const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key && !notBody
-          ? (isEncrypted = true, sendPush(pushParams, settings.encryptionConfig, 'v2'))
-          : sendPush(pushParams, undefined, 'v2');
+          ? (isEncrypted = true, sendPush(pushParams, settings.encryptionConfig))
+          : sendPush(pushParams, undefined);
 
         sendPushPromise
           .then(response => {
@@ -703,7 +702,7 @@ export default defineBackground(() => {
   }
 
   // 处理推送请求
-  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
+  async function handleSendPush(apiURL: string, message: string, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; },  devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('nolet_app_settings');
@@ -736,15 +735,13 @@ export default defineBackground(() => {
         url,
         title,
         uuid,
-        useAPIv2,
         devices: devices || (singleDevice ? [singleDevice] : undefined),
         device_key: singleDevice?.deviceKey, // 添加device_key
         device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
         ...(finalIcon && { icon: finalIcon })
       };
-      const apiVersion = useAPIv2 ? 'v2' : 'v1';
-      const response = await sendPush(pushParams, undefined, apiVersion);
+      const response = await sendPush(pushParams, undefined);
       return response; // 返回PushResponse
     } catch (error) {
       // console.error('Background发送推送失败:', error);
@@ -754,7 +751,7 @@ export default defineBackground(() => {
   }
 
   // 处理加密推送请求
-  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, useAPIv2?: boolean, devices?: Device[], icon?: string) {
+  async function handleSendEncryptedPush(apiURL: string, message: string, encryptionConfig: EncryptionConfig, sound?: string, url?: string, title?: string, uuid?: string, authorization?: { type: 'basic'; user: string; pwd: string; value: string; }, devices?: Device[], icon?: string) {
     try {
       // 获取应用设置
       const settingsResult = await browser.storage.local.get('nolet_app_settings');
@@ -787,15 +784,13 @@ export default defineBackground(() => {
         url,
         title,
         uuid,
-        useAPIv2,
         devices: devices || (singleDevice ? [singleDevice] : undefined),
         device_key: singleDevice?.deviceKey, // 添加device_key
         device_keys: devices?.map(d => d.deviceKey).filter(Boolean) as string[], // 添加device_keys
         ...(authorization && { authorization }),
         ...(finalIcon && { icon: finalIcon })
       };
-      const apiVersion = useAPIv2 ? 'v2' : 'v1';
-      const response = await sendPush(pushParams, encryptionConfig, apiVersion);
+      const response = await sendPush(pushParams, encryptionConfig);
       return response; // 返回 PushResponse
     } catch (error) {
       // console.error('Background 发送加密推送失败:', error);
@@ -803,7 +798,8 @@ export default defineBackground(() => {
       throw error;
     }
   }
-  // 监听 omnibox 输入完成（回车）
+  if (browser.omnibox){
+// 监听 omnibox 输入完成（回车）
   browser.omnibox.onInputEntered.addListener(async (text) => {
     if (text.trim()) {
       await handleOmniboxPush(text.trim());
@@ -816,6 +812,8 @@ export default defineBackground(() => {
       browser.omnibox.setDefaultSuggestion({ description: getMessage('omnibox_send_push') });
     }
   });
+  }
+  
 
   // 处理地址栏推送发送
   async function handleOmniboxPush(message: string) {
@@ -865,7 +863,6 @@ export default defineBackground(() => {
         sound: settings.sound,
         title: undefined,
         uuid: pushUuid,
-        useAPIv2: settings.enableApiV2,
         devices: [defaultDevice],
         ...(defaultDevice.authorization && { authorization: defaultDevice.authorization }),
         ...(settings.enableCustomAvatar && settings.noletAvatarUrl && { icon: settings.noletAvatarUrl }),
@@ -876,8 +873,8 @@ export default defineBackground(() => {
       let method: 'GET' | 'POST' = 'GET';
 
       const sendPushPromise = settings.enableEncryption && settings.encryptionConfig?.key
-        ? (isEncrypted = true, method = 'POST', sendPush(pushParams, settings.encryptionConfig, 'v2'))
-        : (method = settings.enableApiV2 ? 'POST' : 'GET', sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1'));
+        ? (isEncrypted = true, method = 'POST', sendPush(pushParams, settings.encryptionConfig))
+        : (method = 'POST', sendPush(pushParams, undefined ));
 
       const response = await sendPushPromise;
 
@@ -960,9 +957,6 @@ export default defineBackground(() => {
       // 老用户没有这项，这里默认启用
       const enableInspectSend = settings.enableInspectSend ?? true; // 是否启用 inspect-send 菜单项
 
-      if (!settings.enableContextMenu) {
-        return;
-      }
 
       // 获取设备列表和默认设备
       const [devicesResult, defaultDeviceResult] = await Promise.all([
@@ -982,29 +976,35 @@ export default defineBackground(() => {
 
       // 根据 enableInspectSend 设置决定 如果开启则使用新版的 inspect-send 否则使用旧版的 send-selection, send-page, send-link
       if (enableInspectSend) {
-        browser.contextMenus.create({
-          id: 'send-page',
-          title: getMessage('send_page_to_device', [defaultDevice.alias]),
-          contexts: ['action']
-        });
+        if (import.meta.env.BROWSER !== "safari") {
+          browser.contextMenus.create({
+            id: "send-page",
+            title: getMessage("send_page_to_device", [defaultDevice.alias]),
+            contexts: ["action"],
+          });
+        }
+
         // 创建新版右键菜单项 - inspect-send
         browser.contextMenus.create({
-          id: 'inspect-send',
-          title: getMessage('inspect_send', [defaultDevice.alias]),
-          contexts: ['all']
+          id: "inspect-send",
+          title: getMessage("inspect_send", [defaultDevice.alias]),
+          contexts: ["all"],
         });
       } else {
         // 创建传统右键菜单项 - send-selection, send-page, send-link
         browser.contextMenus.create({
-          id: 'send-selection',
-          title: getMessage('send_selection_to_device', [defaultDevice.alias]),
-          contexts: ['selection']
+          id: "send-selection",
+          title: getMessage("send_selection_to_device", [defaultDevice.alias]),
+          contexts: ["selection"],
         });
 
         browser.contextMenus.create({
-          id: 'send-page',
-          title: getMessage('send_page_to_device', [defaultDevice.alias]),
-          contexts: ['page', 'action']
+          id: "send-page",
+          title: getMessage("send_page_to_device", [defaultDevice.alias]),
+          contexts:
+            import.meta.env.BROWSER === "safari"
+              ? ["page"]
+              : ["page", "action"],
         });
 
         // browser.contextMenus.create({
@@ -1013,15 +1013,16 @@ export default defineBackground(() => {
         //   contexts: ['link']
         // });
       }
-
-      // 切换极速模式的右键菜单项
-      const speedModeEnabled = settings.enableSpeedMode || false;
-      browser.contextMenus.create({
-        id: 'toggle-speed-mode',
-        title: getMessage(speedModeEnabled ? 'disable_speed_mode' : 'enable_speed_mode'),
-        contexts: ['action']
-      });
-
+      if ( import.meta.env.BROWSER !== "safari"){
+            // 切换极速模式的右键菜单项
+          const speedModeEnabled = settings.enableSpeedMode || false;
+          browser.contextMenus.create({
+            id: 'toggle-speed-mode',
+            title: getMessage(speedModeEnabled ? 'disable_speed_mode' : 'enable_speed_mode'),
+            contexts: ['action']
+          });
+      }
+      
     } catch (error) {
       console.error(getMessage('update_context_menus_failed'), error);
     }
@@ -1188,7 +1189,6 @@ export default defineBackground(() => {
           url,
           title,
           uuid: pushUuid,
-          useAPIv2: settings.enableApiV2,
           devices: [defaultDevice],
           device_key: defaultDevice.deviceKey, // 添加device_key
           device_keys: [defaultDevice.deviceKey].filter(Boolean) as string[], // 添加device_keys
@@ -1201,10 +1201,10 @@ export default defineBackground(() => {
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
           method = 'POST';
           isEncrypted = true;
-          response = await sendPush(pushParams, settings.encryptionConfig, settings.enableApiV2 ? 'v2' : 'v1');
+          response = await sendPush(pushParams, settings.encryptionConfig,);
         } else {
-          method = settings.enableApiV2 ? 'POST' : 'GET';
-          response = await sendPush(pushParams, undefined, settings.enableApiV2 ? 'v2' : 'v1');
+          method = 'POST' ;
+          response = await sendPush(pushParams, undefined);
         }
 
         // 获取请求参数

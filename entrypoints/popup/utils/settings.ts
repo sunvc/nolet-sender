@@ -36,7 +36,6 @@ export const DEFAULT_SETTINGS: AppSettings = {
     },
     sound: undefined, // 推送铃声，默认不设置
     enableBasicAuth: false, // Basic Auth，默认关闭
-    enableApiV2: false, // API v2，默认关闭
     enableAdvancedParams: false, // 完整参数配置，默认关闭
     advancedParamsJson: JSON.stringify(DEFAULT_ADVANCED_PARAMS, null, 2), // 默认自定义参数JSON
     enableSpeedMode: false, // 极速模式，默认关闭

@@ -223,11 +223,7 @@ export default function DeviceDialog({
             }
             // truncatedURL 是截取后的URL, 格式为 `https://wzs.app/<device_key>/`
             await onSubmit(deviceAlias.trim(), truncatedURL, authorization);
-            // 如果是自建服务器，开启 API v2 的开关, 如果自建服务器使用额外的代理路径, API v1 模式下容易将内容截断
-            if (selfHosted && !appSettings?.enableApiV2) {
-                await updateAppSetting('enableApiV2', true);
-                showAlert('warning', t('settings.api_v2.success_message'));
-            }
+           
             onClose();
         } catch (error) {
             // setError(`操作失败: ${error instanceof Error ? error.message : '未知错误'}`);

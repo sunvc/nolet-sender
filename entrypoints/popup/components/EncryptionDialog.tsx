@@ -130,8 +130,6 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                             label={t('encryption.mode')}
                             onChange={(e) => setMode(e.target.value as EncryptionMode)}
                         >
-                            <MenuItem value="CBC">{t('encryption.modes.cbc')}</MenuItem>
-                            <MenuItem value="ECB">{t('encryption.modes.ecb')}</MenuItem>
                             <MenuItem value="GCM">{t('encryption.modes.gcm')}</MenuItem>
                         </Select>
                     </FormControl>

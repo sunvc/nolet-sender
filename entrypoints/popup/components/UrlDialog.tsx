@@ -15,7 +15,6 @@ import LinkIcon from '@mui/icons-material/Link';
 import TextFieldsIcon from '@mui/icons-material/TextFields';
 import { useTranslation } from 'react-i18next';
 import { Device } from '../types';
-import DeviceSelect from './DeviceSelect';
 import { sendPushMessage } from '../utils/api';
 import { generateID } from '../../shared/push-service';
 
@@ -290,14 +289,6 @@ export default function UrlDialog({
             </DialogTitle>
             <DialogContent>
                 <Stack spacing={2}>
-                    <Box sx={{ pt: 2 }}>
-                        <DeviceSelect
-                            devices={devices}
-                            selectedDevice={selectedDevice}
-                            onDeviceChange={onDeviceChange}
-                            onAddClick={onDeviceAdd}
-                        />
-                    </Box>
 
                     <Stack
                         spacing={1}

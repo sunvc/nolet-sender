@@ -62,15 +62,6 @@ export default function FeatureSettings({ devices, onError, onToast }: FeatureSe
         }
     };
 
-    // 处理 API v2 开关切换
-    const handleApiV2Toggle = async (enabled: boolean) => {
-        try {
-            await updateAppSetting('enableApiV2', enabled);
-        } catch (error) {
-            onError(t('common.error_update', { message: error instanceof Error ? error.message : '未知错误' }));
-        }
-    };
-
     return (
         <Paper elevation={2} sx={{ p: 3 }}>
             <Stack spacing={3}>
@@ -139,20 +130,6 @@ export default function FeatureSettings({ devices, onError, onToast }: FeatureSe
                         />
                         <Divider sx={{ pt: 1 }} />
 
-                        {/* API v2 开关 */}
-                        <FormControlLabel
-                            control={
-                                <Switch
-                                    checked={appSettings?.enableApiV2 || false}
-                                    onChange={(e) => handleApiV2Toggle(e.target.checked)}
-                                />
-                            }
-                            label={<Stack direction="row" alignItems="center" gap={1}>
-                                <Typography variant="body1">{t('settings.api_v2.title')}</Typography>
-                                {/* <Chip label="Beta" size="small" color="default" variant="outlined" /> */}
-                            </Stack>}
-                            sx={{ userSelect: 'none' }}
-                        />
                     </Stack>
                 </Box>
             </Stack>

@@ -82,13 +82,10 @@ export async function sendPushMessage(
         if (settings.enableEncryption && settings.encryptionConfig?.key) {
             method = 'POST';
             isEncrypted = true;
-            // 添加API v2标志
-            pushParams.useAPIv2 = settings.enableApiV2;
             response = await sendPushDirectly(pushParams, settings.encryptionConfig);
         } else {
-            method = settings.enableApiV2 ? 'POST' : 'GET';
-            // 添加API v2标志
-            pushParams.useAPIv2 = settings.enableApiV2;
+            method =  'POST';
+    
             response = await sendPushDirectly(pushParams);
         }
 
@@ -158,9 +155,8 @@ export async function sendPushMessage(
  */
 async function sendPushDirectly(params: PushParams, encryptionConfig?: EncryptionConfig): Promise<PushResponse> {
     try {
-        // 尝试直接发送
-        const apiVersion = params.useAPIv2 ? 'v2' : 'v1';
-        return await sendPush(params, encryptionConfig, apiVersion);
+      
+        return await sendPush(params, encryptionConfig);
     } catch (error) {
         console.error('直接请求失败，尝试通过background script:', error);
 
@@ -175,7 +171,6 @@ async function sendPushDirectly(params: PushParams, encryptionConfig?: Encryptio
                 url: params.url,
                 title: params.title,
                 uuid: params.uuid, // 传递UUID给background script
-                useAPIv2: params.useAPIv2, // 传递API版本标志
                 devices: params.devices // 传递设备列表
             };
 

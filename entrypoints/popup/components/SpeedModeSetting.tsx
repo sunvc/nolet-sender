@@ -82,115 +82,132 @@ export default function SpeedModeSetting({ disabled }: { disabled: boolean }) {
     };
 
     return (
-        <>
-            <FormControlLabel
-                control={
-                    <Switch
-                        checked={enableSpeedMode}
-                        onChange={(e) => handleEnableChange(e.target.checked)}
-                        disabled={disabled}
+      <>
+        {import.meta.env.BROWSER !== "safari" && (
+          <FormControlLabel
+            control={
+              <Switch
+                checked={enableSpeedMode}
+                onChange={(e) => handleEnableChange(e.target.checked)}
+                disabled={disabled}
+              />
+            }
+            label={t("settings.speed_mode.enable")}
+            sx={{ userSelect: "none" }}
+          />
+        )}
+
+        <Dialog
+          open={dialogOpen}
+          onClose={handleCloseDialog}
+          maxWidth="sm"
+          fullWidth
+          slots={{
+            transition: SlideUpTransition,
+          }}
+          keepMounted
+        >
+          <DialogTitle>
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Typography variant="h6">
+                {t("settings.speed_mode.dialog_title")}
+              </Typography>
+            </Stack>
+          </DialogTitle>
+          <DialogContent dividers>
+            <Stack spacing={3}>
+              <Alert
+                severity="warning"
+                icon={<WarningAmberIcon />}
+                sx={{ px: 1 }}
+              >
+                <Typography variant="body2">
+                  {t("settings.speed_mode.warning_description")}
+                </Typography>
+              </Alert>
+
+              <Box>
+                <Typography
+                  variant="subtitle1"
+                  gutterBottom
+                  fontWeight="medium"
+                >
+                  {t("settings.speed_mode.how_it_works_title")}
+                </Typography>
+                <Stack gap={1}>
+                  <Typography variant="body2">
+                    • {t("settings.speed_mode.feature_1")}
+                  </Typography>
+                  <Typography variant="body2">
+                    •{" "}
+                    {t("settings.speed_mode.feature_2", {
+                      countdown: countdownTime / 1000,
+                    })}
+                  </Typography>
+
+                  <Typography
+                    variant="caption"
+                    component="span"
+                    color="text.secondary"
+                    sx={{ pt: 1 }}
+                  >
+                    {t("settings.speed_mode.feature_3")}
+                  </Typography>
+                </Stack>
+              </Box>
+
+              <Box>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <TimerIcon />
+                  <Box sx={{ px: 2, flex: 1 }}>
+                    <Slider
+                      value={countdownTime}
+                      onChange={handleCountdownChange}
+                      onMouseUp={handleCountdownSave}
+                      min={1000}
+                      max={5000}
+                      step={100}
+                      marks={[
+                        { value: 1000, label: "1s" },
+                        { value: 3000, label: "3s" },
+                        { value: 5000, label: "5s" },
+                      ]}
+                      valueLabelDisplay="auto"
+                      valueLabelFormat={(value) => `${value / 1000}s`}
+                      sx={{ mt: 1 }}
+                      color="warning"
                     />
-                }
-                label={t('settings.speed_mode.enable')}
-                sx={{ userSelect: 'none' }}
-            />
-
-            <Dialog
-                open={dialogOpen}
-                onClose={handleCloseDialog}
-                maxWidth="sm"
-                fullWidth
-                slots={{
-                    transition: SlideUpTransition,
-                }}
-                keepMounted
+                  </Box>
+                </Stack>
+              </Box>
+            </Stack>
+          </DialogContent>
+          <DialogActions>
+            <Tooltip title={t("settings.speed_mode.requirements")}>
+              <IconButton size="small" sx={{ mr: "auto", ml: 1 }}>
+                <InfoOutlineIcon style={{ color: "text.secondary" }} />
+              </IconButton>
+            </Tooltip>
+            <Button onClick={handleCloseDialog}>{t("common.cancel")}</Button>
+            <Button
+              onClick={handleConfirmEnable}
+              variant="contained"
+              color="warning"
+              disabled={saving}
+              startIcon={<SpeedIcon />}
             >
-                <DialogTitle>
-                    <Stack direction="row" alignItems="center" spacing={1}>
-                        <Typography variant="h6">
-                            {t('settings.speed_mode.dialog_title')}
-                        </Typography>
-                    </Stack>
-                </DialogTitle>
-                <DialogContent dividers>
-                    <Stack spacing={3}>
-                        <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ px: 1 }}>
-                            <Typography variant="body2">
-                                {t('settings.speed_mode.warning_description')}
-                            </Typography>
-                        </Alert>
-
-                        <Box>
-                            <Typography variant="subtitle1" gutterBottom fontWeight="medium">
-                                {t('settings.speed_mode.how_it_works_title')}
-                            </Typography>
-                            <Stack gap={1}>
-                                <Typography variant="body2">
-                                    • {t('settings.speed_mode.feature_1')}
-                                </Typography>
-                                <Typography variant="body2">
-                                    • {t('settings.speed_mode.feature_2', { countdown: countdownTime / 1000 })}
-                                </Typography>
-
-                                <Typography variant="caption" component="span" color="text.secondary" sx={{ pt: 1 }}>
-                                    {t('settings.speed_mode.feature_3')}
-                                </Typography>
-                            </Stack>
-                        </Box>
-
-                        <Box>
-                            <Stack direction="row" alignItems="center" gap={1}>
-                                <TimerIcon />
-                                <Box sx={{ px: 2, flex: 1 }}>
-                                    <Slider
-                                        value={countdownTime}
-                                        onChange={handleCountdownChange}
-                                        onMouseUp={handleCountdownSave}
-                                        min={1000}
-                                        max={5000}
-                                        step={100}
-                                        marks={[
-                                            { value: 1000, label: '1s' },
-                                            { value: 3000, label: '3s' },
-                                            { value: 5000, label: '5s' }
-                                        ]}
-                                        valueLabelDisplay="auto"
-                                        valueLabelFormat={(value) => `${value / 1000}s`}
-                                        sx={{ mt: 1 }}
-                                        color="warning"
-                                    />
-                                </Box>
-                            </Stack>
-                        </Box>
-                    </Stack>
-                </DialogContent>
-                <DialogActions>
-                    <Tooltip title={t('settings.speed_mode.requirements')}>
-                        <IconButton size="small" sx={{ mr: 'auto', ml: 1 }}>
-                            <InfoOutlineIcon style={{ color: 'text.secondary' }} />
-                        </IconButton>
-                    </Tooltip>
-                    <Button onClick={handleCloseDialog}>
-                        {t('common.cancel')}
-                    </Button>
-                    <Button
-                        onClick={handleConfirmEnable}
-                        variant="contained"
-                        color="warning"
-                        disabled={saving}
-                        startIcon={<SpeedIcon />}
-                    >
-                        {saving ? t('common.processing') : t('settings.speed_mode.confirm_enable')}
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            <Snackbar
-                open={!!error}
-                autoHideDuration={3000}
-                onClose={() => setError('')}
-                message={error}
-            />
-        </>
+              {saving
+                ? t("common.processing")
+                : t("settings.speed_mode.confirm_enable")}
+            </Button>
+          </DialogActions>
+        </Dialog>
+        <Snackbar
+          open={!!error}
+          autoHideDuration={3000}
+          onClose={() => setError("")}
+          message={error}
+        />
+      </>
     );
 }

@@ -318,7 +318,7 @@
         },
         "contact": {
             "title": "联系方式",
-            "email": "feedback@uuphy.com"
+            "email": "to@wzs.app"
         },
         "nolet_app": {
             "title": "下载 NoLet App",
@@ -423,8 +423,6 @@
             "aes128": "AES-128"
         },
         "modes": {
-            "cbc": "CBC",
-            "ecb": "ECB",
             "gcm": "GCM"
         },
         "paddings": {

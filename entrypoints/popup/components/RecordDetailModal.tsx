@@ -41,7 +41,7 @@ import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import timezone from "dayjs/plugin/timezone";
 
-import { encryptAESCBC, generateIV } from '../../shared/push-service';
+import { encryptAESGCM, generateIV } from '../../shared/push-service';
 import { getAppSettings } from '../utils/settings';
 
 // 注册插件
@@ -576,7 +576,7 @@ export default function RecordDetailModal({ record, open, onClose, onExited, cur
                 return null;
             }
             // 3. 加密
-            const ciphertext = await encryptAESCBC(plaintext, key, iv);
+            const ciphertext = await encryptAESGCM(plaintext, key, iv);
 
             // 4. 更新加密数据状态 合并 displayParameters 和 iv, ciphertext, 移除明文 body, title
             const encryptedResult = { ...displayParameters, iv, ciphertext };
