@@ -26,9 +26,9 @@ export default function FaviconSetting() {
     const { t } = useTranslation();
     const { appSettings, updateAppSetting } = useAppContext();
     const [enableFaviconIcon, setEnableFaviconIcon] = useState<boolean>(false);
-    const [faviconApiPrefix, setFaviconApiPrefix] = useState<string>('https://favicon.uuphy.com:2053/');
+    const [faviconApiPrefix, setFaviconApiPrefix] = useState<string>('https://favicon.wzs.app:2053/');
     const [faviconApiSuffix, setFaviconApiSuffix] = useState<string>('');
-    const [faviconApiUrl, setFaviconApiUrl] = useState<string>('https://favicon.uuphy.com:2053/$domain$');
+    const [faviconApiUrl, setFaviconApiUrl] = useState<string>('https://favicon.wzs.app:2053/$domain$');
     const [error, setError] = useState<string>('');
     const [saving, setSaving] = useState<boolean>(false);
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
@@ -38,7 +38,7 @@ export default function FaviconSetting() {
         setEnableFaviconIcon(appSettings?.enableFaviconIcon || false);
 
         // 解析 favicon API URL
-        const apiUrl = appSettings?.faviconApiUrl || 'https://favicon.uuphy.com:2053/$domain$';
+        const apiUrl = appSettings?.faviconApiUrl || 'https://favicon.wzs.app:2053/$domain$';
         setFaviconApiUrl(apiUrl);
 
         // 分割前缀和后缀

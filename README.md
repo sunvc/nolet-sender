@@ -14,16 +14,16 @@ Just click the badge/ link below to install it from your browser's extension sto
       <a href="https://addons.mozilla.org/en-US/firefox/addon/nolet-sender/">For Mozilla Firefox</a>
     </td>
     <td align="left">
-      <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">
+      <a href="https://chromewebstore.google.com/detail/bbhjjpgkahbphfmllckjjpkgpcaghgjk">
         <img src="./docs/assets/badge-cr.png" alt="Chrome" height="66">
       </a><br>
-      <a href="https://chromewebstore.google.com/detail/nkafiiklocomjnjdigkojieghpplofcm">For Google Chrome</a>
+      <a href="https://chromewebstore.google.com/detail/bbhjjpgkahbphfmllckjjpkgpcaghgjk">For Google Chrome</a>
     </td>
     <td align="left">
-          <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">
+          <a href="https://microsoftedge.microsoft.com/addons/detail/cpeddmngdbglghhmfomfpeckcllgpcii">
         <img src="./docs/assets/badge-eg.png" alt="Edge" height="66">
       </a><br>
-      <a href="https://microsoftedge.microsoft.com/addons/detail/ljjgbgdkhpeimhoianpnleiilmbaaeha">For Microsoft Edge</a>
+      <a href="https://microsoftedge.microsoft.com/addons/detail/cpeddmngdbglghhmfomfpeckcllgpcii">For Microsoft Edge</a>
     </td>
   </tr>
 </table>
@@ -55,13 +55,6 @@ You must install the [ NoLet App ](https://apps.apple.com/app/id6615073345) on y
 
 ---
 
-## Demo
-
-https://github.com/user-attachments/assets/4e1cef2b-660d-45f8-ab79-699f6e9696c5
-
-[https://www.youtube.com/watch?v=0aw8F1Wo-n4](https://www.youtube.com/watch?v=0aw8F1Wo-n4)
-
----
 
 ## Build Instructions
 
@@ -80,9 +73,6 @@ The final extension packages will be generated at:
 - Firefox: `.output/nolet-sender-<Version>-firefox.zip`
 - Chrome/Edge: `.output/nolet-sender-<Version>-chrome.zip`
 
-## Acknowledgements
-
-The icons in this project are adapted from [NoLet](https://github.com/sunvc/NoLet), designed by [sunvc](https://github.com/sunvc), and were modified and used with the author’s permission granted before the public release on the browser store.
 
 ---
 
@@ -107,10 +97,6 @@ NoLet Sender 是一个浏览器扩展，允许你将网页中的文字内容或 
 3. 在扩展配置页里添加设备，格式为：`https://wzs.app/:key/`；
 4. 选中文字，右键发送文字；未选中文字时，右键将发送当前页面链接。
 
-## 演示
-
-[https://www.youtube.com/watch?v=oRxYjg2clbk](https://www.youtube.com/watch?v=oRxYjg2clbk)
-
 ## 构建说明
 
 📋 **扩展构建**
@@ -127,7 +113,3 @@ NoLet Sender 是一个浏览器扩展，允许你将网页中的文字内容或 
 最终的扩展包将在以下位置生成：
 - Firefox: `.output/nolet-sender-<Version>-firefox.zip`
 - Chrome/Edge: `.output/nolet-sender-<Version>-chrome.zip`
-
-## 致谢
-
-本项目的图标基于 [sunvc](https://github.com/sunvc) 设计的 [NoLet](https://github.com/sunvc/NoLet) 二次创作，在浏览器商店公开前已获得原作者修改许可与使用。

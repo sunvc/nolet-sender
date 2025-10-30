@@ -136,7 +136,7 @@ export default defineConfig({
         2. clipboardRead 也不支持, 实际测试会被忽略所以没必要移除
         3. 需要增加 "browser_specific_settings": {
               "gecko": {
-                "id": "nolet-sender@uuphy.com",
+                "id": "nolet-sender@wzs.app",
                 "strict_min_version": "109.0"
               }
             };
@@ -169,10 +169,11 @@ export default defineConfig({
         }
       } else if (wxt.config.browser === "safari") {
         delete manifest.omnibox;
-        manifest.background = {
-          scripts: ["background.js"],
-          type: "module",
-        };
+        // manifest.background = {
+        //   scripts: ["background.js"],
+        //   type: "module",
+        //   persistent: false
+        // };
         manifest.action = {
           default_title: "NoLet Sender",
           default_popup: "popup.html",

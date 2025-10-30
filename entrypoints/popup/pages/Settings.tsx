@@ -549,7 +549,7 @@ export default function Settings({
 
                                 <Typography variant="caption" color="text.secondary">
                                     <Link
-                                        onClick={() => window.open('https://nolet-sender.uuphy.com/', '_blank')}
+                                        onClick={() => window.open('https://nolet-sender.wzs.app/', '_blank')}
                                         color="inherit"
                                         sx={{ fontSize: '0.8rem', textDecoration: 'none', '&:hover': { color: 'primary.main' } }}
                                     >

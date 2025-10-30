@@ -134,9 +134,9 @@ export class BackupCrypto {
      */
     static getVersion(): string {
         try {
-            return (window as any)?.chrome?.runtime?.getManifest?.()?.version || '1.0.0';
+            return (window as any)?.chrome?.runtime?.getManifest?.()?.version || '1.1.0';
         } catch {
-            return '1.0.0';
+            return '1.1.0';
         }
     }
 

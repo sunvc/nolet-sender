@@ -37,7 +37,7 @@ export default function AvatarSetting() {
     const theme = useTheme();
 
     useEffect(() => {
-        setAvatarUrl(appSettings?.noletAvatarUrl || 'https://s3.uuphy.com/bs.png');
+        setAvatarUrl(appSettings?.noletAvatarUrl || 'https://s3.wzs.app/bs.png');
         setEnableCustomAvatar(appSettings?.enableCustomAvatar || false);
     }, [appSettings]);
 
@@ -221,7 +221,7 @@ export default function AvatarSetting() {
                             fullWidth
                             size='small'
                             variant="outlined"
-                            placeholder="https://s3.uuphy.com/bs.png"
+                            placeholder="https://s3.wzs.app/bs.png"
                             error={!!error}
                             helperText={error}
                             disabled={testing || saving}

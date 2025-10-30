@@ -40,7 +40,7 @@ export function openTelegramChannel() {
 }
 
 export function openOfficialWebsite() {
-    const url = 'https://nolet-sender.uuphy.com';
+    const url = 'https://nolet-sender.wzs.app';
     window.open(url, '_blank');
 }
 
