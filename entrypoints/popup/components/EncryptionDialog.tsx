@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { useTranslation } from 'react-i18next';
-import { EncryptionConfig, EncryptionAlgorithm, EncryptionMode, PaddingMode } from '../types';
+import { EncryptionConfig, EncryptionAlgorithm, EncryptionMode } from '../types';
 import { generateKey, generateIV } from '../../shared/push-service';
 import { SlideUpTransition } from './DialogTransitions';
 
@@ -33,7 +33,6 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
     const { t } = useTranslation();
     const [algorithm, setAlgorithm] = useState<EncryptionAlgorithm>(config.algorithm);
     const [mode, setMode] = useState<EncryptionMode>(config.mode);
-    const [padding, setPadding] = useState<PaddingMode>(config.padding);
     const [key, setKey] = useState(config.key);
     const [iv, setIv] = useState('');
     const [error, setError] = useState('');
@@ -44,7 +43,6 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
         if (open) {
             setAlgorithm(config.algorithm);
             setMode(config.mode);
-            setPadding(config.padding);
             setKey(config.key);
             setIv(generateIV());
             setError('');
@@ -74,7 +72,6 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
         const newConfig: EncryptionConfig = {
             algorithm,
             mode,
-            padding,
             key: key.trim()
         };
 
@@ -134,18 +131,6 @@ export default function EncryptionDialog({ open, config, onClose, onSave }: Encr
                         </Select>
                     </FormControl>
 
-                    <FormControl size="small" fullWidth>
-                        {/* 填充 */}
-                        <InputLabel>{t('encryption.padding')}</InputLabel>
-                        <Select
-                            value={padding}
-                            label={t('encryption.padding')}
-                            onChange={(e) => setPadding(e.target.value as PaddingMode)}
-                        >
-                            <MenuItem value="pkcs7">{t('encryption.paddings.pkcs7')}</MenuItem>
-                            <MenuItem value="space">{t('encryption.paddings.space')}</MenuItem>
-                        </Select>
-                    </FormControl>
 
                     <FormControl variant="standard">
                         {/* Key */}

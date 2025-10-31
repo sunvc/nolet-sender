@@ -424,10 +424,6 @@
     },
     "modes": {
       "gcm": "GCM"
-    },
-    "paddings": {
-      "pkcs7": "PKCS7",
-      "space": "Space"
     }
   },
   "history": {

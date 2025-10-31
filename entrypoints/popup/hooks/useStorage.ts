@@ -120,7 +120,6 @@ export function useAppSettings() {
         encryptionConfig: {
             algorithm: 'AES256',
             mode: 'GCM',
-            padding: 'space',
             key: ''
         },
         enableBasicAuth: false

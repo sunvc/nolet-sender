@@ -590,7 +590,6 @@ export default function Settings({
                 config={appSettings?.encryptionConfig || {
                     algorithm: 'AES256',
                     mode: 'GCM',
-                    padding: 'space',
                     key: ''
                 }}
                 onClose={() => setEncryptionDialogOpen(false)}
